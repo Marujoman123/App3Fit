@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.exemplo.App3fit" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>App3fit</name>
+    <description>
+        A sample Apache Cordova application that responds to the deviceready event.
+    </description>
+    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
+        Apache Cordova Team
+    </author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <platform name="android">  
+    <icon src="res/mipmap-anydpi-v26/icon_3fit.xml" />
+    <icon monochrome="res/mipmap-mdpi/icon_3fit_monochrome.png" 
+          background="res/mipmap-mdpi/icon_3fit_background.png" 
+          density="mdpi" 
+          foreground="res/mipmap-mdpi/icon_3fit_foreground.png" />
+    <icon monochrome="res/mipmap-hdpi/icon_3fit_monochrome.png" 
+          background="res/mipmap-hdpi/icon_3fit_background.png" 
+          density="hdpi" 
+          foreground="res/mipmap-hdpi/icon_3fit_foreground.png" />
+    <icon monochrome="res/mipmap-xhdpi/icon_3fit_monochrome.png" 
+          background="res/mipmap-xhdpi/icon_3fit_background.png" 
+          density="xhdpi" 
+          foreground="res/mipmap-xhdpi/icon_3fit_foreground.png" />
+    <icon monochrome="res/mipmap-xxhdpi/icon_3fit_monochrome.png" 
+          background="res/mipmap-xxhdpi/icon_3fit_background.png" 
+          density="xxhdpi" 
+          foreground="res/mipmap-xxhdpi/icon_3fit_foreground.png" />
+    <icon monochrome="res/mipmap-xxxhdpi/icon_3fit_monochrome.png" 
+          background="res/mipmap-xxxhdpi/icon_3fit_background.png" 
+          density="xxxhdpi" 
+          foreground="res/mipmap-xxxhdpi/icon_3fit_foreground.png" />
+</platform>
+</widget>
