@@ -1,0 +1,114 @@
+[
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxhdpi-v26_ic_launcher_monochrome.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxhdpi-v26/ic_launcher_monochrome.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-mdpi-v26_ic_launcher_foreground.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-mdpi-v26/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xhdpi-v26_ic_launcher.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xhdpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxxhdpi-v26_ic_launcher_monochrome.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxxhdpi-v26/ic_launcher_monochrome.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xhdpi-v26_ic_launcher_background.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xhdpi-v26/ic_launcher_background.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxhdpi-v26_ic_launcher_foreground.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxhdpi-v26/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/xml_cdv_core_file_provider_paths.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/xml/cdv_core_file_provider_paths.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/drawable_ic_cdv_splashscreen.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/drawable/ic_cdv_splashscreen.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xhdpi-v26_ic_launcher_foreground.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xhdpi-v26/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-hdpi-v26_ic_launcher_foreground.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-hdpi-v26/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxxhdpi-v26_ic_launcher.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxxhdpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-hdpi-v26_ic_launcher_monochrome.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-hdpi-v26/ic_launcher_monochrome.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-mdpi-v26_ic_launcher.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-mdpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/xml_config.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/xml/config.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-hdpi-v26_ic_launcher.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-hdpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-hdpi-v26_ic_launcher_background.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-hdpi-v26/ic_launcher_background.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xhdpi-v26_ic_launcher_monochrome.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xhdpi-v26/ic_launcher_monochrome.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxhdpi-v26_ic_launcher.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxhdpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxhdpi-v26_ic_launcher_background.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxhdpi-v26/ic_launcher_background.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxxhdpi-v26_ic_launcher_background.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxxhdpi-v26/ic_launcher_background.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-xxxhdpi-v26_ic_launcher_foreground.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-xxxhdpi-v26/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-mdpi-v26_ic_launcher_monochrome.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-mdpi-v26/ic_launcher_monochrome.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-mdpi-v26_ic_launcher_background.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-mdpi-v26/ic_launcher_background.png"
+    },
+    {
+        "merged": "com.exemplo.App3fit.app-debug-5:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/mipmap-mdpi/ic_launcher.png"
+    }
+]
