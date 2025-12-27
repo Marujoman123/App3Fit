@@ -39,11 +39,11 @@
     </head>
     <body>
 
-     <div class="login-container">
+     <div id="loginContainer" class="login-container">
         <p id="mensagem-erro" class="error"></p>
         <h2>Bem-vindo</h2>
         <p>Digite seu CPF para acessar o sistema</p>
-        
+         
         <div class="input-group">
             <input type="text" id="cpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" autocomplete="off" >
         </div>
@@ -52,6 +52,14 @@
         
       
     </div>
+
+
+
+    <div id="loadingLogin" style="display: none; text-align: center; margin-top: 15px;">
+        <div class="spinner"></div>
+        <p>Verificando cadastro...</p>
+    </div>
+</div>
 
     </body>
 </html>

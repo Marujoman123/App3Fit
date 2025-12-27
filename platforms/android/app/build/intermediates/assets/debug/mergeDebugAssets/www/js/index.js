@@ -2,6 +2,7 @@ const btnEntrar = document.getElementById('btnEntrar');
 const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');
 const inputs = document.querySelectorAll('input');
+const loginContainer  = document.getElementById('loginContainer');
 
 inputs.forEach(input => {
     input.addEventListener('focus', () => {
@@ -70,32 +71,53 @@ function TestaCPF() {
 
 // Função de Consulta à Planilha
 async function ValidarNoGoogleSheets() {
-    const urlScript = "https://script.google.com/macros/s/AKfycbz6tx-CCnWhqW3IvahfDo0jQ6rVjEo3Eyqwl4Fcui0ZUubihtbhevnUbPy23QRLLR7l/exec";
+    const urlScript = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
     const cpfLimpo = cpfInput.value.replace(/\D/g, "");
 
-    mensagemErro.innerText = "Verificando...";
-    btnEntrar.disabled = true;
+    // Mostra o loading e esconde o botão (conforme combinamos)
+    loginContainer.style.display = 'none';
+    loadingLogin.style.display = 'block';
+
+    let resultado;
 
     try {
-        // Faz a requisição GET para o Script
         const response = await fetch(`${urlScript}?cpf=${cpfLimpo}`);
-        const resultado = await response.json();
-
-        // ... dentro do ValidarNoGoogleSheets
-        if (resultado.status === "exists") {
-            alert("Bem-vindo, " + resultado.nome);
-            window.location.href = "caixa.html"
-        } else {
-            // Se não existir, leva para o cadastro passando o CPF pela URL
-            const cpfLimpo = cpfInput.value.replace(/\D/g, "");
-            localStorage.setItem('cpfParaCadastro', cpfLimpo); // Salva no "HD" do celular
-            window.location.href = "cadastro.html?cpf=" + cpfLimpo; // Tenta passar pela URL também
-        }
+        
+        if (!response.ok) throw new Error("Erro na rede");
+        
+        resultado = await response.json();
     } catch (error) {
+        // O erro só aparece se a requisição REALMENTE falhar antes do redirecionamento
         console.error("Erro na consulta:", error);
-        mensagemErro.innerText = "Erro ao conectar ao servidor.";
-    } finally {
-        btnEntrar.disabled = false;
+        alert("Erro ao consultar servidor.");
+        
+        // Se deu erro, volta o botão
+        loginContainer.style.display = 'block';
+        loadingLogin.style.display = 'none';
+        return; // Sai da função
+    }
+
+    // Se o código chegou aqui, a consulta foi um sucesso. 
+    // Agora tratamos os dados fora do try/catch para evitar o falso erro de rede.
+    if (resultado.status === "exists") {
+        // ADICIONE ESTA LINHA ABAIXO:
+        localStorage.setItem('usuario_cpf', cpfLimpo); 
+        
+        localStorage.setItem('usuario_nome', resultado.nome);
+        localStorage.setItem('usuario_tipo', resultado.tipo);
+
+        if (resultado.tipo === "Parceiro") {
+            localStorage.setItem('usuario_saldo', resultado.saldo);
+            localStorage.setItem('usuario_cupom', resultado.cupom);
+            window.location.href = "caixa.html";
+        } else {
+            window.location.href = "caixa.html";
+        }
+    } else {
+        // Se o usuário não existe, também é bom salvar o CPF para o cadastro
+        localStorage.setItem('usuario_cpf', cpfLimpo); 
+        localStorage.setItem('cpfParaCadastro', cpfLimpo);
+        window.location.href = "cadastro.html?cpf=" + cpfLimpo;
     }
 }
 

@@ -28,28 +28,38 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: content:;">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="color-scheme" content="light dark">
         <link rel="stylesheet" href="css/index.css">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self';connect-src 'self' https://script.google.com https://script.googleusercontent.com;style-src 'self' 'unsafe-inline';img-src 'self' data:;">
+        
         <title>Hello World</title>
     </head>
     <body>
-     <div class="login-container">
+
+     <div id="loginContainer" class="login-container">
+        <p id="mensagem-erro" class="error"></p>
         <h2>Bem-vindo</h2>
         <p>Digite seu CPF para acessar o sistema</p>
-        
+         
         <div class="input-group">
             <input type="text" id="cpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" autocomplete="off" >
         </div>
 
         <button id="btnEntrar">Entrar</button>
         
-        <p id="mensagem-erro" class="error"></p>
+      
     </div>
+
+
+
+    <div id="loadingLogin" style="display: none; text-align: center; margin-top: 15px;">
+        <div class="spinner"></div>
+        <p>Verificando cadastro...</p>
+    </div>
+</div>
 
     </body>
 </html>

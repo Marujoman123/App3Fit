@@ -8,9 +8,15 @@
         Apache Cordova Team
     </author>
     <content src="index.html" />
+    <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
-    <platform name="android">  
+    <allow-navigation href="https://script.google.com/*" />
+    <platform name="android"> 
+
+      <preference name="Fullscreen" value="false" />
+      <preference name="android-windowSoftInputMode" value="adjustResize" />
+
     <icon src="res/mipmap-anydpi-v26/icon_3fit.xml" />
     <icon monochrome="res/mipmap-mdpi/icon_3fit_monochrome.png" 
           background="res/mipmap-mdpi/icon_3fit_background.png" 

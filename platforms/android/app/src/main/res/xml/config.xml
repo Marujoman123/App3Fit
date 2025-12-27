@@ -22,6 +22,6 @@
     <icon background="res/mipmap-xxhdpi/icon_3fit_background.png" density="xxhdpi" foreground="res/mipmap-xxhdpi/icon_3fit_foreground.png" monochrome="res/mipmap-xxhdpi/icon_3fit_monochrome.png" />
     <icon background="res/mipmap-xxxhdpi/icon_3fit_background.png" density="xxxhdpi" foreground="res/mipmap-xxxhdpi/icon_3fit_foreground.png" monochrome="res/mipmap-xxxhdpi/icon_3fit_monochrome.png" />
     <preference name="loglevel" value="DEBUG" />
-    <preference name="Fullscreen" value="true" />
+    <preference name="Fullscreen" value="false" />
     <preference name="android-windowSoftInputMode" value="adjustResize" />
 </widget>

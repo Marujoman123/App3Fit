@@ -1,6 +1,18 @@
 const btnEntrar = document.getElementById('btnEntrar');
 const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');
+const inputs = document.querySelectorAll('input');
+const loginContainer  = document.getElementById('loginContainer');
+
+inputs.forEach(input => {
+    input.addEventListener('focus', () => {
+        // Aguarda 300ms para o teclado terminar de subir e centraliza o campo na tela
+        setTimeout(() => {
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    });
+});
+
 
 // Evento de Clique
 btnEntrar.addEventListener('click', async () => {
@@ -59,33 +71,53 @@ function TestaCPF() {
 
 // Função de Consulta à Planilha
 async function ValidarNoGoogleSheets() {
-    const URL_PLANILHA = "https://script.google.com/macros/s/AKfycby--AQNhoQcwiA7pI0pj181_IbN0oGmqhi0MPbzxESgiKU4S2PHzBCdo3zgLRbnZ1Ij/exec";
+    const urlScript = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
     const cpfLimpo = cpfInput.value.replace(/\D/g, "");
 
-    mensagemErro.style.color = "#007bff";
-    mensagemErro.innerText = "Consultando base de dados...";
-    btnEntrar.disabled = true;
+    // Mostra o loading e esconde o botão (conforme combinamos)
+    loginContainer.style.display = 'none';
+    loadingLogin.style.display = 'block';
+
+    let resultado;
 
     try {
-        const resposta = await fetch(`${URL_PLANILHA}?cpf=${cpfLimpo}`, {
-            method: 'GET',
-            mode: 'cors', // Garante que o navegador lide com o compartilhamento de recursos
-            redirect: 'follow' // Necessário para seguir o redirecionamento do Google
-        });
-        const resultado = await resposta.json();
+        const response = await fetch(`${urlScript}?cpf=${cpfLimpo}`);
+        
+        if (!response.ok) throw new Error("Erro na rede");
+        
+        resultado = await response.json();
+    } catch (error) {
+        // O erro só aparece se a requisição REALMENTE falhar antes do redirecionamento
+        console.error("Erro na consulta:", error);
+        alert("Erro ao consultar servidor.");
+        
+        // Se deu erro, volta o botão
+        loginContainer.style.display = 'block';
+        loadingLogin.style.display = 'none';
+        return; // Sai da função
+    }
 
-        if (resultado.status === "encontrado") {
-            mensagemErro.style.color = "#28a745";
-            mensagemErro.innerText = "Acesso autorizado!";
-            alert("Sucesso! Bem-vindo.");
+    // Se o código chegou aqui, a consulta foi um sucesso. 
+    // Agora tratamos os dados fora do try/catch para evitar o falso erro de rede.
+    if (resultado.status === "exists") {
+        // ADICIONE ESTA LINHA ABAIXO:
+        localStorage.setItem('usuario_cpf', cpfLimpo); 
+        
+        localStorage.setItem('usuario_nome', resultado.nome);
+        localStorage.setItem('usuario_tipo', resultado.tipo);
+
+        if (resultado.tipo === "Parceiro") {
+            localStorage.setItem('usuario_saldo', resultado.saldo);
+            localStorage.setItem('usuario_cupom', resultado.cupom);
+            window.location.href = "caixa.html";
         } else {
-            mensagemErro.style.color = "#dc3545";
-            mensagemErro.innerText = "CPF não autorizado no sistema.";
+            window.location.href = "caixa.html";
         }
-    } catch (erro) {
-        mensagemErro.innerText = "Erro de conexão com a planilha.";
-        console.error("Erro no Fetch:", erro);
-    } finally {
-        btnEntrar.disabled = false;
+    } else {
+        // Se o usuário não existe, também é bom salvar o CPF para o cadastro
+        localStorage.setItem('usuario_cpf', cpfLimpo); 
+        localStorage.setItem('cpfParaCadastro', cpfLimpo);
+        window.location.href = "cadastro.html?cpf=" + cpfLimpo;
     }
 }
+

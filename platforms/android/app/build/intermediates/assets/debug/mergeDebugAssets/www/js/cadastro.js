@@ -1,5 +1,5 @@
 // URL do seu Google Apps Script (aquela que você gerou na implantação)
-const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbzlvNQ6utZPW1CPI4Ew64esBVdBHh6PZY0XlnawXfs_mvQnP76ekCpVIbbaOlPmF_1P/exec";
+const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
 const cadCpf = document.getElementById('cadCpf');
     const btnSalvar = document.getElementById('btnSalvar');
     
@@ -9,16 +9,6 @@ const inputs = document.querySelectorAll('input');
 
 
 capturarCPF();
-
-inputs.forEach(input => {
-    input.addEventListener('focus', () => {
-        // Aguarda 300ms para o teclado terminar de subir e centraliza o campo na tela
-        setTimeout(() => {
-            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
-    });
-});
-
 
 
 // Máscara e Tecla Enter (Seu código original está perfeito aqui)

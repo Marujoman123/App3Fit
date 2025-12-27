@@ -8,9 +8,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    height: 100vh;
+    margin: 0;
     margin: 0;
     overflow-y: auto;
+    height: 100%;
+    overflow: auto;
 }
 
 body {
@@ -38,6 +40,10 @@ body {
     text-align: center;
     width: 100%;
     max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding-bottom: 20px; /* Espaço extra no fim */
     
     /* Adicione isso para dar um espaço do topo */
     margin-top: 40px; 
@@ -79,6 +85,8 @@ button {
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s;
+    position: relative; 
+
 }
 
 button:hover {

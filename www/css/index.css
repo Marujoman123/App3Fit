@@ -7,9 +7,29 @@ body {
     background-color: #f0f2f5;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
     margin: 0;
+    margin: 0;
+    overflow-y: auto;
+    height: 100%;
+    overflow: auto;
+}
+
+body {
+    /* Caminho para a sua imagem */
+    background-image: url('../img/01.webp');
+
+    /* Define que a imagem deve se repetir horizontalmente e verticalmente */
+    background-repeat: repeat;
+
+    /* Mantém o fundo fixo enquanto você rola a página (opcional, mas fica elegante) */
+    background-attachment: fixed;
+
+    /* Define o tamanho da imagem original (se estiver muito grande, use um valor em px) */
+    background-size: 25% 25%;
+
+    /* Cor de fundo reserva caso a imagem demore a carregar */
+    background-color: #f0f2f5;
 }
 
 .login-container {
@@ -20,6 +40,13 @@ body {
     text-align: center;
     width: 100%;
     max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding-bottom: 20px; /* Espaço extra no fim */
+    
+    /* Adicione isso para dar um espaço do topo */
+    margin-top: 40px; 
 }
 
 h2 {
@@ -58,6 +85,8 @@ button {
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s;
+    position: relative; 
+
 }
 
 button:hover {
@@ -70,3 +99,4 @@ button:hover {
     margin-top: 1rem;
     min-height: 1.2rem;
 }
+
