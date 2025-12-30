@@ -23,6 +23,7 @@ btnEntrar.addEventListener('click', async () => {
         alert("O CPF " + cpfInput.value + " não é válido.");
         cpfInput.value = '';
         mensagemErro.innerText = "Digite um CPF válido.";
+        cpfInput.focus();
         return; // Para a execução aqui
     }
 
