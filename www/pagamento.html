@@ -18,9 +18,10 @@
     under the License.
 -->
 <html>
-    <head>
-        <meta charset="utf-8">
-        <!--
+
+<head>
+    <meta charset="utf-8">
+    <!--
         Customize this policy to fit your own app's needs. For more guidance, please refer to the docs:
             https://cordova.apache.org/docs/en/latest/
         Some notes:
@@ -28,59 +29,107 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: content:;">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-        <meta name="color-scheme" content="light dark">
-        <link rel="stylesheet" href="css/index.css">
-        
-        <title>Hello World</title>
-    </head>
-    <body>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/style.css">
 
-<div class="login-container">
-    <h2>Resumo da Compra</h2>
+    <title>Hello World</title>
+</head>
 
-    <div class="input-group" id="containerCupom">
-    <label style="color: #000;">Possui Cupom de Parceiro?</label>
+<body>
 
-    <div style="display: flex; gap: 5px;">
-        <input type="text" id="inputCupom" placeholder="Digite o cupom">
-        <button id="btnValidarCupom" style="width: auto;">Validar</button>
+
+    <div class="login-container-internal">
+
+        <h2>Resumo da Compra</h2>
+
+
+
+        <div class="login-container">
+
+
+
+            <div class="login-container-internal">
+
+                <div class="input-group" id="containerCupom" >
+                    <label style="color: #000;">Possui Cupom de Parceiro?</label>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="inputCupom" placeholder="Digite o cupom">
+                    <button id="btnValidarCupom" style="width: auto; height: 100%;">Validar</button>
+                </div>
+
+                <label id="msgCupom" style="font-size: 0.8rem; margin-top: 5px; display: block;"></label>
+
+
+            
+                <div id="listaItensPagamento"
+                    style="margin-bottom: 10px; text-align: left; border-bottom: 1px solid #ddd;">
+                    <h3 style="font-size: 1rem; color: #000;">Itens selecionados:</h3>
+                </div>
+
+
+
+
+            </div>
+
+
+
+
+ <div class="login-container-internal">
+                <div class="resumo-simples">
+                    <p id="dtot">Total dos Itens: <b>R$ <span id="totalOriginal">0.00</span></b></p>
+                    <p id="txtDesconto" style="color: green; display: none;">Desconto Cupom: <b>- R$ <span
+                                id="valorDesconto">0.00</span></b></p>
+                    <hr id="linhatot">
+                    <p>Total a Pagar: R$ <span id="totalFinal">0.00</span></p>
+                </div>
+
+
+
+                <div id="containerSaldo"
+                    style="display: none; margin-top: 15px; border: 1px dashed #ccc; padding: 10px;">
+                    <label>Saldo Disponível: <b>R$ <span id="txtSaldoDisponivel">0.00</span></b></label>
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        <input type="number" id="inputUsarSaldo" placeholder="Quanto usar?">
+                        <button id="btnAplicarSaldo" style="width: auto;">Aplicar</button>
+                    </div>
+                    <label id="msgSaldo" style="font-size: 0.8rem; display: block;"></label>
+                </div>
+
+                <button id="btnConfirmarPagamento" style="background-color: #28a745; margin-top: 20px;">Confirmar e
+                    Finalizar</button>
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
     </div>
-    
-    <label id="msgCupom" style="font-size: 0.8rem; margin-top: 5px; display: block;"></label>
-</div>
+</body>
 
-    <div id="listaItensPagamento" style="margin-bottom: 20px; text-align: left; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-    <h3 style="font-size: 1rem;">Itens selecionados:</h3>
-    </div>
-    
-    <div class="resumo-simples">
-        <p id="dtot">Total dos Itens: <b>R$ <span id="totalOriginal">0.00</span></b></p>
-        <p id="txtDesconto" style="color: green; display: none;">Desconto Cupom: <b>- R$ <span id="valorDesconto">0.00</span></b></p>
-        <hr id="linhatot">
-        <p>Total a Pagar: R$ <span id="totalFinal">0.00</span></p>
-    </div>
-
-    
-
-<div id="containerSaldo" style="display: none; margin-top: 15px; border: 1px dashed #ccc; padding: 10px;">
-    <label>Saldo Disponível: <b>R$ <span id="txtSaldoDisponivel">0.00</span></b></label>
-    <div style="display: flex; gap: 5px; margin-top: 5px;">
-        <input type="number" id="inputUsarSaldo" placeholder="Quanto usar?">
-        <button id="btnAplicarSaldo" style="width: auto;">Aplicar</button>
-    </div>
-    <label id="msgSaldo" style="font-size: 0.8rem; display: block;"></label>
-</div>
-
-    <button id="btnConfirmarPagamento" style="background-color: #28a745; margin-top: 20px;">Confirmar e Finalizar</button>
-    <button onclick="history.back()" style="background: none; color: gray; font-size: 0.8rem;">Voltar para o Carrinho</button>
-</div>
-
-
-    </body>
 </html>
 <script src="js/pagamento.js"></script>
-

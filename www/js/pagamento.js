@@ -6,6 +6,8 @@ const totalOriginal = parseFloat(localStorage.getItem('total_venda')) || 0;
 const tipoUsuario = localStorage.getItem('usuario_tipo');
 const nomeUsuario = localStorage.getItem('usuario_nome');
 const cpfUsuario = localStorage.getItem('usuario_cpf');
+const btnValidar = document.getElementById('btnValidarCupom');
+const inputCupom = document.getElementById('inputCupom');
 
 let descontoAplicado = 0;
 
@@ -23,6 +25,13 @@ if (carrinho.length === 0) {
         containerLista.appendChild(p);
     });
 }
+
+inputCupom.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        btnValidar.click();
+    }
+});
 
 // Atualiza totais na tela
 document.getElementById('totalOriginal').innerText = totalOriginal.toFixed(2);

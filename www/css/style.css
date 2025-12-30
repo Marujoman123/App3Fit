@@ -1,0 +1,72 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 0;
+    margin: 0;
+    overflow-y: auto;
+    height: 100%;
+    overflow: auto;
+}
+
+body {
+    /* Caminho para a sua imagem */
+    background-image: url('../img/012.webp');
+
+    /* Define que a imagem deve se repetir horizontalmente e verticalmente */
+    background-repeat: repeat;
+
+    /* Mantém o fundo fixo enquanto você rola a página (opcional, mas fica elegante) */
+    background-attachment: fixed;
+
+    /* Define o tamanho da imagem original (se estiver muito grande, use um valor em px) */
+    background-size: 25% 25%;
+
+    /* Cor de fundo reserva caso a imagem demore a carregar */
+    background-color: #f0f2f5;
+}
+
+.login-container {
+    background: white; 
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: line;
+    min-height: 100%;
+    padding-bottom: 20px; /* Espaço extra no fim */
+    
+    /* Adicione isso para dar um espaço do topo */
+    margin-top: 20px; 
+}
+
+.login-container-sem-margem {
+    background: white; 
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: line;
+    min-height: 100%;
+    padding-bottom: 20px; /* Espaço extra no fim */
+    
+}
+
+.login-container-internal {
+    padding: 1rem;
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    flex-direction: column;
+    min-height: 100%;
+}

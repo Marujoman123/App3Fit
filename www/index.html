@@ -18,9 +18,10 @@
     under the License.
 -->
 <html>
-    <head>
-        <meta charset="utf-8">
-        <!--
+
+<head>
+    <meta charset="utf-8">
+    <!--
         Customize this policy to fit your own app's needs. For more guidance, please refer to the docs:
             https://cordova.apache.org/docs/en/latest/
         Some notes:
@@ -28,29 +29,37 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: content:;">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-        <meta name="color-scheme" content="light dark">
-        <link rel="stylesheet" href="css/index.css">
-        
-        <title>Hello World</title>
-    </head>
-    <body>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/style.css">
 
-     <div id="loginContainer" class="login-container">
+    <title>Hello World</title>
+</head>
+
+<body>
+
+    <div id="loginContainer" class="login-container">
         <p id="mensagem-erro" class="error"></p>
-        <h2>Bem-vindo</h2>
-        <p>Digite seu CPF para acessar o sistema</p>
-         
-        <div class="input-group">
-            <input type="text" id="cpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" autocomplete="off" >
+
+        <div class="login-container-internal">
+            <h2>Bem-vindo</h2>
+            <p>Digite seu CPF para acessar o sistema</p>
         </div>
 
-        <button id="btnEntrar">Entrar</button>
-        
-      
+        <div class="login-container-internal">
+            <div class="input-group">
+                <input type="text" id="cpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14"
+                    autocomplete="off">
+            </div>
+
+            <button id="btnEntrar">Entrar</button>
+        </div>
+
     </div>
 
 
@@ -59,9 +68,9 @@
         <div class="spinner"></div>
         <p>Verificando cadastro...</p>
     </div>
-</div>
+    </div>
 
-    </body>
+</body>
+
 </html>
 <script src="js/index.js"></script>
-

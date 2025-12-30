@@ -1,36 +1,4 @@
-* {
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
 
-body {
-    background-image: url('../img/01.webp');
-    background-repeat: repeat;
-    background-attachment: fixed;
-    background-size: 200px; /* Tamanho fixo para não distorcer */
-    background-color: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    height: 100%;
-    overflow: auto;
-}
-
-.caixa-container {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 450px;
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    padding-bottom: 20px; /* Espaço extra no fim */
-}
 
 
 h2 { text-align: center; color: #333; margin-top: 0; }
@@ -44,7 +12,6 @@ input {
     border-radius: 6px;
     font-size: 1rem;
     margin-bottom: 10px;
-    outline: none;
 }
 
 input:focus { border-color: #007bff; }
@@ -53,19 +20,18 @@ input:focus { border-color: #007bff; }
 .lista-itens {
     background: #f9f9f9;
     border-radius: 8px;
-    height: 250px; 
+    height: 250px;
+    width:  400px; 
     overflow-y: auto;
-    margin: 10px 0;
+    margin: 10px 10px;
     border: 1px solid #eee;
 }
 
 /* No caixa.css */
 .item-carrinho {
     display: flex;
-    justify-content: space-between;
-    padding: 15px;
-    margin-bottom: 8px;
-    border-radius: 8px;
+    margin-bottom: 5px;
+    border-radius: 2px;
     background: #fdfdfd;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra suave */
 }
@@ -75,7 +41,11 @@ input:focus { border-color: #007bff; }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.item-info { display: flex; flex-direction: column; }
+.item-info {
+    flex-direction: line; 
+    margin-right: auto;
+}
+
 .item-nome {
     font-size: 1.1rem;
     color: #333;
@@ -83,6 +53,7 @@ input:focus { border-color: #007bff; }
 .item-preco {
     color: #28a745; /* Cor verde para o preço */
     font-weight: bold;
+    margin-left: auto;
 }
 
 .btn-remover {
@@ -94,6 +65,11 @@ input:focus { border-color: #007bff; }
     height: 30px;
     cursor: pointer;
     font-weight: bold;
+  display: flex;           /* Alinha conteúdo */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;     /* Centraliza verticalmente */
+  margin-left: auto;       /* Mantém ele na direita */
+    padding: 0;              /* Evita deslocamento */
 }
 
 .total-container {
@@ -104,7 +80,7 @@ input:focus { border-color: #007bff; }
 
 
 button {
-    width: 100%;
+   
     padding: 12px;
     background-color: #007bff;
     color: white;
@@ -112,7 +88,7 @@ button {
     border-radius: 6px;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s;
+    /* transition: background 0.3s; */
 }
 
 button:hover {
