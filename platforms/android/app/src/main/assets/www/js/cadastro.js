@@ -1,15 +1,15 @@
 // URL do seu Google Apps Script (aquela que você gerou na implantação)
 const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
 const cadCpf = document.getElementById('cadCpf');
-    const btnSalvar = document.getElementById('btnSalvar');
-    
-    const cadNome = document.getElementById('cadNome');
-    const cadTelefone = document.getElementById('cadTelefone');
+const btnSalvar = document.getElementById('btnSalvar');
+
+const cadNome = document.getElementById('cadNome');
+const cadTelefone = document.getElementById('cadTelefone');
 const inputs = document.querySelectorAll('input');
 
 
 capturarCPF();
-
+cadNome.focus();
 
 // Máscara e Tecla Enter (Seu código original está perfeito aqui)
 cadCpf.addEventListener('input', (e) => {
@@ -24,83 +24,98 @@ cadCpf.addEventListener('input', (e) => {
 cadCpf.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
         event.preventDefault();
+        cadNome.focus();
+    }
+});
+
+cadNome.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        cadTelefone.focus();
+    }
+});
+
+cadTelefone.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
         btnSalvar.click();
     }
 });
 
- 
-    // 2. Máscara de Telefone (Opcional, mas melhora a experiência)
-    cadTelefone.addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\D/g, "");
-        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-        v = v.replace(/(\d)(\d{4})$/, "$1-$2");
-        e.target.value = v;
-    });
 
-    // 3. Evento de clique para salvar
-    btnSalvar.addEventListener('click', async () => {
-        const nome = cadNome.value.trim();
-        const telefone = cadTelefone.value.trim();
-        const cpf = cadCpf.value;
+// 2. Máscara de Telefone (Opcional, mas melhora a experiência)
+cadTelefone.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+    e.target.value = v;
+});
 
-        if (!nome || !telefone) {
-            alert("Por favor, preencha todos os campos.");
-            return;
-        }
+// 3. Evento de clique para salvar
+btnSalvar.addEventListener('click', async () => {
+    const nome = cadNome.value.trim();
+    const telefone = cadTelefone.value.trim();
+    const cpf = cadCpf.value;
 
-        btnSalvar.disabled = true;
-        btnSalvar.innerText = "Salvando...";
+    if (!nome || !telefone || !cpf) {
+        alert("Por favor, preencha todos os campos.");
+        cadNome.focus();
+        return;
+    }
 
-        const dados = {
-            cpf: cpf,
-            nome: nome,
-            telefone: telefone.replace(/\D/g, ""),
-            tipo:"Cliente",
-            saldo:0
-        };
+    btnSalvar.disabled = true;
+    btnSalvar.innerText = "Salvando...";
 
-        try {
-            // Enviando para o Google Sheets
-            const response = await fetch(URL_PLANILHA, {
-                method: 'POST',
-                mode: 'no-cors', // Importante para evitar erros de CORS no Apps Script
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dados)
-            });
+    const dados = {
+        cpf: cpf,
+        nome: nome,
+        telefone: telefone.replace(/\D/g, ""),
+        tipo: "Cliente",
+        saldo: 0
+    };
 
-            // Como usamos 'no-cors', o fetch não consegue ler o JSON de resposta com precisão, 
-            // mas se não cair no 'catch', o dado foi enviado.
-            alert("Cadastro realizado com sucesso!");
-            window.location.href = "caixa.html";
+    try {
+        // Enviando para o Google Sheets
+        const response = await fetch(URL_PLANILHA, {
+            method: 'POST',
+            mode: 'no-cors', // Importante para evitar erros de CORS no Apps Script
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dados)
+        });
 
-        } catch (error) {
-            console.error("Erro ao salvar:", error);
-            alert("Erro ao conectar com o banco de dados.");
-            btnSalvar.disabled = false;
-            btnSalvar.innerText = "Finalizar Cadastro";
-        }
-    });
+        // Como usamos 'no-cors', o fetch não consegue ler o JSON de resposta com precisão, 
+        // mas se não cair no 'catch', o dado foi enviado.
+        alert("Cadastro realizado com sucesso!");
+        window.location.href = "caixa.html";
+
+    } catch (error) {
+        console.error("Erro ao salvar:", error);
+        alert("Erro ao conectar com o banco de dados.");
+        btnSalvar.disabled = false;
+        btnSalvar.innerText = "Finalizar Cadastro";
+    }
+});
 
 
-function capturarCPF(){
+function capturarCPF() {
 
     // 1. Tenta pegar o CPF da URL ou do LocalStorage
-const urlParams = new URLSearchParams(window.location.search);
-let cpfRecebido = urlParams.get('cpf') || localStorage.getItem('cpfParaCadastro');
+    const urlParams = new URLSearchParams(window.location.search);
+    let cpfRecebido = urlParams.get('cpf') || localStorage.getItem('cpfParaCadastro');
 
-if (cpfRecebido && cadCpf) {
-    // Remove qualquer caractere que não seja número antes de formatar
-    let valor = cpfRecebido.replace(/\D/g, "");
-    
-    // Aplica a máscara: 000.000.000-00
-    if (valor.length === 11) {
-        valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    if (cpfRecebido && cadCpf) {
+        // Remove qualquer caractere que não seja número antes de formatar
+        let valor = cpfRecebido.replace(/\D/g, "");
+
+        // Aplica a máscara: 000.000.000-00
+        if (valor.length === 11) {
+            valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        }
+
+        cadCpf.value = valor;
+        console.log("CPF carregado e formatado: " + valor);
     }
-    
-    cadCpf.value = valor;
-    console.log("CPF carregado e formatado: " + valor);
-}
 }

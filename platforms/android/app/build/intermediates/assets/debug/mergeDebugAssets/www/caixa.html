@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
     <link rel="stylesheet" href="css/caixa.css">
+    <link rel="stylesheet" href="css/style.css">
     <title>Caixa Autônomo</title>
 </head>
 
@@ -15,30 +16,31 @@
         <p>Sincronizando produtos...</p>
     </div>
 
-    <div class="caixa-container" id="conteudoCaixa" style="display:none;">
-
+    <div class="login-container-internal" id="conteudoCaixa" style="display: none;">
         <h2 id="tituloCaixa">Caixa</h2>
-        <button id="btnContinuar">Continuar para Pagamento</button>
-        <div class="total-container">
-            <h3>Total: R$ <span id="valorTotal">0.00</span></h3>
-        </div>
-        <div id="listaProdutos" class="lista-itens"> </div>
 
-        <div class="input-group">
-            <label>Produto:</label>
-            <form id="formBarcode">
-                <input type="number" id="barcodeInput" placeholder="Escaneie ou digite..." inputmode="numeric"
-                    enterkeyhint="done" autofocus>
-            </form>
-        </div>
+        <div class="login-container-sem-margem">
 
-     
+            <div class="login-container-internal">
+                <div id="listaProdutos" class="lista-itens"> </div>
+                <h3> Total: R$ <span id="valorTotal">0.00</span></h3>
+            </div>
+
+            <div class="login-container-internal">
+                <div class="input-group">
+                    <label>Produto:</label>
+                    <form id="formBarcode">
+                        <input type="number" id="barcodeInput" placeholder="Escaneie ou digite..." inputmode="numeric"
+                            enterkeyhint="done" autofocus>
+                    </form>
+                </div>
+                <button id="btnContinuar">Continuar para Pagamento</button>
+            </div>
+        </div>
     </div>
-    <div class="caixa-container" id="conteudoCaixa" style="display:none;"></div>
-       
-</div>
 
-    <script src="js/caixa.js"></script>
 </body>
 
 </html>
+
+<script src="js/caixa.js"></script>

@@ -1,41 +1,15 @@
-* {
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
+h2 {
+    text-align: center;
+    color: #333;
+    margin-top: 0;
 }
 
-body {
-    background-image: url('../img/01.webp');
-    background-repeat: repeat;
-    background-attachment: fixed;
-    background-size: 200px; /* Tamanho fixo para não distorcer */
-    background-color: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    height: 100%;
-    overflow: auto;
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
 }
-
-.caixa-container {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 450px;
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    padding-bottom: 20px; /* Espaço extra no fim */
-}
-
-
-h2 { text-align: center; color: #333; margin-top: 0; }
-
-label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
 
 input {
     width: 100%;
@@ -44,45 +18,60 @@ input {
     border-radius: 6px;
     font-size: 1rem;
     margin-bottom: 10px;
-    outline: none;
 }
 
-input:focus { border-color: #007bff; }
+input:focus {
+    border-color: #007bff;
+}
 
 /* Lista de Itens com Scroll */
 .lista-itens {
     background: #f9f9f9;
     border-radius: 8px;
-    height: 250px; 
+    height: 250px;
+    width: 400px;
     overflow-y: auto;
-    margin: 10px 0;
+    margin: 10px 10px;
     border: 1px solid #eee;
 }
 
 /* No caixa.css */
 .item-carrinho {
     display: flex;
-    justify-content: space-between;
-    padding: 15px;
-    margin-bottom: 8px;
-    border-radius: 8px;
+    margin-bottom: 5px;
+    border-radius: 2px;
     background: #fdfdfd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra suave */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* Sombra suave */
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.item-info { display: flex; flex-direction: column; }
+.item-info {
+    flex-direction: line;
+    margin-right: auto;
+}
+
 .item-nome {
     font-size: 1.1rem;
     color: #333;
 }
+
 .item-preco {
-    color: #28a745; /* Cor verde para o preço */
+    color: #28a745;
+    /* Cor verde para o preço */
     font-weight: bold;
+    margin-left: auto;
 }
 
 .btn-remover {
@@ -94,6 +83,16 @@ input:focus { border-color: #007bff; }
     height: 30px;
     cursor: pointer;
     font-weight: bold;
+    display: flex;
+    /* Alinha conteúdo */
+    justify-content: center;
+    /* Centraliza horizontalmente */
+    align-items: center;
+    /* Centraliza verticalmente */
+    margin-left: auto;
+    /* Mantém ele na direita */
+    padding: 0;
+    /* Evita deslocamento */
 }
 
 .total-container {
@@ -104,7 +103,7 @@ input:focus { border-color: #007bff; }
 
 
 button {
-    width: 100%;
+
     padding: 12px;
     background-color: #007bff;
     color: white;
@@ -112,7 +111,7 @@ button {
     border-radius: 6px;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s;
+    /* transition: background 0.3s; */
 }
 
 button:hover {
@@ -126,19 +125,11 @@ button:hover {
     min-height: 1.2rem;
 }
 
-/* Spinner */
-.loading-container { text-align: center; margin-top: 100px; width: 100%; }
-.spinner {
-    border: 4px solid rgba(0,0,0,.1);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border-left-color: #09f;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+
+
+
 .btnContinuar {
-    position: relative; 
-    margin-top: auto; /* Empurra o botão para o fim do conteúdo, mas permite scroll */
+    position: relative;
+    margin-top: auto;
+    /* Empurra o botão para o fim do conteúdo, mas permite scroll */
 }

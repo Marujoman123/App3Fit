@@ -3,6 +3,8 @@ let totalGeral = 0;
 let listaLocalProdutos = []; 
 let carrinho = []; // ADICIONADO: Array para armazenar os objetos dos produtos
 const tipoUsuario = localStorage.getItem('usuario_tipo'); 
+const nome = localStorage.getItem('usuario_nome');
+const primeiroNome = nome.split(" ")[0];
 
 // Elementos da tela
 const loading = document.getElementById('loading');
@@ -11,6 +13,7 @@ const formBarcode = document.getElementById('formBarcode');
 const barcodeInput = document.getElementById('barcodeInput');
 const listaProdutosDiv = document.getElementById('listaProdutos');
 const valorTotalTxt = document.getElementById('valorTotal');
+
 
 async function carregarDados() {
     try {
@@ -21,13 +24,13 @@ async function carregarDados() {
             listaLocalProdutos = json.produtos;
             
             if (tipoUsuario === "Parceiro") {
-                document.getElementById('tituloCaixa').innerText = "Caixa (Parceiro)";
+                document.getElementById('header-nome').innerText = primeiroNome + " (Parceiro)";
             } else {
-                document.getElementById('tituloCaixa').innerText = "Caixa (Cliente)";
+                document.getElementById('header-nome').innerText = primeiroNome;
             }
 
             loading.style.display = 'none';
-            conteudoCaixa.style.display = 'block';
+            conteudoCaixa.style.display = 'flex';
             barcodeInput.focus();
         }
     } catch (err) {
@@ -76,9 +79,10 @@ function adicionarNaTela(nome, preco) {
     itemDiv.innerHTML = `
         <div class="item-info">
             <span class="item-nome">${nome}</span>
-            <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>
+            
         </div>
-        <button class="btn-remover">×</button>
+        <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>
+         <button class="btn-remover">×</button>
     `;
 
   itemDiv.querySelector('.btn-remover').addEventListener('click', (e) => {
@@ -98,7 +102,7 @@ function adicionarNaTela(nome, preco) {
     itemDiv.remove();
 });
 
-    listaProdutosDiv.prepend(itemDiv);
+    listaProdutosDiv.append(itemDiv);
     
     totalGeral += parseFloat(preco);
     valorTotalTxt.innerText = totalGeral.toFixed(2);

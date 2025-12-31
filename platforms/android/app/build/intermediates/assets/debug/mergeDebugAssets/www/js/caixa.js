@@ -27,7 +27,7 @@ async function carregarDados() {
             }
 
             loading.style.display = 'none';
-            conteudoCaixa.style.display = 'block';
+            conteudoCaixa.style.display = 'flex';
             barcodeInput.focus();
         }
     } catch (err) {
@@ -76,9 +76,10 @@ function adicionarNaTela(nome, preco) {
     itemDiv.innerHTML = `
         <div class="item-info">
             <span class="item-nome">${nome}</span>
-            <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>
+            
         </div>
-        <button class="btn-remover">×</button>
+        <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>
+         <button class="btn-remover">×</button>
     `;
 
   itemDiv.querySelector('.btn-remover').addEventListener('click', (e) => {
@@ -98,7 +99,7 @@ function adicionarNaTela(nome, preco) {
     itemDiv.remove();
 });
 
-    listaProdutosDiv.prepend(itemDiv);
+    listaProdutosDiv.append(itemDiv);
     
     totalGeral += parseFloat(preco);
     valorTotalTxt.innerText = totalGeral.toFixed(2);
