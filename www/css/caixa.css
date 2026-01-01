@@ -29,7 +29,7 @@ input:focus {
     background: #f9f9f9;
     border-radius: 8px;
     height: 250px;
-    width: 400px;
+    width: 100%;
     overflow-y: auto;
     margin: 10px 10px;
     border: 1px solid #eee;
@@ -102,21 +102,7 @@ input:focus {
 }
 
 
-button {
 
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    /* transition: background 0.3s; */
-}
-
-button:hover {
-    background-color: #0056b3;
-}
 
 .error {
     color: #dc3545;
@@ -132,4 +118,28 @@ button:hover {
     position: relative;
     margin-top: auto;
     /* Empurra o botão para o fim do conteúdo, mas permite scroll */
+}
+
+
+
+
+
+/* O Modal Bottom Sheet */
+.modal-bottom-sheet {
+    width: 100%;
+    background: rgb(145, 145, 145);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease-out; /* Efeito de subir */
+     margin-top: 10px;
+}
+
+
+
+
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
 }

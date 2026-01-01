@@ -119,3 +119,20 @@ function capturarCPF() {
         console.log("CPF carregado e formatado: " + valor);
     }
 }
+
+
+
+// -----------------FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
+function forcarTeclado() {
+    const inputs = document.querySelectorAll('input:not(#barcodeInput)');
+    inputs.forEach(input => {
+        // O atributo decimal ou numeric costuma forçar a chamada do teclado no Android
+        if(!input.getAttribute('inputmode')) {
+            input.setAttribute('inputmode', 'text'); 
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', forcarTeclado);
+
+// -----------------/FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------

@@ -17,7 +17,21 @@
     </div>
 
     <div class="login-container-internal" id="conteudoCaixa" style="display: none;">
-        <h2 id="tituloCaixa">Caixa</h2>
+
+        <div id="user-header" class="user-header">
+            <h2 id="tituloCaixa" style="margin-right: auto;">Caixa</h2>
+            <div class="user-info-container">
+
+                <div class="user-details">
+
+                    <span id="header-nome">Carregando...</span>
+                    <span id="header-saldo" class="saldo-badge" style="display: none;">Saldo: R$ 0.00</span>
+                </div>
+                <div class="user-icon">
+                    <img src="img/user-icon.png" alt="Usuário">
+                </div>
+            </div>
+        </div>
 
         <div class="login-container-sem-margem">
 
@@ -42,5 +56,5 @@
 </body>
 
 </html>
-
+<script src="js/auth.js"></script>
 <script src="js/caixa.js"></script>

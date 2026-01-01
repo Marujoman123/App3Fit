@@ -123,3 +123,18 @@ document.getElementById('btnContinuar').addEventListener('click', () => {
 });
 
 carregarDados();
+
+
+
+
+// No caixa.js, desative o teclado virtual explicitamente para o campo de scan
+const inputScan = document.getElementById('barcodeInput');
+if (inputScan) {
+    inputScan.setAttribute('inputmode', 'none'); // Isso diz ao Android: "não chame o teclado aqui"
+}
+
+
+
+
+
+

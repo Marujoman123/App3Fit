@@ -3,6 +3,8 @@ let totalGeral = 0;
 let listaLocalProdutos = []; 
 let carrinho = []; // ADICIONADO: Array para armazenar os objetos dos produtos
 const tipoUsuario = localStorage.getItem('usuario_tipo'); 
+const nome = localStorage.getItem('usuario_nome');
+const primeiroNome = nome.split(" ")[0];
 
 // Elementos da tela
 const loading = document.getElementById('loading');
@@ -11,6 +13,7 @@ const formBarcode = document.getElementById('formBarcode');
 const barcodeInput = document.getElementById('barcodeInput');
 const listaProdutosDiv = document.getElementById('listaProdutos');
 const valorTotalTxt = document.getElementById('valorTotal');
+
 
 async function carregarDados() {
     try {
@@ -21,9 +24,9 @@ async function carregarDados() {
             listaLocalProdutos = json.produtos;
             
             if (tipoUsuario === "Parceiro") {
-                document.getElementById('tituloCaixa').innerText = "Caixa (Parceiro)";
+                document.getElementById('header-nome').innerText = primeiroNome + " (Parceiro)";
             } else {
-                document.getElementById('tituloCaixa').innerText = "Caixa (Cliente)";
+                document.getElementById('header-nome').innerText = primeiroNome;
             }
 
             loading.style.display = 'none';
@@ -120,3 +123,12 @@ document.getElementById('btnContinuar').addEventListener('click', () => {
 });
 
 carregarDados();
+
+
+
+
+// No caixa.js, desative o teclado virtual explicitamente para o campo de scan
+const inputScan = document.getElementById('barcodeInput');
+if (inputScan) {
+    inputScan.setAttribute('inputmode', 'none'); // Isso diz ao Android: "não chame o teclado aqui"
+}

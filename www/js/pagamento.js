@@ -104,6 +104,8 @@ document.getElementById('btnValidarCupom').addEventListener('click', async () =>
             msgLabel.style.color = "red";
             btn.innerText = "Validar";
             btn.disabled = false;
+            inputCupom.value="";
+            inputCupom.focus();
         }
     } catch (e) {
         msgLabel.innerText = "Erro de conexão.";
@@ -180,3 +182,21 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
     // localStorage.removeItem('carrinho');
     alert('Venda Finalizada');
 });
+
+
+
+
+// -----------------FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
+function forcarTeclado() {
+    const inputs = document.querySelectorAll('input:not(#barcodeInput)');
+    inputs.forEach(input => {
+        // O atributo decimal ou numeric costuma forçar a chamada do teclado no Android
+        if(!input.getAttribute('inputmode')) {
+            input.setAttribute('inputmode', 'text'); 
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', forcarTeclado);
+
+// -----------------/FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------

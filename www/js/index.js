@@ -1,3 +1,7 @@
+
+// 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
+    localStorage.clear(); 
+
 const btnEntrar = document.getElementById('btnEntrar');
 const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');
@@ -121,4 +125,19 @@ async function ValidarNoGoogleSheets() {
         window.location.href = "cadastro.html?cpf=" + cpfLimpo;
     }
 }
+
+// -----------------FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
+function forcarTeclado() {
+    const inputs = document.querySelectorAll('input:not(#barcodeInput)');
+    inputs.forEach(input => {
+        // O atributo decimal ou numeric costuma forçar a chamada do teclado no Android
+        if(!input.getAttribute('inputmode')) {
+            input.setAttribute('inputmode', 'numeric'); 
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', forcarTeclado);
+
+// -----------------/FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
 

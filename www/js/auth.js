@@ -25,3 +25,68 @@ function carregarPerfilHeader() {
 
 // Executa assim que a página carrega
 document.addEventListener('DOMContentLoaded', carregarPerfilHeader);
+
+
+
+
+// ------------------------INATIVIDADE DO APLICATIVO----------------------
+
+
+// Configuração: 3 minutos (180.000 milissegundos)
+const TEMPO_LIMITE = 30 * 60 * 1000; 
+let cronometroInatividade;
+
+function iniciarMonitoramento() {
+    // Lista de eventos que provam que o usuário ainda está lá
+    const eventos = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+
+    // Para cada interação, o cronômetro reinicia
+    eventos.forEach(evento => {
+        document.addEventListener(evento, resetarTemporizador, true);
+    });
+
+    resetarTemporizador();
+}
+
+function resetarTemporizador() {
+    // Cancela o agendamento anterior
+    clearTimeout(cronometroInatividade);
+    
+    // Se estiver na index.html, não precisa deslogar dela mesma
+    if (!window.location.href.includes("index.html")) {
+        // Agenda o logout para daqui a 3 minutos
+        cronometroInatividade = setTimeout(voltarAoInicio, TEMPO_LIMITE);
+    }
+}
+
+function voltarAoInicio() {
+    alert("Inatividade detectada. Redirecionando...");
+    
+    // 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
+    localStorage.clear(); 
+    
+    // 2. Opcional: Avisar o usuário antes (mas em totens autônomos geralmente é direto)
+    // alert("Sessão encerrada por inatividade.");
+    
+    // 3. Volta para a página de Login
+    window.location.href = "index.html";
+}
+
+// Inicia assim que a página carregar
+document.addEventListener('DOMContentLoaded', iniciarMonitoramento);
+
+
+// ------------------------/INATIVIDADE DO APLICATIVO----------------------
+
+
+
+// Fechar ao clicar no botão cancelar
+document.getElementById('btnFecharModal').addEventListener('click', () => {
+    // Abre a caixa de confirmação
+    const confirmacao = confirm("Tem certeza que deseja cancelar e voltar para o início?");
+    // Se o usuário clicou em "OK" (true)
+    if (confirmacao) {
+        window.location.href = "index.html";
+    } 
+    // Se clicou em "Cancelar" (false), o código não faz nada e o modal continua aberto
+});

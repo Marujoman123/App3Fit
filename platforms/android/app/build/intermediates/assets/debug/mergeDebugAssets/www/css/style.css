@@ -48,6 +48,21 @@ body {
     margin-top: 20px; 
 }
 
+.login-container-sem-Fundo {
+
+
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: line;
+    min-height: 100%;
+    padding-bottom: 20px; /* Espaço extra no fim */
+    
+    /* Adicione isso para dar um espaço do topo */
+    margin-top: 20px; 
+}
+
 .login-container-sem-margem {
     background: white; 
     border-radius: 12px;
@@ -70,3 +85,80 @@ body {
     flex-direction: column;
     min-height: 100%;
 }
+
+
+/* Spinner */
+.loading-container {
+    text-align: center;
+    margin-top: 100px;
+    width: 50%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, .1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border-left-color: #09f;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
+/* ---------------------HEADER USUARIO----------------------------- */
+.user-header {
+    width: 100%;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: flex-end; /* Alinha tudo à direita */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+#header-nome {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.saldo-badge {
+    font-size: 0.8rem;
+    color: #28a745; /* Verde para o saldo */
+    font-weight: bold;
+}
+
+.user-icon img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #007bff;
+    padding: 2px;
+}
+
+
+/* ---------------------/HEADER USUARIO----------------------------- */

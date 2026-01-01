@@ -31,6 +31,7 @@
                     <img src="img/user-icon.png" alt="Usuário">
                 </div>
             </div>
+            
         </div>
 
         <div class="login-container-sem-margem">
@@ -40,7 +41,7 @@
                 <h3> Total: R$ <span id="valorTotal">0.00</span></h3>
             </div>
 
-            <div class="login-container-internal">
+            <!-- <div class="login-container-internal">
                 <div class="input-group">
                     <label>Produto:</label>
                     <form id="formBarcode">
@@ -50,8 +51,25 @@
                 </div>
                 <button id="btnContinuar">Continuar para Pagamento</button>
             </div>
-        </div>
+        </div> -->
     </div>
+
+
+        <div id="modalFooter" class="modal-bottom-sheet">
+            <div class="modal-handle"></div>
+            <div class="login-container-internal">
+                <div class="input-group">
+                    <label>Produto:</label>
+                    <form id="formBarcode">
+                        <input type="number" id="barcodeInput" placeholder="Escaneie o código de barras" inputmode="numeric"
+                            enterkeyhint="done">
+                    </form>
+                </div>
+                <button id="btnContinuar">Continuar para Pagamento</button>
+                <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
+            </div>
+        </div>
+
 
 </body>
 
