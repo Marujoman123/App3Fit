@@ -89,7 +89,7 @@ body {
     display: flex;
     flex-direction: line;
     min-height: 100%;
-    padding-bottom: 20px; /* Espaço extra no fim */
+    /* padding-bottom: 20px; Espaço extra no fim */
 
 }
 

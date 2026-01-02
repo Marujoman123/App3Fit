@@ -24,25 +24,52 @@ input:focus {
     border-color: #007bff;
 }
 
-/* Lista de Itens com Scroll */
-.lista-itens {
-    background: #f9f9f9;
-    border-radius: 8px;
-    height: 250px;
-    width: 100%;
-    overflow-y: auto;
-    margin: 10px 10px;
-    border: 1px solid #eee;
+/* Cabeçalho Fixo da Lista */
+.lista-header {
+    display: flex;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px 8px 0 0; /* Arredonda apenas o topo */
+    margin: 0 10px; /* Alinha com a margem da lista-itens */
 }
 
-/* No caixa.css */
+
+/* Área da Lista com Scroll */
+.lista-itens {
+    background: #ffffff;
+    border-radius: 0 0 8px 8px; /* Arredonda apenas o fundo */
+    height: 250px; /* Ajuste a altura conforme seu tablet */
+    width: auto;
+    overflow-y: scroll; /* Força o aparecimento da barra se necessário */
+    margin: 0 10px 10px 10px;
+    border: 1px solid #ddd;
+    border-top: none; /* Une visualmente com o header azul */
+}
+
+/* Estilização da Barra de Rolagem (Chrome/Android) */
+.lista-itens::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lista-itens::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 0 0 8px 0;
+}
+
+.lista-itens::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+/* Ajuste no item interno para alinhar com o cabeçalho */
 .item-carrinho {
     display: flex;
-    margin-bottom: 5px;
-    border-radius: 2px;
-    background: #fdfdfd;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    /* Sombra suave */
+    align-items: center;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
@@ -57,22 +84,33 @@ input:focus {
     }
 }
 
-.item-info {
-    flex-direction: line;
-    margin-right: auto;
-}
+
+
+.header-produto { flex: 1; text-align: left; }
+.header-preco { width: 80px; text-align: right; margin-right: 40px; }
+.header-vazio { width: 30px; } /* Espaço compensando o botão remover */
 
 .item-nome {
-    font-size: 1.1rem;
-    color: #333;
+    flex: 1;
+    text-align: left;
+    /* white-space: nowrap;
+    overflow: hidden; */
+    text-overflow: ellipsis; /* Evita que nomes longos quebrem o layout */
 }
 
 .item-preco {
+    flex: 1;
+    width: 80px;
+    text-align: right;
+    margin-right: 30px;     
     color: #28a745;
-    /* Cor verde para o preço */
     font-weight: bold;
-    margin-left: auto;
 }
+
+/* .total-fundo {
+    color: #000000;
+1
+} */
 
 .btn-remover {
     background: #ffebee;

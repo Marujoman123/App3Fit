@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', carregarPerfilHeader);
 
 
 // Configuração: 3 minutos (180.000 milissegundos)
-const TEMPO_LIMITE = 3 * 60 * 1000; 
+const TEMPO_LIMITE = 30 * 60 * 1000; 
 let cronometroInatividade;
 
 function iniciarMonitoramento() {
