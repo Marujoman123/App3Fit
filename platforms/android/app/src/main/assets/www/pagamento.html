@@ -79,10 +79,25 @@
                     <label id="msgCupom" style="font-size: 0.8rem; margin-top: 5px; display: block;"></label>
                 </div>
 
+                 <div id="containerSaldo"
+                    style="display: none; margin-top: 15px; border: 1px dashed #ccc; padding: 10px;">
+                    <label style="color: #000;">Gostaria de pagar com saldo?</label>
+                    <label>Saldo Disponível: <b>R$ <span id="txtSaldoDisponivel">0.00</span></b></label>
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        <input type="tel" id="inputUsarSaldo" placeholder="Quanto usar?">
+                        <button id="btnAplicarSaldo" style="width: auto;">Aplicar</button>
+                    </div>
+                    <label id="msgSaldo" style="font-size: 0.8rem; display: block;"></label>
+                </div>
+
                 <div id="listaItensPagamento"
                     style="margin-bottom: 10px; text-align: left; border-bottom: 1px solid #ddd;">
                     <h3 style="font-size: 1rem; color: #000;">Itens selecionados:</h3>
                 </div>
+
+
+
+                
 
 
 
@@ -103,15 +118,7 @@
 
 
 
-                <div id="containerSaldo"
-                    style="display: none; margin-top: 15px; border: 1px dashed #ccc; padding: 10px;">
-                    <label>Saldo Disponível: <b>R$ <span id="txtSaldoDisponivel">0.00</span></b></label>
-                    <div style="display: flex; gap: 5px; margin-top: 5px;">
-                        <input type="number" id="inputUsarSaldo" placeholder="Quanto usar?">
-                        <button id="btnAplicarSaldo" style="width: auto;">Aplicar</button>
-                    </div>
-                    <label id="msgSaldo" style="font-size: 0.8rem; display: block;"></label>
-                </div>
+               
 
                 <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
                 <button id="btnConfirmarPagamento" style="background-color: #28a745; margin-top: 20px;">Confirmar e

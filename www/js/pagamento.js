@@ -9,7 +9,51 @@ const cpfUsuario = localStorage.getItem('usuario_cpf');
 const btnValidar = document.getElementById('btnValidarCupom');
 const inputCupom = document.getElementById('inputCupom');
 
+
+const saldoDisponivel = parseFloat(localStorage.getItem('usuario_saldo')) || 0;
+let saldoUtilizadoTotal = 0;
 let descontoAplicado = 0;
+
+// --- CONFIGURAÇÃO INICIAL DA TELA ---
+if (tipoUsuario === "Parceiro") {
+    document.getElementById('containerSaldo').style.display = 'block';
+    document.getElementById('txtSaldoDisponivel').innerText = saldoDisponivel.toFixed(2);
+    // Para parceiros, escondemos o cupom como solicitado anteriormente
+    document.getElementById('containerCupom').style.display = 'none';
+}
+
+
+// ------------------------------MASCARA INPUT------------------------------
+const inputSaldo = document.getElementById('inputUsarSaldo');
+
+inputSaldo.addEventListener('input', function (e) {
+    let value = e.target.value;
+
+    // 1. Remove tudo que não for número
+    value = value.replace(/\D/g, "");
+
+    // 2. Transforma em centavos (divide por 100)
+    // Se digitou "125", vira 1.25. Se digitou "5", vira 0.05
+    value = (value / 100).toFixed(2) + "";
+
+    // 3. Troca o ponto pela vírgula para exibição brasileira
+    // value = value.replace(".", ",");
+
+    // 4. Adiciona separador de milhar (opcional, mas recomendado)
+    // value = value.replace(/(\d)(\d{3}),/g, "$1.$2,");
+
+    // 5. Devolve o valor formatado para o campo
+    e.target.value =  value;
+});
+
+
+// ------------------------------/MASCARA INPUT------------------------------
+
+
+
+
+
+
 
 // --- 1. RENDERIZAR ITENS NA TELA ---
 const containerLista = document.getElementById('listaItensPagamento');
@@ -39,10 +83,10 @@ document.getElementById('totalFinal').innerText = totalOriginal.toFixed(2);
 
 // --- 2. LÓGICA DO CUPOM (Mantida) ---
 if (tipoUsuario === "Parceiro") {
-    document.getElementById('containerCupom').style.display = 'none';
-    document.getElementById('dtot').style.display = 'none';
-    document.getElementById('txtDesconto').style.display = 'none';
-    document.getElementById('linhatot').style.display = 'none';
+   document.getElementById('containerCupom').style.display = 'none';
+    // document.getElementById('dtot').style.display = 'none';
+    //document.getElementById('txtDesconto').style.display = 'none';
+    //document.getElementById('linhatot').style.display = 'none';
 
 }
 
@@ -122,8 +166,7 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
     const cpfUsuario = localStorage.getItem('usuario_cpf') || "000.000.000-00";
     const nomeUsuario = localStorage.getItem('usuario_nome') || "Consumidor";
     const tipoUsuario = localStorage.getItem('usuario_tipo') || "Cliente";
-    
-    // Pega o valor do input de cupom, mas se estiver vazio ou desabilitado, define como "NENHUM"
+
     const inputCupomElement = document.getElementById('inputCupom');
     const cupomTexto = (inputCupomElement && inputCupomElement.value.trim() !== "") ? inputCupomElement.value : "NENHUM";
 
@@ -134,53 +177,61 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
         return;
     }
 
-    // --- CORREÇÃO DO FATOR DE DESCONTO ---
-    const txtTotalFinal = document.getElementById('totalFinal').innerText;
-    const txtTotalOriginal = document.getElementById('totalOriginal').innerText;
-    
-    const valorTotalFinal = parseFloat(txtTotalFinal);
-    const valorTotalOriginal = parseFloat(txtTotalOriginal);
+    const valorTotalFinal = parseFloat(document.getElementById('totalFinal').innerText);
+    const valorTotalOriginal = parseFloat(document.getElementById('totalOriginal').innerText);
 
-    // Se não houver desconto, o fator é 1. Se houver, é a proporção (ex: 0.9 para 10% off)
-    let fatorDesconto = 1; 
-    if (valorTotalOriginal > 0 && valorTotalFinal < valorTotalOriginal) {
-        fatorDesconto = valorTotalFinal / valorTotalOriginal;
-    }
-
-  const jsonVendaFinal = carrinhoParaVenda.map(item => {
+    const jsonVendaFinal = carrinhoParaVenda.map(item => {
         const valorItemOriginal = parseFloat(item.preco);
-        const valorComDesconto = valorItemOriginal * fatorDesconto;
+        const proporcao = valorItemOriginal / valorTotalOriginal;
         
-        let comissaoParceiro = 0;
+        // 1. Calculamos o valor do item APÓS o desconto do cupom (se houver)
+        // Se houve 10% de desconto no total, o item de 10,00 vira 9,00.
+        const valorComDescontoCupom = (valorTotalOriginal > 0) 
+            ? valorItemOriginal * ((valorTotalOriginal - descontoAplicado) / valorTotalOriginal)
+            : valorItemOriginal;
 
-        // CORREÇÃO AQUI: Usamos !== para comparar se o cupom é diferente de "NENHUM"
-        // Também verificamos se o cupomTexto (variável que já limpamos lá em cima) não é "NENHUM"
+        // 2. Calculamos quanto do saldo aplicado pertence a este item
+        const valorEmSaldoDesteItem = (typeof saldoUtilizadoTotal !== 'undefined') ? (saldoUtilizadoTotal * proporcao) : 0;
+
+        // 3. ValorPAgo: O que sobra para pagar em dinheiro. 
+        // Math.max(0, ...) garante que se o saldo cobrir tudo, o valor não fique negativo.
+        const valorPagoDesteItem = Math.max(0, valorComDescontoCupom - valorEmSaldoDesteItem);
+
+        // 4. Comissão: 15% sobre o valor ORIGINAL do item (ou conforme sua regra de negócio)
+        let comissaoParceiro = 0;
         if (cupomTexto !== "NENHUM") {
             comissaoParceiro = valorItemOriginal * 0.15;
         }
 
         return {
-            "ID Venda": idVendaUnico,
-            "Data/Hora": dataHora,
-            "CPF": cpfUsuario,
-            "Nome": nomeUsuario,
-            "Tipo": tipoUsuario,
-            "Cod": item.codigo,
-            "Produto": item.nome,
-            "Valor Item": valorItemOriginal.toFixed(2),
-            "cupom": cupomTexto,
-            "Valor desconto": valorComDesconto.toFixed(2),
-            "Valor parceiro": comissaoParceiro.toFixed(2),
-            "Valor liquido": (valorComDesconto - comissaoParceiro).toFixed(2)
-        };
+    "ID Venda": idVendaUnico,
+    "Data/Hora": dataHora,
+    "CPF": cpfUsuario,
+    "Nome": nomeUsuario,
+    "Tipo": tipoUsuario,
+    "Cod": item.codigo,
+    "Produto": item.nome,
+    // Convertendo para número e garantindo 2 casas decimais matematicamente
+    "Valor Item": Number(valorItemOriginal.toFixed(2)),
+    "cupom": cupomTexto,
+    "ValoremSaldo": Number(valorEmSaldoDesteItem.toFixed(2)),
+    "ValorPAgo": Number(valorPagoDesteItem.toFixed(2)),
+    "Valor parceiro": Number(comissaoParceiro.toFixed(2)),
+    // Cálculo do valor líquido garantindo que não seja negativo e seja do tipo Number
+    "Valor liquido": Number(Math.max(0, valorPagoDesteItem - comissaoParceiro).toFixed(2))
+};
     });
 
     console.log("--- NOVA VENDA GERADA ---");
     console.table(jsonVendaFinal);
     
-    // Sugestão: Limpar o carrinho após sucesso para evitar duplicidade
-    // localStorage.removeItem('carrinho');
+    // Agora você pode enviar jsonVendaFinal para o Google Sheets via Fetch
+    enviarVendaParaPlanilha(jsonVendaFinal);
     alert('Venda Finalizada');
+    
+    // Sugestão de limpeza após sucesso real:
+    // localStorage.removeItem('carrinho');
+    // window.location.href = "index.html";
 });
 
 
@@ -200,3 +251,180 @@ function forcarTeclado() {
 document.addEventListener('DOMContentLoaded', forcarTeclado);
 
 // -----------------/FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
+
+
+// --- FUNÇÃO PARA ATUALIZAR O TOTAL FINAL NA TELA ---
+function atualizarResumoTela() {
+    const totalComDesconto = totalOriginal - descontoAplicado;
+    const totalFinal = totalComDesconto - saldoUtilizadoTotal;
+    
+    document.getElementById('totalFinal').innerText = Math.max(0, totalFinal).toFixed(2);
+    
+    const elTxtSaldo = document.getElementById('txtSaldoUsado');
+    const elValorSaldo = document.getElementById('valorSaldoAbatido');
+    const txtDescontoDiv = document.getElementById('txtDesconto');
+    const valorDesconto = document.getElementById('valorDesconto');
+
+    // Mostra linha de desconto de CUPOM (10%)
+    if (descontoAplicado > 0) {
+        txtDescontoDiv.style.display = 'block';
+        valorDesconto.innerText = descontoAplicado.toFixed(2);
+    } else {
+        txtDescontoDiv.style.display = 'none';
+    }
+
+    // Mostra linha de saldo ABATIDO (para Parceiros usando saldo)
+    if (saldoUtilizadoTotal > 0) {
+        if(elTxtSaldo) {
+            elTxtSaldo.style.display = 'block';
+            elValorSaldo.innerText = saldoUtilizadoTotal.toFixed(2);
+        }
+    } else {
+        if(elTxtSaldo) elTxtSaldo.style.display = 'none';
+    }
+}
+
+
+
+// --- BOTÃO APLICAR SALDO (SÓ PARA PARCEIRO) ---
+// --- FUNÇÃO PARA PREENCHER O VALOR SUGERIDO ---
+function sugerirValorSaldo() {
+    const inputSaldo = document.getElementById('inputUsarSaldo');
+    const btnSaldo = document.getElementById('btnAplicarSaldo');
+    
+    // Se o botão já estiver como "Alterar", não sobrescrevemos o que o usuário escolheu
+    if (btnSaldo.innerText === "Alterar") return;
+
+    const valorRestante = totalOriginal - descontoAplicado;
+
+    if (valorRestante > saldoDisponivel) {
+        inputSaldo.value = saldoDisponivel.toFixed(2);
+    } else {
+        inputSaldo.value = valorRestante.toFixed(2);
+    }
+}
+
+// --- LOGICA DO BOTÃO APLICAR / ALTERAR SALDO ---
+document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
+    const inputSaldo = document.getElementById('inputUsarSaldo');
+    const btn = document.getElementById('btnAplicarSaldo');
+    const msg = document.getElementById('msgSaldo');
+
+    // CASO: CLICOU EM ALTERAR
+    if (btn.innerText === "Alterar") {
+        saldoUtilizadoTotal = 0; // Reseta o saldo na conta
+        inputSaldo.disabled = false;
+        btn.innerText = "Aplicar";
+        btn.style.backgroundColor = ""; // Volta cor original
+        btn.style.color = "";
+        msg.innerText = "";
+        
+        sugerirValorSaldo(); // Sugere novamente o valor
+        atualizarResumoTela();
+        return;
+    }
+
+    // CASO: CLICOU EM APLICAR
+    const valorPretendido = parseFloat(inputSaldo.value) || 0;
+
+    if (valorPretendido <= 0) return;
+
+    if (valorPretendido > saldoDisponivel) {
+        msg.innerText = "Saldo insuficiente!";
+        msg.style.color = "red";
+        return;
+    }
+
+    const totalPossivel = totalOriginal - descontoAplicado;
+    if (valorPretendido > totalPossivel) {
+        msg.innerText = "Valor maior que a compra!";
+        msg.style.color = "orange";
+        return;
+    }
+
+    // Sucesso ao aplicar
+    saldoUtilizadoTotal = valorPretendido;
+    msg.innerText = "Saldo aplicado!";
+    msg.style.color = "green";
+    
+    // Transforma em botão de Alterar
+    inputSaldo.disabled = true;
+    btn.innerText = "Alterar";
+    btn.style.backgroundColor = "#ffc107"; // Amarelo para destaque
+    btn.style.color = "#000";
+    
+    atualizarResumoTela();
+});
+
+
+// --- FUNÇÃO PARA PREENCHER O VALOR SUGERIDO ---
+sugerirValorSaldo();
+
+
+function sugerirValorSaldo() {
+    const inputSaldo = document.getElementById('inputUsarSaldo');
+    const btnSaldo = document.getElementById('btnAplicarSaldo');
+    
+    // Se o botão já estiver como "Alterar", não sobrescrevemos o que o usuário escolheu
+    if (btnSaldo.innerText === "Alterar") return;
+
+    const valorRestante = totalOriginal - descontoAplicado;
+
+    if (valorRestante > saldoDisponivel) {
+        inputSaldo.value = saldoDisponivel.toFixed(2);
+    } else {
+        inputSaldo.value = valorRestante.toFixed(2);
+    }
+}
+
+
+
+
+// --- FUNÇÃO PARA ENVIAR PARA A PLANILHA ---
+async function enviarVendaParaPlanilha(dadosVenda) {
+    const btnConfirmar = document.getElementById('btnConfirmarPagamento');
+    const originalText = btnConfirmar.innerText;
+    
+    // Feedback visual para o usuário
+    btnConfirmar.innerText = "Processando...";
+    btnConfirmar.disabled = true;
+
+    try {
+        // O fetch envia o array de objetos (jsonVendaFinal) com os valores numéricos
+        const response = await fetch(URL_SCRIPT, {
+            method: 'POST',
+            mode: 'no-cors', // Evita bloqueios de política de mesma origem em apps mobile
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosVenda)
+        });
+
+        /* Nota: No modo 'no-cors', o status da resposta é sempre 0 e não conseguimos 
+           ler o corpo. Se não houve erro de rede (catch), assumimos o sucesso.
+        */
+        
+        alert("Venda Finalizada com Sucesso!");
+
+        // --- ATUALIZAÇÃO DE SALDO LOCAL (Se o usuário for o comprador parceiro) ---
+        if (tipoUsuario === "Parceiro" && saldoUtilizadoTotal > 0) {
+            const novoSaldoLocal = saldoDisponivel - saldoUtilizadoTotal;
+            localStorage.setItem('usuario_saldo', novoSaldoLocal.toFixed(2));
+        }
+
+        // --- LIMPEZA DE CARRINHO ---
+        localStorage.removeItem('carrinho');
+        localStorage.removeItem('total_venda');
+
+        // Redireciona para o início
+        window.location.href = "index.html";
+
+    } catch (error) {
+        console.error("Erro técnico no envio:", error);
+        alert("Erro de conexão. Verifique sua internet e tente novamente.");
+        
+        // Reativa o botão para nova tentativa
+        btnConfirmar.innerText = originalText;
+        btnConfirmar.disabled = false;
+    }
+}

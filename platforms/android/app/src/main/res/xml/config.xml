@@ -25,4 +25,7 @@
     <preference name="Fullscreen" value="true" />
     <preference name="HideKeyboardFormAccessoryBar" value="true" />
     <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
+    <feature name="LaunchMyApp">
+        <param name="android-package" value="nl.xservices.plugins.LaunchMyApp" />
+    </feature>
 </widget>

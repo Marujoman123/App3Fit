@@ -9,6 +9,13 @@
   "installed_plugins": {
     "cordova-plugin-keyboard": {
       "PACKAGE_NAME": "com.exemplo.App3fit"
+    },
+    "cordova-plugin-customurlscheme": {
+      "URL_SCHEME": "app3fit",
+      "ANDROID_SCHEME": " ",
+      "ANDROID_HOST": " ",
+      "ANDROID_PATHPREFIX": "/",
+      "PACKAGE_NAME": "com.exemplo.App3fit"
     }
   },
   "dependent_plugins": {}
