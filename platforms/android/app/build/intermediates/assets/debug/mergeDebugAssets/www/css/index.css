@@ -1,8 +1,5 @@
 
-h2 {
-    margin-bottom: 0.5rem;
-    color: #333;
-}
+
 
 p {
     color: #666;
@@ -25,28 +22,9 @@ input:focus {
     border-color: #007bff;
 }
 
-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s;
-    position: flex; 
-
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
 .error {
     color: #dc3545;
     font-size: 0.85rem;
-    margin-top: 1rem;
-    min-height: 1.2rem;
+    
 }
 

@@ -129,6 +129,25 @@ carregarDados();
 
 // No caixa.js, desative o teclado virtual explicitamente para o campo de scan
 const inputScan = document.getElementById('barcodeInput');
+
 if (inputScan) {
-    inputScan.setAttribute('inputmode', 'none'); // Isso diz ao Android: "não chame o teclado aqui"
+    // 1. Define como none
+    inputScan.setAttribute('inputmode', 'none');
+    
+    // 2. Truque do readOnly: impede o teclado mas aceita entrada do leitor
+    inputScan.addEventListener('focus', function() {
+        this.readOnly = true;
+        setTimeout(() => { this.readOnly = false; }, 50);
+    });
+
+    // 3. Forçar o fechamento se o teclado teimar em abrir
+    inputScan.addEventListener('click', () => {
+       inputScan.blur();
+       setTimeout(() => inputScan.focus(), 10);
+    });
 }
+
+
+
+
+

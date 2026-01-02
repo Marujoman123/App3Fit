@@ -14,10 +14,9 @@
     <allow-navigation href="https://script.google.com/*" />
     <platform name="android"> 
 
-      <preference name="Fullscreen" value="true" />
-      <preference name="android-windowSoftInputMode" value="adjustResize" />
-      <preference name="HideKeyboardFormAccessoryBar" value="false" />
-'''''<preference name="KeypressAndKeydownEventPropagationPriority" value="true" />
+<preference name="Fullscreen" value="true" />
+    <preference name="HideKeyboardFormAccessoryBar" value="true" />
+    <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
 
     <icon src="res/mipmap-anydpi-v26/icon_3fit.xml" />
     <icon monochrome="res/mipmap-mdpi/icon_3fit_monochrome.png" 

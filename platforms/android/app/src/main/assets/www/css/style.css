@@ -3,6 +3,20 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+h1 {
+    margin-bottom: 0.5rem;
+    color: #000000;
+}
+h2 {
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+}
+
 body {
     background-color: #f0f2f5;
     display: flex;
@@ -29,7 +43,7 @@ body {
     background-size: 25% 25%;
 
     /* Cor de fundo reserva caso a imagem demore a carregar */
-    background-color: #f0f2f5;
+    background-color: #000000;
 }
 
 .login-container {
@@ -46,6 +60,7 @@ body {
     
     /* Adicione isso para dar um espaço do topo */
     margin-top: 20px; 
+
 }
 
 .login-container-sem-Fundo {
@@ -61,6 +76,7 @@ body {
     
     /* Adicione isso para dar um espaço do topo */
     margin-top: 20px; 
+
 }
 
 .login-container-sem-margem {
@@ -74,7 +90,7 @@ body {
     flex-direction: line;
     min-height: 100%;
     padding-bottom: 20px; /* Espaço extra no fim */
-    
+
 }
 
 .login-container-internal {
@@ -96,6 +112,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     padding: 10px;
+     
 }
 
 .spinner {
@@ -143,7 +160,12 @@ body {
 #header-nome {
     font-weight: bold;
     font-size: 0.9rem;
-    color: #333;
+    color: #ffffff;
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
 }
 
 .saldo-badge {
@@ -160,5 +182,30 @@ body {
     padding: 2px;
 }
 
-
 /* ---------------------/HEADER USUARIO----------------------------- */
+
+
+button {
+
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    /* transition: background 0.3s; */
+    width: 100%;
+    margin: 2px
+}
+
+button:hover {
+    background-color: #045fc0;
+}
+
+.btn-secundario {
+    background: #f0f0f0;
+    color: #333;
+    padding: 12px;
+    margin: 2px
+}

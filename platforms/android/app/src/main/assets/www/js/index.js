@@ -1,3 +1,7 @@
+
+// 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
+localStorage.clear(); 
+
 const btnEntrar = document.getElementById('btnEntrar');
 const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');
@@ -137,3 +141,8 @@ document.addEventListener('DOMContentLoaded', forcarTeclado);
 
 // -----------------/FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
 
+
+
+
+
+cpfInput.focus();

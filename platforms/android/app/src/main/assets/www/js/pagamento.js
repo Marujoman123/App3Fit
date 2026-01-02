@@ -104,6 +104,8 @@ document.getElementById('btnValidarCupom').addEventListener('click', async () =>
             msgLabel.style.color = "red";
             btn.innerText = "Validar";
             btn.disabled = false;
+            inputCupom.value="";
+            inputCupom.focus();
         }
     } catch (e) {
         msgLabel.innerText = "Erro de conexão.";

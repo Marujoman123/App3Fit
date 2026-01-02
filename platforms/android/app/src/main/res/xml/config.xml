@@ -23,7 +23,6 @@
     <icon background="res/mipmap-xxxhdpi/icon_3fit_background.png" density="xxxhdpi" foreground="res/mipmap-xxxhdpi/icon_3fit_foreground.png" monochrome="res/mipmap-xxxhdpi/icon_3fit_monochrome.png" />
     <preference name="loglevel" value="DEBUG" />
     <preference name="Fullscreen" value="true" />
-    <preference name="android-windowSoftInputMode" value="adjustResize" />
-    <preference name="HideKeyboardFormAccessoryBar" value="false" />
-    <preference name="KeypressAndKeydownEventPropagationPriority" value="true" />
+    <preference name="HideKeyboardFormAccessoryBar" value="true" />
+    <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
 </widget>

@@ -56,6 +56,7 @@ btnSalvar.addEventListener('click', async () => {
     const nome = cadNome.value.trim();
     const telefone = cadTelefone.value.trim();
     const cpf = cadCpf.value;
+    const cpfLimpo = cpf.replace(/\D/g, "");
 
     if (!nome || !telefone || !cpf) {
         alert("Por favor, preencha todos os campos.");
@@ -89,6 +90,12 @@ btnSalvar.addEventListener('click', async () => {
         // Como usamos 'no-cors', o fetch não consegue ler o JSON de resposta com precisão, 
         // mas se não cair no 'catch', o dado foi enviado.
         alert("Cadastro realizado com sucesso!");
+
+
+        localStorage.setItem('usuario_cpf', cpfLimpo);        
+        localStorage.setItem('usuario_nome', nome);
+        localStorage.setItem('usuario_tipo', "Cliente");
+
         window.location.href = "caixa.html";
 
     } catch (error) {
