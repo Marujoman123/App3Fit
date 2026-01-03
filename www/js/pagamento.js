@@ -180,47 +180,49 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
     const valorTotalFinal = parseFloat(document.getElementById('totalFinal').innerText);
     const valorTotalOriginal = parseFloat(document.getElementById('totalOriginal').innerText);
 
-    const jsonVendaFinal = carrinhoParaVenda.map(item => {
-        const valorItemOriginal = parseFloat(item.preco);
-        const proporcao = valorItemOriginal / valorTotalOriginal;
-        
-        // 1. Calculamos o valor do item APÓS o desconto do cupom (se houver)
-        // Se houve 10% de desconto no total, o item de 10,00 vira 9,00.
-        const valorComDescontoCupom = (valorTotalOriginal > 0) 
-            ? valorItemOriginal * ((valorTotalOriginal - descontoAplicado) / valorTotalOriginal)
-            : valorItemOriginal;
+const jsonVendaFinal = carrinhoParaVenda.map(item => {
+    const valorItemOriginal = parseFloat(item.preco);
+    const proporcao = valorItemOriginal / valorTotalOriginal;
+    
+    // 1. Valor após desconto de cupom
+    const valorComDescontoCupom = (valorTotalOriginal > 0) 
+        ? valorItemOriginal * ((valorTotalOriginal - descontoAplicado) / valorTotalOriginal)
+        : valorItemOriginal;
 
-        // 2. Calculamos quanto do saldo aplicado pertence a este item
-        const valorEmSaldoDesteItem = (typeof saldoUtilizadoTotal !== 'undefined') ? (saldoUtilizadoTotal * proporcao) : 0;
+    // 2. Quanto do saldo total aplicado pertence a este item
+    const valorEmSaldoDesteItem = (typeof saldoUtilizadoTotal !== 'undefined') ? (saldoUtilizadoTotal * proporcao) : 0;
 
-        // 3. ValorPAgo: O que sobra para pagar em dinheiro. 
-        // Math.max(0, ...) garante que se o saldo cobrir tudo, o valor não fique negativo.
-        const valorPagoDesteItem = Math.max(0, valorComDescontoCupom - valorEmSaldoDesteItem);
+    // 3. Valor Pago em dinheiro/cartão
+    const valorPagoDesteItem = Math.max(0, valorComDescontoCupom - valorEmSaldoDesteItem);
 
-        // 4. Comissão: 15% sobre o valor ORIGINAL do item (ou conforme sua regra de negócio)
-        let comissaoParceiro = 0;
-        if (cupomTexto !== "NENHUM") {
-            comissaoParceiro = valorItemOriginal * 0.15;
-        }
+    // --- NOVA LÓGICA DE COMISSÃO/RETIRADA ---
+    let comissaoParceiro = 0;
 
-        return {
-    "ID Venda": idVendaUnico,
-    "Data/Hora": dataHora,
-    "CPF": cpfUsuario,
-    "Nome": nomeUsuario,
-    "Tipo": tipoUsuario,
-    "Cod": item.codigo,
-    "Produto": item.nome,
-    // Convertendo para número e garantindo 2 casas decimais matematicamente
-    "Valor Item": Number(valorItemOriginal.toFixed(2)),
-    "cupom": cupomTexto,
-    "ValoremSaldo": Number(valorEmSaldoDesteItem.toFixed(2)),
-    "ValorPAgo": Number(valorPagoDesteItem.toFixed(2)),
-    "Valor parceiro": Number(comissaoParceiro.toFixed(2)),
-    // Cálculo do valor líquido garantindo que não seja negativo e seja do tipo Number
-    "Valor liquido": Number(Math.max(0, valorPagoDesteItem - comissaoParceiro).toFixed(2))
-};
-    });
+    if (tipoUsuario === "Parceiro" && valorEmSaldoDesteItem > 0) {
+        // Se o comprador é parceiro e usou saldo, registramos como valor NEGATIVO
+        // Isso aparecerá no relatório como uma "Retirada"
+        comissaoParceiro = -valorEmSaldoDesteItem;
+    } else if (cupomTexto !== "NENHUM") {
+        // Se houve uso de cupom (venda para terceiro), mantém os 15% positivos
+        comissaoParceiro = valorItemOriginal * 0.15;
+    }
+
+    return {
+        "ID Venda": idVendaUnico,
+        "Data/Hora": dataHora,
+        "CPF": cpfUsuario.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"),
+        "Nome": nomeUsuario,
+        "Tipo": tipoUsuario,
+        "Cod": item.codigo,
+        "Produto": item.nome,
+        "Valor Item": Number(valorItemOriginal.toFixed(2)),
+        "cupom": cupomTexto,
+        "ValoremSaldo": Number(valorEmSaldoDesteItem.toFixed(2)),
+        "ValorPAgo": Number(valorPagoDesteItem.toFixed(2)),
+        "Valor parceiro": Number(comissaoParceiro.toFixed(2)), // Agora pode ser negativo
+        "Valor liquido": Number(Math.max(0, valorPagoDesteItem - (comissaoParceiro > 0 ? comissaoParceiro : 0)).toFixed(2))
+    };
+});
 
     console.log("--- NOVA VENDA GERADA ---");
     console.table(jsonVendaFinal);

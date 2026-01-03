@@ -3,7 +3,6 @@
 // ======================================================
 function doGet(e) {
   try {
-    // Conecta na planilha ativa
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
     // --- ROTA 1: Listar TODOS os produtos (Carregamento inicial) ---
@@ -14,7 +13,7 @@ function doGet(e) {
       return respostaJSON({ status: "success", produtos: dados });
     }
     
-    // --- ROTA 2: Validar Cupom (Nova Lógica) ---
+    // --- ROTA 2: Validar Cupom ---
     if (e.parameter.validarCupom) {
       return validarCupom(e.parameter.validarCupom, ss);
     }
@@ -28,12 +27,22 @@ function doGet(e) {
     if (e.parameter.cpf) {
       return realizarLogin(e.parameter.cpf, ss);
     }
+
+    // --- ROTA 5: Buscar todas as vendas para o Relatório Local ---
+    // (IMPORTANTE: Deve vir antes da mensagem de "Rota não encontrada")
+    if (e.parameter.buscarTodasVendas) {
+      var sheetVendas = ss.getSheetByName("Vendas");
+      if (!sheetVendas) {
+        return respostaJSON({ status: "error", message: "Aba Vendas não encontrada" });
+      }
+      var dadosVendas = sheetVendas.getDataRange().getValues();
+      return respostaJSON({ status: "success", vendas: dadosVendas });
+    }
     
     // Se nenhum parâmetro conhecido for enviado:
     return respostaJSON({status: "error", message: "Rota não encontrada ou parâmetro inválido"});
 
   } catch (err) {
-    // Captura erros gerais de execução
     return respostaJSON({status: "error", message: err.toString()});
   }
 }
@@ -42,19 +51,16 @@ function doGet(e) {
 // 2. FUNÇÕES AUXILIARES (LÓGICA DO NEGÓCIO)
 // ======================================================
 
-// Função para validar se o cupom existe na aba Parceiros
 function validarCupom(cupomRecebido, ss) {
   var cupomBuscado = cupomRecebido.toUpperCase().trim();
-  var abaParceiros = ss.getSheets()[1]; // Aba Parceiros (Índice 1)
+  var abaParceiros = ss.getSheets()[1]; // Aba Parceiros
   var dados = abaParceiros.getDataRange().getValues();
 
-  // Começa do 1 para pular o cabeçalho
   for (var i = 1; i < dados.length; i++) {
-    // Coluna D (índice 3) é onde está o código do cupom
     if (dados[i][3].toString().toUpperCase().trim() === cupomBuscado) {
       return respostaJSON({
         status: "success",
-        parceiro: dados[i][1], // Retorna o nome do parceiro dono do cupom
+        parceiro: dados[i][1],
         mensagem: "Cupom válido"
       });
     }
@@ -62,13 +68,11 @@ function validarCupom(cupomRecebido, ss) {
   return respostaJSON({ status: "not_found", message: "Cupom inválido" });
 }
 
-// Função para buscar um produto específico
 function buscarProduto(barcode, ss) {
-  var abaProd = ss.getSheets()[2]; // Aba Produtos (Índice 2)
+  var abaProd = ss.getSheets()[2]; // Aba Produtos
   var dados = abaProd.getDataRange().getValues();
   
   for (var i = 1; i < dados.length; i++) {
-    // Converte para String e remove espaços para garantir a comparação
     if (dados[i][0].toString().trim() === barcode.toString().trim()) {
       return respostaJSON({
         status: "success",
@@ -81,11 +85,9 @@ function buscarProduto(barcode, ss) {
   return respostaJSON({status: "not_found"});
 }
 
-// Função para fazer Login
 function realizarLogin(cpfOriginal, ss) {
   var cpf = cpfOriginal.replace(/\D/g, "");
   
-  // 1. Busca na aba Clientes (Índice 0)
   var abaCli = ss.getSheets()[0];
   var dadosCli = abaCli.getDataRange().getValues();
   for (var i = 1; i < dadosCli.length; i++) {
@@ -94,7 +96,6 @@ function realizarLogin(cpfOriginal, ss) {
     }
   }
   
-  // 2. Busca na aba Parceiros (Índice 1)
   var abaPar = ss.getSheets()[1];
   var dadosPar = abaPar.getDataRange().getValues();
   for (var j = 1; j < dadosPar.length; j++) {
@@ -123,12 +124,11 @@ function doPost(e) {
       var sheetVendas = ss.getSheetByName("Vendas");
       var sheetParceiros = ss.getSheetByName("Parceiros");
       
-      var totalSaldoDebitar = 0;    // Saldo usado pelo comprador (se for parceiro)
-      var totalComissaoCreditar = 0; // Comisssão para o dono do cupom
+      var totalSaldoDebitar = 0;    
+      var totalComissaoCreditar = 0; 
       var cpfComprador = data[0]["CPF"].replace(/\D/g, "");
       var cupomUsado = data[0]["cupom"].toUpperCase().trim();
 
-      // 1. Grava os itens na aba Vendas e calcula totais
       data.forEach(function(item) {
         totalSaldoDebitar += parseFloat(item["ValoremSaldo"]);
         totalComissaoCreditar += parseFloat(item["Valor parceiro"]);
@@ -143,48 +143,31 @@ function doPost(e) {
 
       var dadosPar = sheetParceiros.getDataRange().getValues();
 
-      // 2. LÓGICA DE SALDO
       for (var i = 1; i < dadosPar.length; i++) {
         var cpfNaPlanilha = dadosPar[i][0].toString().replace(/\D/g, "");
         var cupomNaPlanilha = dadosPar[i][3].toString().toUpperCase().trim();
 
-        // A) DEBITAR saldo do comprador (se ele usou saldo próprio)
         if (totalSaldoDebitar > 0 && cpfNaPlanilha === cpfComprador) {
           var saldoAtual = parseFloat(dadosPar[i][4]) || 0;
           sheetParceiros.getRange(i + 1, 5).setValue(saldoAtual - totalSaldoDebitar);
         }
 
-        // B) CREDITAR comissão ao DONO DO CUPOM (se um cupom foi usado)
         if (cupomUsado !== "NENHUM" && cupomNaPlanilha === cupomUsado) {
           var saldoAtualDono = parseFloat(dadosPar[i][4]) || 0;
-          // Soma a comissão ao saldo do dono do cupom
           sheetParceiros.getRange(i + 1, 5).setValue(saldoAtualDono + totalComissaoCreditar);
         }
       }
-      
       return respostaJSON({status: "success"});
     } 
-    
-    // ... manter lógica de cadastro de cliente ...
   } catch (err) {
     return respostaJSON({status: "error", message: err.toString()});
   }
 }
 
-
-
-
 // ======================================================
 // 4. FORMATADOR DE RESPOSTA (JSON)
 // ======================================================
 function respostaJSON(objeto) {
-  return ContentService.createTextOutput(JSON.stringify(objeto)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(objeto))
+    .setMimeType(ContentService.MimeType.JSON);
 }
-
-
-
-
-
-
-
-

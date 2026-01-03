@@ -12,11 +12,18 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-navigation href="https://script.google.com/*" />
+
     <platform name="android"> 
+
+    <!-- <splash src="res/www/img/01.webp" />
+    <preference name="SplashScreen" value="screen" />
+    <preference name="SplashScreenDelay" value="3000" /> <preference name="FadeSplashScreenDuration" value="300" /> -->
 
 <preference name="Fullscreen" value="true" />
     <preference name="HideKeyboardFormAccessoryBar" value="true" />
     <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
+
+    
 
     <icon src="res/mipmap-anydpi-v26/icon_3fit.xml" />
     <icon monochrome="res/mipmap-mdpi/icon_3fit_monochrome.png" 

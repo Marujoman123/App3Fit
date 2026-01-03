@@ -76,13 +76,10 @@ function adicionarNaTela(nome, preco) {
     const itemDiv = document.createElement('div');
     itemDiv.className = 'item-carrinho';
     
-    itemDiv.innerHTML = `
-        <div class="item-info">
+    itemDiv.innerHTML = `  
             <span class="item-nome">${nome}</span>
-            
-        </div>
-        <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>
-         <button class="btn-remover">×</button>
+            <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>                
+          <button class="btn-remover">×</button>
     `;
 
   itemDiv.querySelector('.btn-remover').addEventListener('click', (e) => {
@@ -103,6 +100,9 @@ function adicionarNaTela(nome, preco) {
 });
 
     listaProdutosDiv.append(itemDiv);
+    
+    // NOVO: Faz o scroll descer automaticamente ao adicionar um produto
+    listaProdutosDiv.scrollTop = listaProdutosDiv.scrollHeight;
     
     totalGeral += parseFloat(preco);
     valorTotalTxt.innerText = totalGeral.toFixed(2);

@@ -3,6 +3,9 @@
     <feature name="Keyboard">
         <param name="android-package" onload="true" value="org.apache.cordova.labs.keyboard.Keyboard" />
     </feature>
+    <feature name="LaunchMyApp">
+        <param name="android-package" value="nl.xservices.plugins.LaunchMyApp" />
+    </feature>
     <name>App3fit</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
@@ -15,6 +18,7 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-navigation href="https://script.google.com/*" />
+    <splash src="res/www/img/01.webp" />
     <icon src="res/mipmap-anydpi-v26/icon_3fit.xml" />
     <icon background="res/mipmap-mdpi/icon_3fit_background.png" density="mdpi" foreground="res/mipmap-mdpi/icon_3fit_foreground.png" monochrome="res/mipmap-mdpi/icon_3fit_monochrome.png" />
     <icon background="res/mipmap-hdpi/icon_3fit_background.png" density="hdpi" foreground="res/mipmap-hdpi/icon_3fit_foreground.png" monochrome="res/mipmap-hdpi/icon_3fit_monochrome.png" />
@@ -22,6 +26,9 @@
     <icon background="res/mipmap-xxhdpi/icon_3fit_background.png" density="xxhdpi" foreground="res/mipmap-xxhdpi/icon_3fit_foreground.png" monochrome="res/mipmap-xxhdpi/icon_3fit_monochrome.png" />
     <icon background="res/mipmap-xxxhdpi/icon_3fit_background.png" density="xxxhdpi" foreground="res/mipmap-xxxhdpi/icon_3fit_foreground.png" monochrome="res/mipmap-xxxhdpi/icon_3fit_monochrome.png" />
     <preference name="loglevel" value="DEBUG" />
+    <preference name="SplashScreen" value="screen" />
+    <preference name="SplashScreenDelay" value="3000" />
+    <preference name="FadeSplashScreenDuration" value="300" />
     <preference name="Fullscreen" value="true" />
     <preference name="HideKeyboardFormAccessoryBar" value="true" />
     <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
