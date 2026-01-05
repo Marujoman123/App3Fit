@@ -2,15 +2,20 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs
 
 // Recupera o carrinho e os dados do usuário do localStorage
 const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-const totalOriginal = parseFloat(localStorage.getItem('total_venda')) || 0;
+const totalOriginal = gr(parseFloat(localStorage.getItem('total_venda')) || 0);
 const tipoUsuario = localStorage.getItem('usuario_tipo');
 const nomeUsuario = localStorage.getItem('usuario_nome');
 const cpfUsuario = localStorage.getItem('usuario_cpf');
 const btnValidar = document.getElementById('btnValidarCupom');
 const inputCupom = document.getElementById('inputCupom');
 
+// Função para garantir 2 casas decimais sem erros de arredondamento
+function gr(valor) {
+    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
+}
 
-const saldoDisponivel = parseFloat(localStorage.getItem('usuario_saldo')) || 0;
+
+const saldoDisponivel = gr(parseFloat(localStorage.getItem('usuario_saldo')) || 0);
 let saldoUtilizadoTotal = 0;
 let descontoAplicado = 0;
 
@@ -65,7 +70,7 @@ if (carrinho.length === 0) {
         p.style.fontSize = "0.9rem";
         p.style.margin = "5px 0";
         // Formato: 1x Nome do Produto - R$ 10.00
-        p.innerHTML = `• ${item.nome} <span style="float:right;">R$ ${parseFloat(item.preco).toFixed(2)}</span>`;
+        p.innerHTML = `• ${item.nome} <span style="float:right;">R$ ${gr(parseFloat(item.preco))}</span>`;
         containerLista.appendChild(p);
     });
 }
@@ -177,11 +182,11 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
         return;
     }
 
-    const valorTotalFinal = parseFloat(document.getElementById('totalFinal').innerText);
-    const valorTotalOriginal = parseFloat(document.getElementById('totalOriginal').innerText);
+    const valorTotalFinal = gr(parseFloat(document.getElementById('totalFinal').innerText));
+    const valorTotalOriginal = gr(parseFloat(document.getElementById('totalOriginal').innerText));
 
 const jsonVendaFinal = carrinhoParaVenda.map(item => {
-    const valorItemOriginal = parseFloat(item.preco);
+    const valorItemOriginal = gr(parseFloat(item.preco));
     const proporcao = valorItemOriginal / valorTotalOriginal;
     
     // 1. Valor após desconto de cupom
@@ -327,8 +332,7 @@ document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
     }
 
     // CASO: CLICOU EM APLICAR
-    const valorPretendido = parseFloat(inputSaldo.value) || 0;
-
+    const valorPretendido = gr(parseFloat(inputSaldo.value) || 0);
     if (valorPretendido <= 0) return;
 
     if (valorPretendido > saldoDisponivel) {
@@ -370,12 +374,12 @@ function sugerirValorSaldo() {
     // Se o botão já estiver como "Alterar", não sobrescrevemos o que o usuário escolheu
     if (btnSaldo.innerText === "Alterar") return;
 
-    const valorRestante = totalOriginal - descontoAplicado;
+    const valorRestante = gr(totalOriginal) - descontoAplicado;
 
     if (valorRestante > saldoDisponivel) {
-        inputSaldo.value = saldoDisponivel.toFixed(2);
+        inputSaldo.value = saldoDisponivel;
     } else {
-        inputSaldo.value = valorRestante.toFixed(2);
+        inputSaldo.value = valorRestante;
     }
 }
 

@@ -120,58 +120,65 @@ function filtrarEProcessarRelatorio() {
 /**
  * 4. RENDERIZAÇÃO NA TABELA (Com sinalização de Compra Própria)
  */
-function exibirNaTela(itens, saldo, qtdVendas) {
+function exibirNaTela(itens, comissaoFiltrada, qtdVendas) {
     const tbody = document.getElementById('corpoRelatorio');
-    const saldoTxt = document.getElementById('saldoValor');
-    const totalVendasTxt = document.getElementById('totalVendas');
+    const elSaldoGeral = document.getElementById('saldoValor'); // Do LocalStorage ou Global
+    const elComissaoPeriodo = document.getElementById('comissaoPeriodo');
+    const elTotalVendas = document.getElementById('totalVendas');
 
     tbody.innerHTML = "";
 
+    // 1. Preenche a tabela
     if (itens.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 15px;">Nenhuma movimentação encontrada.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">Sem movimentações.</td></tr>`;
     } else {
         itens.forEach(v => {
             const tr = document.createElement('tr');
-
-            // Estilização baseada no tipo de lançamento
-            let corComissao = "color: green;";
-            let rotulo = "";
-
-            if (v.valorComissao < 0) {
-                corComissao = "color: #d32f2f;"; // Vermelho para saídas
-                rotulo = v.isCompraPropria ? "<small style='display:block;color:orange'>COMPRA PRÓPRIA</small>" : "<small style='display:block;color:red'>RETIRADA</small>";
-            } else if (v.isCompraPropria) {
-                rotulo = "<small style='display:block;color:blue'>COMPRA PRÓPRIA</small>";
-            }
-
+            const cor = v.valorComissao < 0 ? "color: red;" : "color: green;";
             tr.innerHTML = `
                 <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
-                <td>${v.cliente}${rotulo}</td>
+                <td>${v.cliente}</td>
                 <td>${v.produto}</td>
                 <td>R$ ${v.valorItem.toFixed(2)}</td>
-                <td style="${corComissao} font-weight: bold;">R$ ${v.valorComissao.toFixed(2)}</td>
+                <td style="${cor} font-weight: bold;">R$ ${v.valorComissao.toFixed(2)}</td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    if (saldoTxt) {
-    let valorFinal = parseFloat(saldo);
+    // 2. Trata o valor da comissão do período (Mata o zero negativo)
+    let valorPeriodoLimpo = (parseFloat(comissaoFiltrada) + 0);
+    if (valorPeriodoLimpo < 0 && valorPeriodoLimpo > -0.01) valorPeriodoLimpo = 0;
+    
+    // 3. Atualiza os Cards
+    if (elComissaoPeriodo) elComissaoPeriodo.innerText = `R$ ${valorPeriodoLimpo.toFixed(2)}`;
+    if (elTotalVendas) elTotalVendas.innerText = qtdVendas;
 
-    // 1. Arredonda para 2 casas decimais para eliminar resíduos infinitesimais
-    // Ex: -0.0000000001 vira -0.00
-    let valorArredondado = Number(valorFinal.toFixed(2));
-
-    // 2. Se o valor arredondado for ZERO (ou seja, 0 ou -0), 
-    // usamos Math.abs para garantir que o sinal suma
-    if (valorArredondado === 0) {
-        valorArredondado = Math.abs(valorArredondado);
-    }
-
-    saldoTxt.innerText = `R$ ${valorArredondado.toFixed(2)}`;
-}
-
-    if (totalVendasTxt) {
-        totalVendasTxt.innerText = qtdVendas;
+    // 4. Saldo Geral (O saldo total que ele tem na conta, pegando do login atualizado)
+    const saldoNoLogin = localStorage.getItem('usuario_saldo');
+    if (elSaldoGeral) {
+        const saldoGeralLimpo = (parseFloat(saldoNoLogin) + 0).toFixed(2);
+        elSaldoGeral.innerText = `R$ ${saldoGeralLimpo}`;
     }
 }
+
+//     if (saldoTxt) {
+//     let valorFinal = parseFloat(saldo);
+
+//     // 1. Arredonda para 2 casas decimais para eliminar resíduos infinitesimais
+//     // Ex: -0.0000000001 vira -0.00
+//     let valorArredondado = Number(valorFinal.toFixed(2));
+
+//     // 2. Se o valor arredondado for ZERO (ou seja, 0 ou -0), 
+//     // usamos Math.abs para garantir que o sinal suma
+//     if (valorArredondado === 0) {
+//         valorArredondado = Math.abs(valorArredondado);
+//     }
+
+//     saldoTxt.innerText = `R$ ${valorArredondado.toFixed(2)}`;
+// }
+
+//     if (totalVendasTxt) {
+//         totalVendasTxt.innerText = qtdVendas;
+//     }
+// }
