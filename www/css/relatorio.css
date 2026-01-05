@@ -1,18 +1,33 @@
 .resumo-cards {
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
+    gap: 10px;
     margin-bottom: 20px;
 }
 
 .card {
     flex: 1;
-    background: #f8f9fa;
+    min-width: 120px; /* Garante que não fiquem espremidos */
+    background: #fff;
     padding: 15px;
     border-radius: 8px;
-    border-left: 5px solid #28a745; /* Verde para saldo */
-    display: flex;
-    flex-direction: column;
-    color: #000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-bottom: 4px solid #28a745; /* Azul para padrão */
+}
+
+.card-azul {
+    border-bottom: 4px solid #007bff; /* Verde para destacar o ganho do período */
+}
+
+.card span {
+    font-size: 0.8rem;
+    color: #666;
+    display: block;
+}
+
+.card strong {
+    font-size: 1.2rem;
+    color: #333;
 }
 
 /* Container para controlar o tamanho e a rolagem */
