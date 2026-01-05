@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     sincronizarDadosVendas();
 });
 
-// Evento de Clique
 btnFiltrar.addEventListener('click', () => {
     sincronizarDadosVendas();
 });
@@ -32,10 +31,9 @@ btnVoltar.addEventListener('click', () => {
 async function sincronizarDadosVendas() {
     const tbody = document.getElementById('corpoRelatorio');
 
-    // EXIBE MENSAGEM DE CARREGAMENTO NO LUGAR DA TABELA
     tbody.innerHTML = `
         <tr>
-            <td colspan="5" style="text-align: center; padding: 20px; font-weight: bold; color: #666;">
+            <td colspan="6" style="text-align: center; padding: 20px; font-weight: bold; color: #666;">
                 Iniciando sincronização com a planilha...
             </td>
         </tr>
@@ -54,20 +52,19 @@ async function sincronizarDadosVendas() {
 
             filtrarEProcessarRelatorio();
         } else {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Erro: ${data.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Erro: ${data.message}</td></tr>`;
         }
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Erro de conexão ao carregar dados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Erro de conexão ao carregar dados.</td></tr>`;
     }
 }
 
 /**
  * 3. FILTRO E PROCESSAMENTO (LOCAL)
- * Agora filtra por CUPOM ou por CPF do parceiro logado
  */
 function filtrarEProcessarRelatorio() {
-    const cupomLogado = localStorage.getItem('usuario_cupom') || "";
-    const cpfLogado = localStorage.getItem('usuario_cpf') || ""; // Certifique-se de salvar o CPF no login
+    const cupomLogado = (localStorage.getItem('usuario_cupom') || "").toUpperCase().trim();
+    const cpfLogado = (localStorage.getItem('usuario_cpf') || "").replace(/\D/g, "");
     const dataInicioStr = document.getElementById('dataInicio').value;
     const dataFimStr = document.getElementById('dataFim').value;
 
@@ -76,23 +73,17 @@ function filtrarEProcessarRelatorio() {
     const dInicio = new Date(dataInicioStr + "T00:00:00");
     const dFim = new Date(dataFimStr + "T23:59:59");
 
-    // Limpa o CPF para comparação (apenas números)
-    const cpfLimpo = cpfLogado.replace(/\D/g, "");
-
     const vendasFiltradas = cacheVendasGeral.filter(linha => {
         const dataVenda = new Date(linha[1]);
-        const cpfVenda = linha[2].toString().replace(/\D/g, ""); // Coluna C: CPF
-        const cupomVenda = linha[8].toString().trim().toUpperCase(); // Coluna I: Cupom
+        const cpfVenda = linha[2].toString().replace(/\D/g, ""); 
+        const cupomVenda = linha[8].toString().trim().toUpperCase();
 
         const pertenceAoPeriodo = dataVenda >= dInicio && dataVenda <= dFim;
-
-        // NOVA LÓGICA: Se o cupom bate OU se o CPF do comprador é o dele
-        const eDoParceiro = (cupomVenda === cupomLogado.toUpperCase().trim()) || (cpfVenda === cpfLimpo);
+        const eDoParceiro = (cupomVenda === cupomLogado) || (cpfVenda === cpfLogado);
 
         return pertenceAoPeriodo && eDoParceiro;
     });
 
-    // Mapeamento para exibição
     const relatorioFinal = vendasFiltradas.map(v => {
         const comissao = parseFloat(v[11]) || 0;
         const cpfVenda = v[2].toString().replace(/\D/g, "");
@@ -103,82 +94,80 @@ function filtrarEProcessarRelatorio() {
             produto: v[6],
             valorItem: parseFloat(v[7]),
             valorComissao: comissao,
-            // Identifica se é uma compra própria para sinalizar na tabela
-            isCompraPropria: (cpfVenda === cpfLimpo)
+            pagoSaldo: parseFloat(v[9]) || 0,
+            pagoDinheiro: parseFloat(v[10]) || 0,
+            isCompraPropria: (cpfVenda === cpfLogado)
         };
     });
 
-    const saldoTotal = relatorioFinal.reduce((sum, item) => sum + item.valorComissao, 0);
+    // Soma as comissões do período
+    const somaComissao = relatorioFinal.reduce((sum, item) => sum + item.valorComissao, 0);
 
-    // Vendas positivas (ignorando retiradas e compras próprias negativas no card de contagem)
+    // Vendas positivas para o card de contagem
     const apenasVendas = relatorioFinal.filter(item => item.valorComissao > 0);
     const quantidadeVendas = apenasVendas.length;
 
-    exibirNaTela(relatorioFinal, saldoTotal, quantidadeVendas);
+    exibirNaTela(relatorioFinal, somaComissao, quantidadeVendas);
 }
 
 /**
- * 4. RENDERIZAÇÃO NA TABELA (Com sinalização de Compra Própria)
+ * 4. RENDERIZAÇÃO NA TABELA
  */
 function exibirNaTela(itens, comissaoFiltrada, qtdVendas) {
     const tbody = document.getElementById('corpoRelatorio');
-    const elSaldoGeral = document.getElementById('saldoValor'); // Do LocalStorage ou Global
+    const elSaldoGeral = document.getElementById('saldoValor');
     const elComissaoPeriodo = document.getElementById('comissaoPeriodo');
     const elTotalVendas = document.getElementById('totalVendas');
 
     tbody.innerHTML = "";
 
-    // 1. Preenche a tabela
     if (itens.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">Sem movimentações.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px;">Sem movimentações.</td></tr>`;
     } else {
         itens.forEach(v => {
             const tr = document.createElement('tr');
-            const cor = v.valorComissao < 0 ? "color: red;" : "color: green;";
+            
+            // Etiqueta de Tipo de Pagamento
+            let etiquetaPagto = "";
+            if (v.pagoSaldo > 0 && v.pagoDinheiro > 0) {
+                etiquetaPagto = v.isCompraPropria ? `<span style="font-size:10px; background:#e0e0e0; padding:2px 5px; border-radius:4px; margin-right:5px;">Misto</span>`: "";
+            } else if (v.pagoSaldo > 0) {
+                etiquetaPagto = v.isCompraPropria ? `<span style="font-size:10px; background:#d1ecf1; color:#0c5460; padding:2px 5px; border-radius:4px; margin-right:5px;">Saldo</span>`: "";
+            } else {
+                etiquetaPagto = v.isCompraPropria ? `<span style="font-size:10px; background:#d4edda; color:#155724; padding:2px 5px; border-radius:4px; margin-right:5px;">Dinheiro/Cartão</span>`: "";
+            }
+
+            // Etiqueta de Compra Própria
+            let etiquetaCompraPropria = v.isCompraPropria ? `<span style="font-size:10px; background:#fff3cd; color:#856404; padding:2px 5px; border-radius:4px; border:1px solid #ffeeba;">COMPRA PRÓPRIA</span>` : "";
+            const corComissao = v.valorComissao < 0 ? "color: red;" : "color: green;";
+            
             tr.innerHTML = `
                 <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
-                <td>${v.cliente}</td>
-                <td>${v.produto}</td>
+                <td>${v.cliente} <br>${etiquetaCompraPropria}</td>
+                <td>${v.produto} </td>
                 <td>R$ ${v.valorItem.toFixed(2)}</td>
-                <td style="${cor} font-weight: bold;">R$ ${v.valorComissao.toFixed(2)}</td>
+                <td style="font-size:11px; color:#666;">
+                    S: R$ ${v.pagoSaldo.toFixed(2)}<br>
+                    D: R$ ${v.pagoDinheiro.toFixed(2)}<br>
+                    ${etiquetaPagto}
+                </td>
+                <td style="${corComissao} font-weight: bold;">R$ ${v.valorComissao.toFixed(2)}</td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // 2. Trata o valor da comissão do período (Mata o zero negativo)
+    // Mata o zero negativo na comissão do período
     let valorPeriodoLimpo = (parseFloat(comissaoFiltrada) + 0);
     if (valorPeriodoLimpo < 0 && valorPeriodoLimpo > -0.01) valorPeriodoLimpo = 0;
     
-    // 3. Atualiza os Cards
     if (elComissaoPeriodo) elComissaoPeriodo.innerText = `R$ ${valorPeriodoLimpo.toFixed(2)}`;
     if (elTotalVendas) elTotalVendas.innerText = qtdVendas;
 
-    // 4. Saldo Geral (O saldo total que ele tem na conta, pegando do login atualizado)
+    // Saldo Geral vindo do LocalStorage
     const saldoNoLogin = localStorage.getItem('usuario_saldo');
     if (elSaldoGeral) {
         const saldoGeralLimpo = (parseFloat(saldoNoLogin) + 0).toFixed(2);
         elSaldoGeral.innerText = `R$ ${saldoGeralLimpo}`;
     }
 }
-
-//     if (saldoTxt) {
-//     let valorFinal = parseFloat(saldo);
-
-//     // 1. Arredonda para 2 casas decimais para eliminar resíduos infinitesimais
-//     // Ex: -0.0000000001 vira -0.00
-//     let valorArredondado = Number(valorFinal.toFixed(2));
-
-//     // 2. Se o valor arredondado for ZERO (ou seja, 0 ou -0), 
-//     // usamos Math.abs para garantir que o sinal suma
-//     if (valorArredondado === 0) {
-//         valorArredondado = Math.abs(valorArredondado);
-//     }
-
-//     saldoTxt.innerText = `R$ ${valorArredondado.toFixed(2)}`;
-// }
-
-//     if (totalVendasTxt) {
-//         totalVendasTxt.innerText = qtdVendas;
-//     }
-// }
