@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <link rel="stylesheet" href="css/caixa.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Caixa Autônomo</title>
+</head>
+
+<body>
+
+    <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Sincronizando produtos...</p>
+    </div>
+
+    <div class="login-container-internal" id="conteudoCaixa" style="display: none;">
+
+        <div id="user-header" class="user-header">
+            <h2 id="tituloCaixa" style="margin-right: auto;">Caixa</h2>
+
+            <div class="user-info-container">
+
+                <button id="btnRelatorio" style="flex: 1; text-align: left; display: none;">Relatório</button>
+                <div class="user-details">
+
+                    <span id="header-nome">Carregando...</span>
+                    <span id="header-saldo" class="saldo-badge" style="display: none;">Saldo: R$ 0.00</span>
+                </div>
+                <div class="user-icon">
+                    <img src="img/user-icon.png" alt="Usuário">
+                </div>
+                <div class="sair">
+                    <button  id="btnSair" style="padding: 0px; background-color: black;">
+                    <img src="img/arrow-right-from-bracket-solid-full.svg" alt="Sair"></button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="login-container-sem-margem">
+
+            <div class="login-container-internal">
+                <div class="lista-header">
+                    <span class="header-produto">Produto</span>
+                    <span class="header-preco">Preço</span>
+                    <span class="header-vazio"></span>
+                </div>
+
+                <div id="listaProdutos" class="lista-itens"> </div>
+
+                <div class="total-fundo">
+                    <h3> Total: R$ <span id="valorTotal">0.00</span></h3>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="modalFooter" class="modal-bottom-sheet">
+            <div class="modal-handle"></div>
+            <div class="login-container-internal">
+                <div class="input-group">
+
+                    <form id="formBarcode">
+                        <input type="text" id="barcodeInput" placeholder="Escaneie o código de barras"
+                            inputmode="numeric" enterkeyhint="done">
+                    </form>
+                </div>
+                <div class="login-container-sem-Fundo">
+
+                    <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
+                    <button id="btnContinuar">Continuar para Pagamento</button>
+                </div>
+
+            </div>
+
+        </div>
+
+
+</body>
+
+</html>
+<script src="js/auth.js"></script>
+<script src="js/caixa.js"></script>
