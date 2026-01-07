@@ -48,7 +48,7 @@ inputSaldo.addEventListener('input', function (e) {
     // value = value.replace(/(\d)(\d{3}),/g, "$1.$2,");
 
     // 5. Devolve o valor formatado para o campo
-    e.target.value =  value;
+    e.target.value = value;
 });
 
 
@@ -70,7 +70,7 @@ if (carrinho.length === 0) {
         p.style.fontSize = "0.9rem";
         p.style.margin = "5px 0";
         // Formato: 1x Nome do Produto - R$ 10.00
-        p.innerHTML = `• ${item.nome} <span style="float:right;">R$ ${gr(parseFloat(item.preco))}</span>`;
+        p.innerHTML = `• ${item.nome} <span style="float:right;">R$ ${gr(parseFloat(item.preco)).toFixed(2)}</span>`;
         containerLista.appendChild(p);
     });
 }
@@ -88,7 +88,7 @@ document.getElementById('totalFinal').innerText = totalOriginal.toFixed(2);
 
 // --- 2. LÓGICA DO CUPOM (Mantida) ---
 if (tipoUsuario === "Parceiro") {
-   document.getElementById('containerCupom').style.display = 'none';
+    document.getElementById('containerCupom').style.display = 'none';
     // document.getElementById('dtot').style.display = 'none';
     //document.getElementById('txtDesconto').style.display = 'none';
     //document.getElementById('linhatot').style.display = 'none';
@@ -106,11 +106,11 @@ document.getElementById('btnValidarCupom').addEventListener('click', async () =>
         descontoAplicado = 0;
         inputCupom.value = "";
         inputCupom.disabled = false;
-        
+
         // Volta os valores na tela para o original
         txtDescontoDiv.style.display = 'none';
         document.getElementById('totalFinal').innerText = totalOriginal.toFixed(2);
-        
+
         // Reseta o botão e a label
         btn.innerText = "Validar";
         btn.disabled = false;
@@ -127,21 +127,21 @@ document.getElementById('btnValidarCupom').addEventListener('click', async () =>
     btn.disabled = true;
     msgLabel.innerText = "Validando...";
     msgLabel.style.color = "gray";
-    
+
     try {
         const response = await fetch(`${URL_SCRIPT}?validarCupom=${cupom}`);
         const data = await response.json();
 
         if (data.status === "success") {
-            descontoAplicado = totalOriginal * 0.10; 
-            
+            descontoAplicado = totalOriginal * 0.10;
+
             txtDescontoDiv.style.display = 'block';
             document.getElementById('valorDesconto').innerText = descontoAplicado.toFixed(2);
             document.getElementById('totalFinal').innerText = (totalOriginal - descontoAplicado).toFixed(2);
-            
+
             msgLabel.innerText = "Cupom de " + data.parceiro.split(" ")[0] + " aplicado!";
             msgLabel.style.color = "green";
-            
+
             // TRANSFORMA EM BOTÃO DE ALTERAR
             inputCupom.disabled = true;
             btn.disabled = false; // Reativamos para ele poder clicar em "Alterar"
@@ -153,7 +153,7 @@ document.getElementById('btnValidarCupom').addEventListener('click', async () =>
             msgLabel.style.color = "red";
             btn.innerText = "Validar";
             btn.disabled = false;
-            inputCupom.value="";
+            inputCupom.value = "";
             inputCupom.focus();
         }
     } catch (e) {
@@ -176,7 +176,7 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
     const cupomTexto = (inputCupomElement && inputCupomElement.value.trim() !== "") ? inputCupomElement.value : "NENHUM";
 
     const carrinhoParaVenda = JSON.parse(localStorage.getItem('carrinho')) || [];
-    
+
     if (carrinhoParaVenda.length === 0) {
         alert("Erro: Carrinho vazio.");
         return;
@@ -185,57 +185,49 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
     const valorTotalFinal = gr(parseFloat(document.getElementById('totalFinal').innerText));
     const valorTotalOriginal = gr(parseFloat(document.getElementById('totalOriginal').innerText));
 
-const jsonVendaFinal = carrinhoParaVenda.map(item => {
-    const valorItemOriginal = gr(parseFloat(item.preco));
-    const proporcao = valorItemOriginal / valorTotalOriginal;
-    
-    // 1. Valor após desconto de cupom
-    const valorComDescontoCupom = (valorTotalOriginal > 0) 
-        ? valorItemOriginal * ((valorTotalOriginal - descontoAplicado) / valorTotalOriginal)
-        : valorItemOriginal;
+    const jsonVendaFinal = carrinhoParaVenda.map(item => {
+        const valorItemOriginal = gr(parseFloat(item.preco));
+        const proporcao = valorItemOriginal / valorTotalOriginal;
 
-    // 2. Quanto do saldo total aplicado pertence a este item
-    const valorEmSaldoDesteItem = (typeof saldoUtilizadoTotal !== 'undefined') ? (saldoUtilizadoTotal * proporcao) : 0;
+        const valorComDescontoCupom = (valorTotalOriginal > 0)
+            ? valorItemOriginal * ((valorTotalOriginal - descontoAplicado) / valorTotalOriginal)
+            : valorItemOriginal;
 
-    // 3. Valor Pago em dinheiro/cartão
-    const valorPagoDesteItem = Math.max(0, valorComDescontoCupom - valorEmSaldoDesteItem);
+        const valorEmSaldoDesteItem = (typeof saldoUtilizadoTotal !== 'undefined') ? (saldoUtilizadoTotal * proporcao) : 0;
+        const valorPagoDesteItem = Math.max(0, valorComDescontoCupom - valorEmSaldoDesteItem);
 
-    // --- NOVA LÓGICA DE COMISSÃO/RETIRADA ---
-    let comissaoParceiro = 0;
+        let comissaoParceiro = 0;
+        if (tipoUsuario === "Parceiro" && valorEmSaldoDesteItem > 0) {
+            comissaoParceiro = -valorEmSaldoDesteItem;
+        } else if (cupomTexto !== "NENHUM") {
+            comissaoParceiro = valorItemOriginal * 0.15;
+        }
 
-    if (tipoUsuario === "Parceiro" && valorEmSaldoDesteItem > 0) {
-        // Se o comprador é parceiro e usou saldo, registramos como valor NEGATIVO
-        // Isso aparecerá no relatório como uma "Retirada"
-        comissaoParceiro = -valorEmSaldoDesteItem;
-    } else if (cupomTexto !== "NENHUM") {
-        // Se houve uso de cupom (venda para terceiro), mantém os 15% positivos
-        comissaoParceiro = valorItemOriginal * 0.15;
-    }
-
-    return {
-        "ID Venda": idVendaUnico,
-        "Data/Hora": dataHora,
-        "CPF": cpfUsuario.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"),
-        "Nome": nomeUsuario,
-        "Tipo": tipoUsuario,
-        "Cod": item.codigo,
-        "Produto": item.nome,
-        "Valor Item": Number(valorItemOriginal.toFixed(2)),
-        "cupom": cupomTexto,
-        "ValoremSaldo": Number(valorEmSaldoDesteItem.toFixed(2)),
-        "ValorPAgo": Number(valorPagoDesteItem.toFixed(2)),
-        "Valor parceiro": Number(comissaoParceiro.toFixed(2)), // Agora pode ser negativo
-        "Valor liquido": Number(Math.max(0, valorPagoDesteItem - (comissaoParceiro > 0 ? comissaoParceiro : 0)).toFixed(2))
-    };
-});
+        // RETORNO DO OBJETO: Certifique-se que os nomes das chaves batem com o doPost
+        return {
+            "ID Venda": idVendaUnico,
+            "Data/Hora": dataHora,
+            "CPF": cpfUsuario.replace(/\D/g, ""), // Enviamos apenas números para facilitar no Script
+            "Nome": nomeUsuario,
+            "Tipo": tipoUsuario,
+            "Cod": item.codigo, // <--- CHAVE ESSENCIAL PARA O ESTOQUE
+            "Produto": item.nome,
+            "Valor Item": gr(valorItemOriginal),
+            "cupom": cupomTexto,
+            "ValoremSaldo": gr(valorEmSaldoDesteItem),
+            "ValorPAgo": gr(valorPagoDesteItem),
+            "Valor parceiro": gr(comissaoParceiro),
+            "Valor liquido": gr(Math.max(0, valorPagoDesteItem - (comissaoParceiro > 0 ? comissaoParceiro : 0)))
+        };
+    });
 
     console.log("--- NOVA VENDA GERADA ---");
     console.table(jsonVendaFinal);
-    
+
     // Agora você pode enviar jsonVendaFinal para o Google Sheets via Fetch
     enviarVendaParaPlanilha(jsonVendaFinal);
     alert('Venda Finalizada');
-    
+
     // Sugestão de limpeza após sucesso real:
     // localStorage.removeItem('carrinho');
     // window.location.href = "index.html";
@@ -249,8 +241,8 @@ function forcarTeclado() {
     const inputs = document.querySelectorAll('input:not(#barcodeInput)');
     inputs.forEach(input => {
         // O atributo decimal ou numeric costuma forçar a chamada do teclado no Android
-        if(!input.getAttribute('inputmode')) {
-            input.setAttribute('inputmode', 'text'); 
+        if (!input.getAttribute('inputmode')) {
+            input.setAttribute('inputmode', 'text');
         }
     });
 }
@@ -264,9 +256,9 @@ document.addEventListener('DOMContentLoaded', forcarTeclado);
 function atualizarResumoTela() {
     const totalComDesconto = totalOriginal - descontoAplicado;
     const totalFinal = totalComDesconto - saldoUtilizadoTotal;
-    
+
     document.getElementById('totalFinal').innerText = Math.max(0, totalFinal).toFixed(2);
-    
+
     const elTxtSaldo = document.getElementById('txtSaldoUsado');
     const elValorSaldo = document.getElementById('valorSaldoAbatido');
     const txtDescontoDiv = document.getElementById('txtDesconto');
@@ -282,12 +274,12 @@ function atualizarResumoTela() {
 
     // Mostra linha de saldo ABATIDO (para Parceiros usando saldo)
     if (saldoUtilizadoTotal > 0) {
-        if(elTxtSaldo) {
+        if (elTxtSaldo) {
             elTxtSaldo.style.display = 'block';
             elValorSaldo.innerText = saldoUtilizadoTotal.toFixed(2);
         }
     } else {
-        if(elTxtSaldo) elTxtSaldo.style.display = 'none';
+        if (elTxtSaldo) elTxtSaldo.style.display = 'none';
     }
 }
 
@@ -298,7 +290,7 @@ function atualizarResumoTela() {
 function sugerirValorSaldo() {
     const inputSaldo = document.getElementById('inputUsarSaldo');
     const btnSaldo = document.getElementById('btnAplicarSaldo');
-    
+
     // Se o botão já estiver como "Alterar", não sobrescrevemos o que o usuário escolheu
     if (btnSaldo.innerText === "Alterar") return;
 
@@ -325,7 +317,7 @@ document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
         btn.style.backgroundColor = ""; // Volta cor original
         btn.style.color = "";
         msg.innerText = "";
-        
+
         sugerirValorSaldo(); // Sugere novamente o valor
         atualizarResumoTela();
         return;
@@ -352,13 +344,13 @@ document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
     saldoUtilizadoTotal = valorPretendido;
     msg.innerText = "Saldo aplicado!";
     msg.style.color = "green";
-    
+
     // Transforma em botão de Alterar
     inputSaldo.disabled = true;
     btn.innerText = "Alterar";
     btn.style.backgroundColor = "#ffc107"; // Amarelo para destaque
     btn.style.color = "#000";
-    
+
     atualizarResumoTela();
 });
 
@@ -370,7 +362,7 @@ sugerirValorSaldo();
 function sugerirValorSaldo() {
     const inputSaldo = document.getElementById('inputUsarSaldo');
     const btnSaldo = document.getElementById('btnAplicarSaldo');
-    
+
     // Se o botão já estiver como "Alterar", não sobrescrevemos o que o usuário escolheu
     if (btnSaldo.innerText === "Alterar") return;
 
@@ -390,7 +382,7 @@ function sugerirValorSaldo() {
 async function enviarVendaParaPlanilha(dadosVenda) {
     const btnConfirmar = document.getElementById('btnConfirmarPagamento');
     const originalText = btnConfirmar.innerText;
-    
+
     // Feedback visual para o usuário
     btnConfirmar.innerText = "Processando...";
     btnConfirmar.disabled = true;
@@ -409,7 +401,7 @@ async function enviarVendaParaPlanilha(dadosVenda) {
         /* Nota: No modo 'no-cors', o status da resposta é sempre 0 e não conseguimos 
            ler o corpo. Se não houve erro de rede (catch), assumimos o sucesso.
         */
-        
+
         alert("Venda Finalizada com Sucesso!");
 
         // --- ATUALIZAÇÃO DE SALDO LOCAL (Se o usuário for o comprador parceiro) ---
@@ -428,7 +420,7 @@ async function enviarVendaParaPlanilha(dadosVenda) {
     } catch (error) {
         console.error("Erro técnico no envio:", error);
         alert("Erro de conexão. Verifique sua internet e tente novamente.");
-        
+
         // Reativa o botão para nova tentativa
         btnConfirmar.innerText = originalText;
         btnConfirmar.disabled = false;

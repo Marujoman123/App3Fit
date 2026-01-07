@@ -5,11 +5,11 @@ function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // --- ROTA 1: Listar TODOS os produtos (Carregamento inicial) ---
+    // --- ROTA 1: Listar TODOS os produtos ---
     if (e.parameter.todosProdutos) {
-      var abaProd = ss.getSheets()[2]; // Aba Produtos
+      var abaProd = ss.getSheetByName("produtos"); // Mais seguro usar nome
       var dados = abaProd.getDataRange().getValues();
-      dados.shift(); // Remove a linha de cabeçalho
+      dados.shift(); // Remove cabeçalho
       return respostaJSON({ status: "success", produtos: dados });
     }
     
@@ -28,19 +28,15 @@ function doGet(e) {
       return realizarLogin(e.parameter.cpf, ss);
     }
 
-    // --- ROTA 5: Buscar todas as vendas para o Relatório Local ---
-    // (IMPORTANTE: Deve vir antes da mensagem de "Rota não encontrada")
+    // --- ROTA 5: Buscar todas as vendas ---
     if (e.parameter.buscarTodasVendas) {
       var sheetVendas = ss.getSheetByName("Vendas");
-      if (!sheetVendas) {
-        return respostaJSON({ status: "error", message: "Aba Vendas não encontrada" });
-      }
+      if (!sheetVendas) return respostaJSON({ status: "error", message: "Aba Vendas não encontrada" });
       var dadosVendas = sheetVendas.getDataRange().getValues();
       return respostaJSON({ status: "success", vendas: dadosVendas });
     }
     
-    // Se nenhum parâmetro conhecido for enviado:
-    return respostaJSON({status: "error", message: "Rota não encontrada ou parâmetro inválido"});
+    return respostaJSON({status: "error", message: "Rota não encontrada"});
 
   } catch (err) {
     return respostaJSON({status: "error", message: err.toString()});
@@ -53,7 +49,7 @@ function doGet(e) {
 
 function validarCupom(cupomRecebido, ss) {
   var cupomBuscado = cupomRecebido.toUpperCase().trim();
-  var abaParceiros = ss.getSheets()[1]; // Aba Parceiros
+  var abaParceiros = ss.getSheetByName("Parceiros");
   var dados = abaParceiros.getDataRange().getValues();
 
   for (var i = 1; i < dados.length; i++) {
@@ -69,7 +65,7 @@ function validarCupom(cupomRecebido, ss) {
 }
 
 function buscarProduto(barcode, ss) {
-  var abaProd = ss.getSheets()[2]; // Aba Produtos
+  var abaProd = ss.getSheetByName("produtos");
   var dados = abaProd.getDataRange().getValues();
   
   for (var i = 1; i < dados.length; i++) {
@@ -78,7 +74,8 @@ function buscarProduto(barcode, ss) {
         status: "success",
         nome: dados[i][1],
         precoCliente: dados[i][2],
-        precoParceiro: dados[i][3]
+        precoParceiro: dados[i][3],
+        estoque: dados[i][4] // Coluna E
       });
     }
   }
@@ -88,7 +85,7 @@ function buscarProduto(barcode, ss) {
 function realizarLogin(cpfOriginal, ss) {
   var cpf = cpfOriginal.replace(/\D/g, "");
   
-  var abaCli = ss.getSheets()[0];
+  var abaCli = ss.getSheetByName("Clientes");
   var dadosCli = abaCli.getDataRange().getValues();
   for (var i = 1; i < dadosCli.length; i++) {
     if (dadosCli[i][0].toString().replace(/\D/g, "") === cpf) {
@@ -96,7 +93,7 @@ function realizarLogin(cpfOriginal, ss) {
     }
   }
   
-  var abaPar = ss.getSheets()[1];
+  var abaPar = ss.getSheetByName("Parceiros");
   var dadosPar = abaPar.getDataRange().getValues();
   for (var j = 1; j < dadosPar.length; j++) {
     if (dadosPar[j][0].toString().replace(/\D/g, "") === cpf) {
@@ -112,53 +109,86 @@ function realizarLogin(cpfOriginal, ss) {
   return respostaJSON({status: "not_found"});
 }
 
+/**
+ * Atualiza o estoque na aba produtos
+ * Coluna A (0): Código | Coluna E (4): Quantidade
+ */
+function atualizarEstoque(codProduto, quantidadeVendida, ss) {
+  var sheetProdutos = ss.getSheetByName("produtos"); 
+  if (!sheetProdutos) return;
+
+  var dados = sheetProdutos.getDataRange().getValues();
+  
+  for (var i = 1; i < dados.length; i++) {
+    if (dados[i][0].toString() === codProduto.toString()) { 
+      var estoqueAtual = Number(dados[i][4]) || 0;
+      var novoEstoque = estoqueAtual - quantidadeVendida;
+      // Coluna E é a 5ª coluna
+      sheetProdutos.getRange(i + 1, 5).setValue(novoEstoque); 
+      break;
+    }
+  }
+}
+
 // ======================================================
 // 3. FUNÇÃO DE PROCESSAMENTO DE DADOS (POST)
 // ======================================================
 function doPost(e) {
-  try {
+   //Pede uma trava para o script
+  const trava = LockService.getScriptLock();
+    try {   
+// 2. Tenta trancar o script por até 1 segundos, Se outra pessoa estiver salvando, esta requisição espera aqui
+    trava.waitLock(1000);
+
     var data = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    
+    var sheetVendas = ss.getSheetByName("Vendas");
+    var sheetParceiros = ss.getSheetByName("Parceiros");
+
     if (Array.isArray(data)) {
-      var sheetVendas = ss.getSheetByName("Vendas");
-      var sheetParceiros = ss.getSheetByName("Parceiros");
-      
       var totalSaldoDebitar = 0;    
       var totalComissaoCreditar = 0; 
       var cpfComprador = data[0]["CPF"].replace(/\D/g, "");
       var cupomUsado = data[0]["cupom"].toUpperCase().trim();
 
       data.forEach(function(item) {
-        totalSaldoDebitar += parseFloat(item["ValoremSaldo"]);
-        totalComissaoCreditar += parseFloat(item["Valor parceiro"]);
+        totalSaldoDebitar += parseFloat(item["ValoremSaldo"]) || 0;
+        totalComissaoCreditar += parseFloat(item["Valor parceiro"]) || 0;
         
+        // 1. Registra a Venda
         sheetVendas.appendRow([
           item["ID Venda"], item["Data/Hora"], item["CPF"], item["Nome"],
           item["Tipo"], item["Cod"], item["Produto"], item["Valor Item"],
           item["cupom"], item["ValoremSaldo"], item["ValorPAgo"],
           item["Valor parceiro"], item["Valor liquido"]
         ]);
+
+        // 2. Atualiza Estoque (Item por Item)
+        atualizarEstoque(item["Cod"], 1, ss); 
       });
 
+      // 3. Atualiza Saldo do Parceiro (Débito e Crédito)
       var dadosPar = sheetParceiros.getDataRange().getValues();
-
       for (var i = 1; i < dadosPar.length; i++) {
         var cpfNaPlanilha = dadosPar[i][0].toString().replace(/\D/g, "");
         var cupomNaPlanilha = dadosPar[i][3].toString().toUpperCase().trim();
 
+        // Se o comprador usou saldo e é o parceiro atual do laço
         if (totalSaldoDebitar > 0 && cpfNaPlanilha === cpfComprador) {
           var saldoAtual = parseFloat(dadosPar[i][4]) || 0;
           sheetParceiros.getRange(i + 1, 5).setValue(saldoAtual - totalSaldoDebitar);
         }
 
+        // Se a venda usou o cupom deste parceiro
         if (cupomUsado !== "NENHUM" && cupomNaPlanilha === cupomUsado) {
-          var saldoAtualDono = parseFloat(dadosPar[i][4]) || 0;
+          // Buscamos o saldo novamente caso tenha sido alterado no if acima
+          var saldoAtualDono = parseFloat(sheetParceiros.getRange(i + 1, 5).getValue()) || 0;
           sheetParceiros.getRange(i + 1, 5).setValue(saldoAtualDono + totalComissaoCreditar);
         }
       }
       return respostaJSON({status: "success"});
     } 
+    return respostaJSON({status: "error", message: "Dados inválidos"});
   } catch (err) {
     return respostaJSON({status: "error", message: err.toString()});
   }
