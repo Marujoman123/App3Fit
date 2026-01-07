@@ -152,12 +152,13 @@ function doPost(e) {
       var cupomUsado = data[0]["cupom"].toUpperCase().trim();
 
       data.forEach(function(item) {
+        var proximoID = "2026" + (sheetVendas.getLastRow() + 1).toString().padStart(4, '0');
         totalSaldoDebitar += parseFloat(item["ValoremSaldo"]) || 0;
         totalComissaoCreditar += parseFloat(item["Valor parceiro"]) || 0;
         
         // 1. Registra a Venda
         sheetVendas.appendRow([
-          item["ID Venda"], item["Data/Hora"], item["CPF"], item["Nome"],
+          proximoID, item["Data/Hora"], item["CPF"], item["Nome"],
           item["Tipo"], item["Cod"], item["Produto"], item["Valor Item"],
           item["cupom"], item["ValoremSaldo"], item["ValorPAgo"],
           item["Valor parceiro"], item["Valor liquido"]

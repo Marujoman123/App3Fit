@@ -166,7 +166,7 @@ document.getElementById('btnValidarCupom').addEventListener('click', async () =>
 
 // --- 3. FINALIZAR VENDA (ITEM POR ITEM) ---
 document.getElementById('btnConfirmarPagamento').addEventListener('click', () => {
-    const idVendaUnico = Math.floor(100000 + Math.random() * 900000).toString();
+    const idVendaUnico = Number("2026" + Date.now().toString().slice(-8));
     const dataHora = new Date().toLocaleString('pt-BR');
     const cpfUsuario = localStorage.getItem('usuario_cpf') || "000.000.000-00";
     const nomeUsuario = localStorage.getItem('usuario_nome') || "Consumidor";
@@ -226,11 +226,20 @@ document.getElementById('btnConfirmarPagamento').addEventListener('click', () =>
 
     // Agora você pode enviar jsonVendaFinal para o Google Sheets via Fetch
     enviarVendaParaPlanilha(jsonVendaFinal);
-    alert('Venda Finalizada');
 
+    alert('Venda Finalizada');
     // Sugestão de limpeza após sucesso real:
     // localStorage.removeItem('carrinho');
     // window.location.href = "index.html";
+
+
+//    ------------------Enviar comporvante SMS android--------------------------
+    // const msgSMS = `Ola! Sua compra de R$ ${valorTotalFinal.toFixed(2)} foi confirmada. ID: ${idVendaUnico}`;
+    // const linkSMS = `sms:+55${19974083740}?body=${encodeURIComponent(msgSMS)}`;
+
+    // // Abre o app de SMS do Android
+    // window.location.href = linkSMS;
+//    ------------------/Enviar comporvante SMS android--------------------------
 });
 
 
