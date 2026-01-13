@@ -1,0 +1,20 @@
+### Listar Terminais Mercado Pago
+
+# Usando a Extensão "REST Client" (Recomendado)
+# Essa é a forma mais profissional. Você cria um arquivo de texto e o VS Code se transforma em um "Postman".
+
+# Abra o VS Code e vá em Extensions (ícone de cubos no lado esquerdo).
+
+# Procure por "REST Client" (de Huachao Mao) e instale.
+
+# Crie um novo arquivo chamado teste.http.
+
+# Cole o conteúdo abaixo (ajustando o Token e o Store ID):
+
+
+
+GET https://api.mercadopago.com/terminals/v1/list?limit=50&offset=0
+# - digite aqui o token real
+Authorization: Bearer APPdskafhsdjlfsdlkflsd  
+
+Content-Type: application/json

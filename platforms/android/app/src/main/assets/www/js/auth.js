@@ -7,6 +7,7 @@ function carregarPerfilHeader() {
 
     const elNome = document.getElementById('header-nome');
     const elSaldo = document.getElementById('header-saldo');
+    const btnRelatorio = document.getElementById('btnRelatorio');
 
     if (nome) {
         // Pega apenas o primeiro nome para não ocupar muito espaço
@@ -14,7 +15,9 @@ function carregarPerfilHeader() {
 
         // Se for parceiro, mostra o saldo
         if (tipo === "Parceiro" && saldo !== null) {
-            elSaldo.innerText = `Saldo: R$ ${parseFloat(saldo).toFixed(2)}`;
+            // Somar + 0 remove o sinal negativo do zero
+            const saldoFormatado = (parseFloat(saldo) + 0).toFixed(2);
+            elSaldo.innerText = `Saldo: R$ ${saldoFormatado}`;
             elSaldo.style.display = 'block';
         }
     } else {
@@ -28,12 +31,16 @@ document.addEventListener('DOMContentLoaded', carregarPerfilHeader);
 
 
 
+btnSair.addEventListener('click', () => {
+    window.location.href = "index.html";
+});
+
 
 // ------------------------INATIVIDADE DO APLICATIVO----------------------
 
 
 // Configuração: 3 minutos (180.000 milissegundos)
-const TEMPO_LIMITE = 30 * 60 * 1000; 
+const TEMPO_LIMITE = 3 * 60 * 1000;
 let cronometroInatividade;
 
 function iniciarMonitoramento() {
@@ -51,7 +58,7 @@ function iniciarMonitoramento() {
 function resetarTemporizador() {
     // Cancela o agendamento anterior
     clearTimeout(cronometroInatividade);
-    
+
     // Se estiver na index.html, não precisa deslogar dela mesma
     if (!window.location.href.includes("index.html")) {
         // Agenda o logout para daqui a 3 minutos
@@ -60,14 +67,12 @@ function resetarTemporizador() {
 }
 
 function voltarAoInicio() {
-    alert("Inatividade detectada. Redirecionando...");
-    
     // 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
-    localStorage.clear(); 
-    
+    localStorage.clear();
+
     // 2. Opcional: Avisar o usuário antes (mas em totens autônomos geralmente é direto)
     // alert("Sessão encerrada por inatividade.");
-    
+
     // 3. Volta para a página de Login
     window.location.href = "index.html";
 }
@@ -87,6 +92,10 @@ document.getElementById('btnFecharModal').addEventListener('click', () => {
     // Se o usuário clicou em "OK" (true)
     if (confirmacao) {
         window.location.href = "index.html";
-    } 
+    }
     // Se clicou em "Cancelar" (false), o código não faz nada e o modal continua aberto
 });
+
+
+
+

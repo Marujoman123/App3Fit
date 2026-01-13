@@ -6,7 +6,7 @@
     <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
     <link rel="stylesheet" href="css/caixa.css">
     <link rel="stylesheet" href="css/style.css">
-    <title>Caixa Autônomo</title>
+    <title>3Fit - Caixa</title>
 </head>
 
 <body>
@@ -20,8 +20,10 @@
 
         <div id="user-header" class="user-header">
             <h2 id="tituloCaixa" style="margin-right: auto;">Caixa</h2>
+
             <div class="user-info-container">
 
+                <button id="btnRelatorio" style="flex: 1; text-align: left; display: none;">Relatório</button>
                 <div class="user-details">
 
                     <span id="header-nome">Carregando...</span>
@@ -29,6 +31,10 @@
                 </div>
                 <div class="user-icon">
                     <img src="img/user-icon.png" alt="Usuário">
+                </div>
+                <div class="sair">
+                    <button  id="btnSair" style="padding: 0px; background-color: black;">
+                    <img src="img/arrow-right-from-bracket-solid-full.svg" alt="Sair"></button>
                 </div>
             </div>
 
@@ -67,6 +73,7 @@
                     <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
                     <button id="btnContinuar">Continuar para Pagamento</button>
                 </div>
+
             </div>
 
         </div>

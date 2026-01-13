@@ -3,18 +3,17 @@
 // ======================================================
 function doGet(e) {
   try {
-    // Conecta na planilha ativa
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // --- ROTA 1: Listar TODOS os produtos (Carregamento inicial) ---
+    // --- ROTA 1: Listar TODOS os produtos ---
     if (e.parameter.todosProdutos) {
-      var abaProd = ss.getSheets()[2]; // Aba Produtos
+      var abaProd = ss.getSheetByName("produtos"); 
       var dados = abaProd.getDataRange().getValues();
-      dados.shift(); // Remove a linha de cabeçalho
+      dados.shift(); // Remove cabeçalho
       return respostaJSON({ status: "success", produtos: dados });
     }
     
-    // --- ROTA 2: Validar Cupom (Nova Lógica) ---
+    // --- ROTA 2: Validar Cupom ---
     if (e.parameter.validarCupom) {
       return validarCupom(e.parameter.validarCupom, ss);
     }
@@ -28,12 +27,18 @@ function doGet(e) {
     if (e.parameter.cpf) {
       return realizarLogin(e.parameter.cpf, ss);
     }
+
+    // --- ROTA 5: Buscar todas as vendas ---
+    if (e.parameter.buscarTodasVendas) {
+      var sheetVendas = ss.getSheetByName("Vendas");
+      if (!sheetVendas) return respostaJSON({ status: "error", message: "Aba Vendas não encontrada" });
+      var dadosVendas = sheetVendas.getDataRange().getValues();
+      return respostaJSON({ status: "success", vendas: dadosVendas });
+    }
     
-    // Se nenhum parâmetro conhecido for enviado:
-    return respostaJSON({status: "error", message: "Rota não encontrada ou parâmetro inválido"});
+    return respostaJSON({status: "error", message: "Rota não encontrada"});
 
   } catch (err) {
-    // Captura erros gerais de execução
     return respostaJSON({status: "error", message: err.toString()});
   }
 }
@@ -42,19 +47,16 @@ function doGet(e) {
 // 2. FUNÇÕES AUXILIARES (LÓGICA DO NEGÓCIO)
 // ======================================================
 
-// Função para validar se o cupom existe na aba Parceiros
 function validarCupom(cupomRecebido, ss) {
   var cupomBuscado = cupomRecebido.toUpperCase().trim();
-  var abaParceiros = ss.getSheets()[1]; // Aba Parceiros (Índice 1)
+  var abaParceiros = ss.getSheetByName("Parceiros");
   var dados = abaParceiros.getDataRange().getValues();
 
-  // Começa do 1 para pular o cabeçalho
   for (var i = 1; i < dados.length; i++) {
-    // Coluna D (índice 3) é onde está o código do cupom
     if (dados[i][3].toString().toUpperCase().trim() === cupomBuscado) {
       return respostaJSON({
         status: "success",
-        parceiro: dados[i][1], // Retorna o nome do parceiro dono do cupom
+        parceiro: dados[i][1],
         mensagem: "Cupom válido"
       });
     }
@@ -62,31 +64,28 @@ function validarCupom(cupomRecebido, ss) {
   return respostaJSON({ status: "not_found", message: "Cupom inválido" });
 }
 
-// Função para buscar um produto específico
 function buscarProduto(barcode, ss) {
-  var abaProd = ss.getSheets()[2]; // Aba Produtos (Índice 2)
+  var abaProd = ss.getSheetByName("produtos");
   var dados = abaProd.getDataRange().getValues();
   
   for (var i = 1; i < dados.length; i++) {
-    // Converte para String e remove espaços para garantir a comparação
     if (dados[i][0].toString().trim() === barcode.toString().trim()) {
       return respostaJSON({
         status: "success",
         nome: dados[i][1],
         precoCliente: dados[i][2],
-        precoParceiro: dados[i][3]
+        precoParceiro: dados[i][3],
+        estoque: dados[i][4] // Coluna E
       });
     }
   }
   return respostaJSON({status: "not_found"});
 }
 
-// Função para fazer Login
 function realizarLogin(cpfOriginal, ss) {
   var cpf = cpfOriginal.replace(/\D/g, "");
   
-  // 1. Busca na aba Clientes (Índice 0)
-  var abaCli = ss.getSheets()[0];
+  var abaCli = ss.getSheetByName("Clientes");
   var dadosCli = abaCli.getDataRange().getValues();
   for (var i = 1; i < dadosCli.length; i++) {
     if (dadosCli[i][0].toString().replace(/\D/g, "") === cpf) {
@@ -94,8 +93,7 @@ function realizarLogin(cpfOriginal, ss) {
     }
   }
   
-  // 2. Busca na aba Parceiros (Índice 1)
-  var abaPar = ss.getSheets()[1];
+  var abaPar = ss.getSheetByName("Parceiros");
   var dadosPar = abaPar.getDataRange().getValues();
   for (var j = 1; j < dadosPar.length; j++) {
     if (dadosPar[j][0].toString().replace(/\D/g, "") === cpf) {
@@ -111,80 +109,133 @@ function realizarLogin(cpfOriginal, ss) {
   return respostaJSON({status: "not_found"});
 }
 
+/**
+ * Atualiza o estoque na aba produtos
+ * Coluna A (0): Código | Coluna E (4): Quantidade
+ */
+function atualizarEstoque(codProduto, quantidadeVendida, ss) {
+  var sheetProdutos = ss.getSheetByName("produtos"); 
+  if (!sheetProdutos) return;
+
+  var dados = sheetProdutos.getDataRange().getValues();
+  
+  for (var i = 1; i < dados.length; i++) {
+    if (dados[i][0].toString() === codProduto.toString()) { 
+      var estoqueAtual = Number(dados[i][4]) || 0;
+      var novoEstoque = estoqueAtual - quantidadeVendida;
+      sheetProdutos.getRange(i + 1, 5).setValue(novoEstoque); 
+      break;
+    }
+  }
+}
+
 // ======================================================
 // 3. FUNÇÃO DE PROCESSAMENTO DE DADOS (POST)
 // ======================================================
 function doPost(e) {
-  try {
+  const trava = LockService.getScriptLock();
+  try {   
+    // Tenta trancar por até 10 segundos para evitar duplicidade em massa
+    trava.waitLock(10000);
+
     var data = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    
+    var sheetVendas = ss.getSheetByName("Vendas");
+    var sheetParceiros = ss.getSheetByName("Parceiros");
+
     if (Array.isArray(data)) {
-      var sheetVendas = ss.getSheetByName("Vendas");
-      var sheetParceiros = ss.getSheetByName("Parceiros");
-      
-      var totalSaldoDebitar = 0;    // Saldo usado pelo comprador (se for parceiro)
-      var totalComissaoCreditar = 0; // Comisssão para o dono do cupom
+      var totalSaldoDebitar = 0;    
+      var totalComissaoCreditar = 0; 
       var cpfComprador = data[0]["CPF"].replace(/\D/g, "");
       var cupomUsado = data[0]["cupom"].toUpperCase().trim();
+      var idVendaOriginal = data[0]["ID Venda"];
 
-      // 1. Grava os itens na aba Vendas e calcula totais
+      // 1. Envia valor para a máquina Point Pro 3 antes de registrar na planilha
+      // Somente se o valor pago for maior que 0
+      var valorTotalPago = data.reduce((acc, item) => acc + parseFloat(item["ValorPAgo"]), 0);
+      if (valorTotalPago > 0) {
+        criarIntencaoPagamento(valorTotalPago, idVendaOriginal);
+      }
+
       data.forEach(function(item) {
-        totalSaldoDebitar += parseFloat(item["ValoremSaldo"]);
-        totalComissaoCreditar += parseFloat(item["Valor parceiro"]);
+        // Gerar ID sequencial baseado na última linha real
+        var proximoID = "2026" + (sheetVendas.getLastRow() + 1).toString().padStart(4, '0');
+        totalSaldoDebitar += parseFloat(item["ValoremSaldo"]) || 0;
+        totalComissaoCreditar += parseFloat(item["Valor parceiro"]) || 0;
         
+        // Registrar a Venda
         sheetVendas.appendRow([
-          item["ID Venda"], item["Data/Hora"], item["CPF"], item["Nome"],
+          proximoID, item["Data/Hora"], item["CPF"], item["Nome"],
           item["Tipo"], item["Cod"], item["Produto"], item["Valor Item"],
           item["cupom"], item["ValoremSaldo"], item["ValorPAgo"],
           item["Valor parceiro"], item["Valor liquido"]
         ]);
+
+        // Atualizar Estoque
+        atualizarEstoque(item["Cod"], 1, ss); 
       });
 
+      // 2. Atualizar Saldo do Parceiro
       var dadosPar = sheetParceiros.getDataRange().getValues();
-
-      // 2. LÓGICA DE SALDO
       for (var i = 1; i < dadosPar.length; i++) {
         var cpfNaPlanilha = dadosPar[i][0].toString().replace(/\D/g, "");
         var cupomNaPlanilha = dadosPar[i][3].toString().toUpperCase().trim();
 
-        // A) DEBITAR saldo do comprador (se ele usou saldo próprio)
         if (totalSaldoDebitar > 0 && cpfNaPlanilha === cpfComprador) {
           var saldoAtual = parseFloat(dadosPar[i][4]) || 0;
           sheetParceiros.getRange(i + 1, 5).setValue(saldoAtual - totalSaldoDebitar);
         }
 
-        // B) CREDITAR comissão ao DONO DO CUPOM (se um cupom foi usado)
         if (cupomUsado !== "NENHUM" && cupomNaPlanilha === cupomUsado) {
-          var saldoAtualDono = parseFloat(dadosPar[i][4]) || 0;
-          // Soma a comissão ao saldo do dono do cupom
+          var saldoAtualDono = parseFloat(sheetParceiros.getRange(i + 1, 5).getValue()) || 0;
           sheetParceiros.getRange(i + 1, 5).setValue(saldoAtualDono + totalComissaoCreditar);
         }
       }
       
+      trava.releaseLock(); // Libera a trava após sucesso
       return respostaJSON({status: "success"});
     } 
-    
-    // ... manter lógica de cadastro de cliente ...
+    return respostaJSON({status: "error", message: "Dados inválidos"});
   } catch (err) {
+    trava.releaseLock(); // Garante liberação mesmo em erro
     return respostaJSON({status: "error", message: err.toString()});
   }
 }
-
-
-
 
 // ======================================================
 // 4. FORMATADOR DE RESPOSTA (JSON)
 // ======================================================
 function respostaJSON(objeto) {
-  return ContentService.createTextOutput(JSON.stringify(objeto)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(objeto))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
+// ======================================================
+// 5. INTEGRAÇÃO MERCADO PAGO POINT PRO 3
+// ======================================================
+const MP_TOKEN = "TEST-3577250795393962-011007-4e69cf8e50732deb7f8eb28ff51fa2a8-3117694591";
+const DEVICE_ID = "1733541950"; 
 
+function criarIntencaoPagamento(valor, idVenda) {
+  const url = `https://api.mercadopago.com/point/integrate/devices/${DEVICE_ID}/payment_intents`;
+  const payload = {
+    "amount": Math.round(valor * 100) / 100,
+    "description": "Venda App 2026 - ID " + idVenda,
+    "payment": { 
+      "installments": 1, 
+      "type": "credit_card" 
+    }
+  };
 
+  const options = {
+    "method": "post",
+    "headers": {
+      "Authorization": "Bearer " + MP_TOKEN,
+      "Content-Type": "application/json"
+    },
+    "payload": JSON.stringify(payload),
+    "muteHttpExceptions": true
+  };
 
-
-
-
-
+  return UrlFetchApp.fetch(url, options);
+}

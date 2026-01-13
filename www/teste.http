@@ -1,0 +1,59 @@
+### Listar Terminais Mercado Pago
+
+# Usando a Extensão "REST Client" (Recomendado)
+# Essa é a forma mais profissional. Você cria um arquivo de texto e o VS Code se transforma em um "Postman".
+
+# Abra o VS Code e vá em Extensions (ícone de cubos no lado esquerdo).
+
+# Procure por "REST Client" (de Huachao Mao) e instale.
+
+# Crie um novo arquivo chamado teste.http.
+
+# Cole o conteúdo abaixo (ajustando o Token e o Store ID):
+
+
+
+GET https://api.mercadopago.com/terminals/v1/list
+# - digite aqui o token real
+Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+
+Content-Type: application/json
+
+
+
+
+
+### Atualizar modo de operação do terminal
+PATCH https://api.mercadopago.com/terminals/v1/setup
+Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591  
+Content-Type: application/json
+
+{
+  "terminals": [
+    {
+      "id": "PAX_Q92__Q92-1733541950",
+      "operating_mode": "PDV"
+    }
+  ]
+}
+
+
+
+### Enviar Cobrança de Teste para o Terminal
+POST https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
+Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+X-Idempotency-Key: 0d5020ed-1af6-469c-ae06-c3bec19954bb
+Content-Type: application/json
+
+{
+    "amount": 2400,
+    "description": "Teste Caixa Autônomo",
+    "payment": {
+        "installments": 1,
+        "type": "credit_card"
+    },
+    "additional_info": {
+        "external_reference": "ext_ref_1234",
+        "print_on_terminal": false
+    }
+}

@@ -7,9 +7,9 @@ function doGet(e) {
     
     // --- ROTA 1: Listar TODOS os produtos ---
     if (e.parameter.todosProdutos) {
-      var abaProd = ss.getSheetByName("produtos"); // Mais seguro usar nome
+      var abaProd = ss.getSheetByName("produtos"); 
       var dados = abaProd.getDataRange().getValues();
-      dados.shift(); // Remove cabeçalho
+      dados.shift(); 
       return respostaJSON({ status: "success", produtos: dados });
     }
     
@@ -34,6 +34,19 @@ function doGet(e) {
       if (!sheetVendas) return respostaJSON({ status: "error", message: "Aba Vendas não encontrada" });
       var dadosVendas = sheetVendas.getDataRange().getValues();
       return respostaJSON({ status: "success", vendas: dadosVendas });
+    }
+
+    // --- ROTA 6: Verificar Status do Pagamento na Maquininha ---
+    if (e.parameter.verificarPagamento) {
+      var intentId = e.parameter.verificarPagamento;
+      var tokenMP = e.parameter.token; 
+      return consultarStatusPagamento(intentId, tokenMP);
+    }
+
+    // --- ROTA 7: Registrar Venda Final (Chamada após aprovação da Point) ---
+    if (e.parameter.registrarVendaFinal) {
+      var dadosVenda = JSON.parse(e.parameter.registrarVendaFinal);
+      return registrarVendaNaPlanilha(dadosVenda);
     }
     
     return respostaJSON({status: "error", message: "Rota não encontrada"});
@@ -75,7 +88,7 @@ function buscarProduto(barcode, ss) {
         nome: dados[i][1],
         precoCliente: dados[i][2],
         precoParceiro: dados[i][3],
-        estoque: dados[i][4] // Coluna E
+        estoque: dados[i][4] 
       });
     }
   }
@@ -84,7 +97,6 @@ function buscarProduto(barcode, ss) {
 
 function realizarLogin(cpfOriginal, ss) {
   var cpf = cpfOriginal.replace(/\D/g, "");
-  
   var abaCli = ss.getSheetByName("Clientes");
   var dadosCli = abaCli.getDataRange().getValues();
   for (var i = 1; i < dadosCli.length; i++) {
@@ -109,21 +121,14 @@ function realizarLogin(cpfOriginal, ss) {
   return respostaJSON({status: "not_found"});
 }
 
-/**
- * Atualiza o estoque na aba produtos
- * Coluna A (0): Código | Coluna E (4): Quantidade
- */
 function atualizarEstoque(codProduto, quantidadeVendida, ss) {
   var sheetProdutos = ss.getSheetByName("produtos"); 
   if (!sheetProdutos) return;
-
   var dados = sheetProdutos.getDataRange().getValues();
-  
   for (var i = 1; i < dados.length; i++) {
     if (dados[i][0].toString() === codProduto.toString()) { 
       var estoqueAtual = Number(dados[i][4]) || 0;
       var novoEstoque = estoqueAtual - quantidadeVendida;
-      // Coluna E é a 5ª coluna
       sheetProdutos.getRange(i + 1, 5).setValue(novoEstoque); 
       break;
     }
@@ -134,70 +139,160 @@ function atualizarEstoque(codProduto, quantidadeVendida, ss) {
 // 3. FUNÇÃO DE PROCESSAMENTO DE DADOS (POST)
 // ======================================================
 function doPost(e) {
-   //Pede uma trava para o script
-  const trava = LockService.getScriptLock();
-    try {   
-// 2. Tenta trancar o script por até 1 segundos, Se outra pessoa estiver salvando, esta requisição espera aqui
-    trava.waitLock(1000);
-
+  try {
     var data = JSON.parse(e.postData.contents);
+    
+    // Verificação de segurança para o modo DESENV do seu pagamento.js
+    if (!data.config || !data.config.token) {
+       return respostaJSON({ status: "debug", message: "Modo de teste detectado no servidor" });
+    }
+
+    var token = data.config.token;
+    var deviceId = data.config.deviceId;
+    var installments = data.config.installments || 1;
+    var paymentType = data.config.paymentType || "credit_card";
+    
+    // AQUI ESTAVA O ERRO: Sincronizando o nome da variável
+    var valorParaMaquininha = Number.parseInt(data.config.amount);
+    var idVenda = data.itens[0]["ID Venda"].toString();
+
+    if (valorParaMaquininha > 0) {
+      // Chamada para a função que você já tem pronta
+      var resMP = acionarMaquinaPoint(valorParaMaquininha, idVenda, token, deviceId, installments, paymentType);
+      var resText = resMP.getContentText();
+      var resObj = JSON.parse(resText);
+      
+      if (resObj.id) {
+        return respostaJSON({ status: "success", intent_id: resObj.id });
+      } else {
+        return respostaJSON({ status: "error", message: "Erro MP: " + resText });
+      }
+    }
+    
+    return respostaJSON({status: "error", message: "Valor inválido ou zerado"});
+    
+  } catch (err) {
+    return respostaJSON({status: "error", message: "Erro no Servidor: " + err.toString()});
+  }
+}
+
+// Função auxiliar para responder JSON corretamente
+function respostaJSON(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function registrarVendaNaPlanilha(data) {
+  const trava = LockService.getScriptLock();
+  try {
+    trava.waitLock(10000);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheetVendas = ss.getSheetByName("Vendas");
     var sheetParceiros = ss.getSheetByName("Parceiros");
 
-    if (Array.isArray(data)) {
-      var totalSaldoDebitar = 0;    
-      var totalComissaoCreditar = 0; 
-      var cpfComprador = data[0]["CPF"].replace(/\D/g, "");
-      var cupomUsado = data[0]["cupom"].toUpperCase().trim();
+    var totalSaldoDebitar = 0;    
+    var totalComissaoCreditar = 0; 
+    var cpfComprador = data[0]["CPF"].replace(/\D/g, "");
+    var cupomUsado = data[0]["cupom"].toUpperCase().trim();
 
-      data.forEach(function(item) {
-        var proximoID = "2026" + (sheetVendas.getLastRow() + 1).toString().padStart(4, '0');
-        totalSaldoDebitar += parseFloat(item["ValoremSaldo"]) || 0;
-        totalComissaoCreditar += parseFloat(item["Valor parceiro"]) || 0;
-        
-        // 1. Registra a Venda
-        sheetVendas.appendRow([
-          proximoID, item["Data/Hora"], item["CPF"], item["Nome"],
-          item["Tipo"], item["Cod"], item["Produto"], item["Valor Item"],
-          item["cupom"], item["ValoremSaldo"], item["ValorPAgo"],
-          item["Valor parceiro"], item["Valor liquido"]
-        ]);
+    data.forEach(function(item) {
+      var proximoID = "2026" + (sheetVendas.getLastRow() + 1).toString().padStart(4, '0');
+      totalSaldoDebitar += parseFloat(item["ValoremSaldo"]) || 0;
+      totalComissaoCreditar += parseFloat(item["Valor parceiro"]) || 0;
+      
+      sheetVendas.appendRow([
+        proximoID, item["Data/Hora"], item["CPF"], item["Nome"],
+        item["Tipo"], item["Cod"], item["Produto"], item["Valor Item"],
+        item["cupom"], item["ValoremSaldo"], item["ValorPAgo"],
+        item["Valor parceiro"], item["Valor liquido"]
+      ]);
 
-        // 2. Atualiza Estoque (Item por Item)
-        atualizarEstoque(item["Cod"], 1, ss); 
-      });
+      atualizarEstoque(item["Cod"], 1, ss); 
+    });
 
-      // 3. Atualiza Saldo do Parceiro (Débito e Crédito)
-      var dadosPar = sheetParceiros.getDataRange().getValues();
-      for (var i = 1; i < dadosPar.length; i++) {
-        var cpfNaPlanilha = dadosPar[i][0].toString().replace(/\D/g, "");
-        var cupomNaPlanilha = dadosPar[i][3].toString().toUpperCase().trim();
+    var dadosPar = sheetParceiros.getDataRange().getValues();
+    for (var i = 1; i < dadosPar.length; i++) {
+      var cpfNaPlanilha = dadosPar[i][0].toString().replace(/\D/g, "");
+      var cupomNaPlanilha = dadosPar[i][3].toString().toUpperCase().trim();
 
-        // Se o comprador usou saldo e é o parceiro atual do laço
-        if (totalSaldoDebitar > 0 && cpfNaPlanilha === cpfComprador) {
-          var saldoAtual = parseFloat(dadosPar[i][4]) || 0;
-          sheetParceiros.getRange(i + 1, 5).setValue(saldoAtual - totalSaldoDebitar);
-        }
-
-        // Se a venda usou o cupom deste parceiro
-        if (cupomUsado !== "NENHUM" && cupomNaPlanilha === cupomUsado) {
-          // Buscamos o saldo novamente caso tenha sido alterado no if acima
-          var saldoAtualDono = parseFloat(sheetParceiros.getRange(i + 1, 5).getValue()) || 0;
-          sheetParceiros.getRange(i + 1, 5).setValue(saldoAtualDono + totalComissaoCreditar);
-        }
+      if (totalSaldoDebitar > 0 && cpfNaPlanilha === cpfComprador) {
+        var saldoAtual = parseFloat(dadosPar[i][4]) || 0;
+        sheetParceiros.getRange(i + 1, 5).setValue(saldoAtual - totalSaldoDebitar);
       }
-      return respostaJSON({status: "success"});
-    } 
-    return respostaJSON({status: "error", message: "Dados inválidos"});
+      if (cupomUsado !== "NENHUM" && cupomNaPlanilha === cupomUsado) {
+        var saldoAtualDono = parseFloat(sheetParceiros.getRange(i + 1, 5).getValue()) || 0;
+        sheetParceiros.getRange(i + 1, 5).setValue(saldoAtualDono + totalComissaoCreditar);
+      }
+    }
+    trava.releaseLock();
+    return respostaJSON({status: "success", message: "Venda gravada com sucesso"});
   } catch (err) {
+    trava.releaseLock();
     return respostaJSON({status: "error", message: err.toString()});
   }
 }
 
 // ======================================================
-// 4. FORMATADOR DE RESPOSTA (JSON)
+// 4. INTEGRAÇÃO MERCADO PAGO E AUXILIARES
 // ======================================================
+
+// ======================================================
+// INTEGRAÇÃO MERCADO PAGO ATUALIZADA (V2)
+// ======================================================
+
+function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, installments, type) {
+  const url = `https://api.mercadopago.com/point/integration-api/devices/${deviceId}/payment-intents`;
+  
+  const payload = {
+    "amount": valorCentavos, // Aqui deve ir o número puro, sem aspas e sem .0
+    "description": "Venda App 2026 - ID " + idVenda,
+    "payment": { 
+      "installments": installments, 
+      "type": type 
+    },
+    "additional_info": {
+      "external_reference": idVenda,
+      "print_on_terminal": true
+    }
+  };
+
+  const options = {
+    "method": "post",
+    "headers": {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": "ID-" + idVenda + "-" + Date.now()
+    },
+    "payload": JSON.stringify(payload),
+    "muteHttpExceptions": true
+  };
+
+  return UrlFetchApp.fetch(url, options);
+}
+
+function consultarStatusPagamento(intentId, token) {
+  // CORREÇÃO AQUI: A URL de consulta na V2 não usa "/devices/ID/..." 
+  // Ela usa diretamente o ID da intenção (payment-intent)
+  const url = `https://api.mercadopago.com/point/integration-api/payment-intents/${intentId}`;
+  
+  const options = {
+    "method": "get",
+    "headers": { 
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    "muteHttpExceptions": true
+  };
+  
+  const response = UrlFetchApp.fetch(url, options);
+  const data = JSON.parse(response.getContentText());
+  
+  // Log para debug caso precise ver no Google Script
+  Logger.log("Status da Consulta: " + response.getContentText());
+  
+  return respostaJSON(data);
+}
+
 function respostaJSON(objeto) {
   return ContentService.createTextOutput(JSON.stringify(objeto))
     .setMimeType(ContentService.MimeType.JSON);
