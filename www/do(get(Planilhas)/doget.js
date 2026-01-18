@@ -142,37 +142,43 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     
-    // Verificação de segurança para o modo DESENV do seu pagamento.js
-    if (!data.config || !data.config.token) {
-       return respostaJSON({ status: "debug", message: "Modo de teste detectado no servidor" });
+    // --- CASO 1: É UM CADASTRO DE NOVO CLIENTE ---
+    // Verificamos se no JSON existe o campo "telefone", que é exclusivo do cadastro
+    if (data.telefone) {
+      var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Clientes"); // Nome da sua aba de clientes
+      sheet.appendRow([
+        data.cpf, 
+        data.nome, 
+        "'" + data.telefone, // O ' evita que o Excel/Google suma com o zero à esquerda
+        data.tipo, 
+        data.saldo
+      ]);
+      return respostaJSON({ status: "success", message: "Cliente cadastrado com sucesso" });
     }
 
-    var token = data.config.token;
-    var deviceId = data.config.deviceId;
-    var installments = data.config.installments || 1;
-    var paymentType = data.config.paymentType || "credit_card";
-    
-    // AQUI ESTAVA O ERRO: Sincronizando o nome da variável
-    var valorParaMaquininha = Number.parseInt(data.config.amount);
-    var idVenda = data.itens[0]["ID Venda"].toString();
+    // --- CASO 2: É UMA VENDA (INTEGRAÇÃO COM POINT) ---
+    if (data.config && data.config.token) {
+      var token = data.config.token;
+      var deviceId = data.config.deviceId;
+      var valorParaMaquininha = Number.parseInt(data.config.amount);
+      var idVenda = data.itens[0]["ID Venda"].toString();
 
-    if (valorParaMaquininha > 0) {
-      // Chamada para a função que você já tem pronta
-      var resMP = acionarMaquinaPoint(valorParaMaquininha, idVenda, token, deviceId, installments, paymentType);
-      var resText = resMP.getContentText();
-      var resObj = JSON.parse(resText);
-      
-      if (resObj.id) {
-        return respostaJSON({ status: "success", intent_id: resObj.id });
-      } else {
-        return respostaJSON({ status: "error", message: "Erro MP: " + resText });
+      if (valorParaMaquininha > 0) {
+        var resMP = acionarMaquinaPoint(valorParaMaquininha, idVenda, token, deviceId, data.config.installments, data.config.paymentType);
+        var resObj = JSON.parse(resMP.getContentText());
+        
+        if (resObj.id) {
+          return respostaJSON({ status: "success", intent_id: resObj.id });
+        } else {
+          return respostaJSON({ status: "error", message: "Erro MP: " + resMP.getContentText() });
+        }
       }
     }
-    
-    return respostaJSON({status: "error", message: "Valor inválido ou zerado"});
-    
+
+    return respostaJSON({ status: "error", message: "Dados inválidos ou formato desconhecido" });
+
   } catch (err) {
-    return respostaJSON({status: "error", message: "Erro no Servidor: " + err.toString()});
+    return respostaJSON({ status: "error", message: "Erro no Servidor: " + err.toString() });
   }
 }
 

@@ -3,7 +3,7 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs
 // ======================================================
 // CONFIGURAÇÃO DE AMBIENTE
 // ======================================================
-const AMBIENTE = 'DESENV'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
+const AMBIENTE = 'PROD'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
 
 // CONFIGURAÇÃO MERCADO PAGO
 const configMP = {
@@ -63,17 +63,28 @@ inputSaldo.addEventListener('input', function (e) {
 
 // FUNÇÕES DE CÁLCULO
 function atualizarResumoTela() {
-    const totalComDesconto = totalOriginal - descontoAplicado;
-    const totalFinal = Math.max(0, totalComDesconto - saldoUtilizadoTotal);
+    // 1. Calcula os valores baseados nas variáveis globais
+    const totalComDesconto = gr(totalOriginal - descontoAplicado);
+    const totalFinal = gr(Math.max(0, totalComDesconto - saldoUtilizadoTotal));
+
+    // 2. Atualiza os textos na tela
+    document.getElementById('totalOriginal').innerText = totalOriginal.toFixed(2);
     document.getElementById('totalFinal').innerText = totalFinal.toFixed(2);
-    document.getElementById('valorDesconto').innerText = descontoAplicado.toFixed(2);
+    
+    // ESTA LINHA É A QUE MOSTRA O DESCONTO:
+    const elDesconto = document.getElementById('valorDesconto');
+    if (elDesconto) {
+        elDesconto.innerText = descontoAplicado.toFixed(2);
+        elDesconto.style.display="block";
+    }
+    
+    // 3. Gerencia a exibição do saldo usado (se for parceiro)
     const elSaldoUsado = document.getElementById('txtSaldoUsado');
     if (elSaldoUsado) {
         elSaldoUsado.style.display = saldoUtilizadoTotal > 0 ? 'block' : 'none';
         document.getElementById('valorSaldoAbatido').innerText = saldoUtilizadoTotal.toFixed(2);
     }
 }
-
 function sugerirValorSaldo() {
     if (tipoUsuario !== "Parceiro") return;
     const valorRestante = totalOriginal - descontoAplicado;
@@ -82,16 +93,53 @@ function sugerirValorSaldo() {
 
 // BOTOES DE AÇÃO
 btnValidar.addEventListener('click', async () => {
-    const cupom = inputCupom.value.trim();
-    if (!cupom) return;
+    const cupom = inputCupom.value.trim().toUpperCase();
+    const textoCupom =  document.getElementById("txtCumpom");
+    
+    // Se o campo estiver vazio, entendemos que o usuário quer remover o cupom
+    if (!cupom) {
+        descontoAplicado = 0;
+        document.getElementById("txtDesconto").style.display = 'none';
+        btnValidar.classList.remove('btn-success');
+        atualizarResumoTela();
+        alert("Cupom removido.");
+        return;
+    }
+
+    btnValidar.innerText = "Verificando...";
+    // Resetamos o visual do botão para neutro durante a nova validação
+    btnValidar.classList.remove('btn-success');
+    
+
     try {
         const response = await fetch(`${URL_SCRIPT}?validarCupom=${cupom}`);
         const data = await response.json();
+        
         if (data.status === "success") {
-            descontoAplicado = totalOriginal * 0.10;
+            // Aplica 10% sobre o total e exibe na tela
+            descontoAplicado = gr(totalOriginal * 0.10); 
+            
+            document.getElementById("txtDesconto").style.display = 'block';
+            textoCupom.style.display = 'block';
+            textoCupom.style.color = 'Green';
+            textoCupom.innerHTML = "Cupom aplicado: 10% de desconto!";
+            btnValidar.classList.add('btn-success');
             atualizarResumoTela();
+            
+        } else {
+            // Se o novo cupom falhar, zeramos o desconto anterior por segurança
+            descontoAplicado = 0;
+            document.getElementById("txtDesconto").style.display = 'none';
+            atualizarResumoTela();
+            textoCupom.style.display = 'block';
+            textoCupom.style.color = 'red';
+            textoCupom.innerHTML = "Cupom inválido ou expirado.";
         }
-    } catch (e) { alert("Erro ao validar cupom"); }
+    } catch (e) { 
+        alert("Erro ao conectar com o servidor para validar cupom."); 
+    } finally {
+        btnValidar.innerText = "Validar";
+    }
 });
 
 document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
@@ -112,20 +160,40 @@ btnConfirmar.addEventListener('click', async () => {
 
     const jsonVendaFinal = carrinho.map(item => {
         const valorItemOriginal = gr(parseFloat(item.preco));
+        
+        // Calcula quanto este item representa no total para ratear o desconto e o saldo
         const proporcao = valorItemOriginal / totalOriginal;
-        const valorComDesconto = (totalOriginal > 0) ? valorItemOriginal * ((totalOriginal - descontoAplicado) / totalOriginal) : valorItemOriginal;
+        
+        // Aplica o desconto do cupom proporcionalmente ao item
+        const valorComDescontoCupom = gr(valorItemOriginal - (descontoAplicado * proporcao));
+        
+        // Abate o saldo (se houver) do valor já com desconto do cupom
         const saldoDesteItem = gr(saldoUtilizadoTotal * proporcao);
-        const valorPagoDesteItem = gr(Math.max(0, valorComDesconto - saldoDesteItem));
+        
+        // Valor que será enviado para a maquininha
+        const valorPagoDesteItem = gr(Math.max(0, valorComDescontoCupom - saldoDesteItem));
 
         let comissao = 0;
-        if (tipoUsuario === "Parceiro" && saldoDesteItem > 0) comissao = -saldoDesteItem;
-        else if (cupomTexto !== "NENHUM") comissao = valorItemOriginal * 0.15;
+        if (tipoUsuario === "Parceiro" && saldoDesteItem > 0) {
+            comissao = -saldoDesteItem; // Se usou saldo, registra como débito
+        } else if (descontoAplicado > 0) {
+            // Se houve cupom, calculamos a comissão de 15% (ou o valor que você desejar)
+            comissao = gr(valorItemOriginal * 0.10); 
+        }
 
         return {
-            "ID Venda": idVendaUnico, "Data/Hora": dataHora, "CPF": cpfUsuario.replace(/\D/g, ""),
-            "Nome": nomeUsuario, "Tipo": tipoUsuario, "Cod": item.codigo, "Produto": item.nome,
-            "Valor Item": gr(valorItemOriginal), "cupom": cupomTexto, "ValoremSaldo": gr(saldoDesteItem),
-            "ValorPAgo": gr(valorPagoDesteItem), "Valor parceiro": gr(comissao),
+            "ID Venda": idVendaUnico, 
+            "Data/Hora": dataHora, 
+            "CPF": cpfUsuario.replace(/\D/g, ""),
+            "Nome": nomeUsuario, 
+            "Tipo": tipoUsuario, 
+            "Cod": item.codigo, 
+            "Produto": item.nome,
+            "Valor Item": gr(valorItemOriginal), 
+            "cupom": descontoAplicado > 0 ? cupomTexto : "NENHUM", 
+            "ValoremSaldo": gr(saldoDesteItem),
+            "ValorPAgo": gr(valorPagoDesteItem), 
+            "Valor parceiro": gr(comissao),
             "Valor liquido": gr(Math.max(0, valorPagoDesteItem - (comissao > 0 ? comissao : 0)))
         };
     });

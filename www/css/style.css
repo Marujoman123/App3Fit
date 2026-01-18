@@ -29,21 +29,28 @@ body {
     overflow: auto;
 }
 
-body {
+body::before {
+    content: "";
     /* Caminho para a sua imagem */
     background-image: url('../img/01.webp');
-
-    /* Define que a imagem deve se repetir horizontalmente e verticalmente */
     background-repeat: repeat;
-
-    /* Mantém o fundo fixo enquanto você rola a página (opcional, mas fica elegante) */
     background-attachment: fixed;
-
-    /* Define o tamanho da imagem original (se estiver muito grande, use um valor em px) */
     background-size: 25% 25%;
+    background-color: #000;
+    /* Controle de Opacidade */
+    opacity: 1; /* Ajuste de 0 a 1 (ex: 0.5 é 50%) */
 
-    /* Cor de fundo reserva caso a imagem demore a carregar */
-    background-color: #000000;
+    /* Posicionamento para cobrir toda a tela */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Garante que a imagem fique atrás do conteúdo */
+}
+
+span {
+    display: inline-block;
 }
 
 .login-container {

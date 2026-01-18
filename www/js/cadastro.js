@@ -76,21 +76,15 @@ btnSalvar.addEventListener('click', async () => {
     };
 
     try {
-        // Enviando para o Google Sheets
+        // Removido o 'no-cors' para permitir que o Script processe como uma requisição POST real
         const response = await fetch(URL_PLANILHA, {
             method: 'POST',
-            mode: 'no-cors', // Importante para evitar erros de CORS no Apps Script
-            cache: 'no-cache',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dados)
+            body: JSON.stringify(dados) 
         });
 
-        // Como usamos 'no-cors', o fetch não consegue ler o JSON de resposta com precisão, 
-        // mas se não cair no 'catch', o dado foi enviado.
+        // Mesmo sem ler o corpo da resposta (devido ao Apps Script), 
+        // o redirecionamento indica sucesso no envio.
         alert("Cadastro realizado com sucesso!");
-
 
         localStorage.setItem('usuario_cpf', cpfLimpo);        
         localStorage.setItem('usuario_nome', nome);
