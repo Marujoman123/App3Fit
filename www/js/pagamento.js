@@ -3,14 +3,14 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs
 // ======================================================
 // CONFIGURAÇÃO DE AMBIENTE
 // ======================================================
-const AMBIENTE = 'PROD'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
+const AMBIENTE = 'DESENV'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
 
 // CONFIGURAÇÃO MERCADO PAGO
 const configMP = {
     token: "APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591",
     deviceId: "PAX_Q92__Q92-1733541950",
     installments: 1,
-    paymentType: "credit_card" 
+    paymentType: "credit_card"
 };
 
 // RECUPERAÇÃO DE DADOS
@@ -32,6 +32,13 @@ const btnConfirmar = document.getElementById('btnConfirmarPagamento');
 function gr(valor) {
     return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
 }
+
+inputCupom.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        btnValidar.click();
+    }
+});
 
 // LÓGICA DE INTERFACE
 if (tipoUsuario === "Parceiro") {
@@ -70,14 +77,13 @@ function atualizarResumoTela() {
     // 2. Atualiza os textos na tela
     document.getElementById('totalOriginal').innerText = totalOriginal.toFixed(2);
     document.getElementById('totalFinal').innerText = totalFinal.toFixed(2);
-    
+
     // ESTA LINHA É A QUE MOSTRA O DESCONTO:
     const elDesconto = document.getElementById('valorDesconto');
     if (elDesconto) {
-        elDesconto.innerText = descontoAplicado.toFixed(2);
-        elDesconto.style.display="block";
+        elDesconto.innerHTML = "Desconto: <b>R$" + descontoAplicado.toFixed(2) + "</b>";
     }
-    
+
     // 3. Gerencia a exibição do saldo usado (se for parceiro)
     const elSaldoUsado = document.getElementById('txtSaldoUsado');
     if (elSaldoUsado) {
@@ -94,12 +100,13 @@ function sugerirValorSaldo() {
 // BOTOES DE AÇÃO
 btnValidar.addEventListener('click', async () => {
     const cupom = inputCupom.value.trim().toUpperCase();
-    const textoCupom =  document.getElementById("txtCumpom");
-    
+    const textoCupom = document.getElementById("txtCumpom");
+    const valorDesconto = document.getElementById("valorDesconto");
+
     // Se o campo estiver vazio, entendemos que o usuário quer remover o cupom
     if (!cupom) {
         descontoAplicado = 0;
-        document.getElementById("txtDesconto").style.display = 'none';
+        valorDesconto.style.display = 'none';
         btnValidar.classList.remove('btn-success');
         atualizarResumoTela();
         alert("Cupom removido.");
@@ -109,34 +116,41 @@ btnValidar.addEventListener('click', async () => {
     btnValidar.innerText = "Verificando...";
     // Resetamos o visual do botão para neutro durante a nova validação
     btnValidar.classList.remove('btn-success');
-    
+
 
     try {
         const response = await fetch(`${URL_SCRIPT}?validarCupom=${cupom}`);
         const data = await response.json();
-        
+
+
+
         if (data.status === "success") {
+
+            // 2. Só faça o split se o cupom for válido e o parceiro existir
+            const nomeParceiro = data.parceiro ? data.parceiro.split(" ")[0] : "Parceiro";
+
             // Aplica 10% sobre o total e exibe na tela
-            descontoAplicado = gr(totalOriginal * 0.10); 
-            
-            document.getElementById("txtDesconto").style.display = 'block';
+            descontoAplicado = gr(totalOriginal * 0.10);
+
+            valorDesconto.style.display = 'block';
             textoCupom.style.display = 'block';
             textoCupom.style.color = 'Green';
-            textoCupom.innerHTML = "Cupom aplicado: 10% de desconto!";
+            textoCupom.innerHTML = "Cupom de " + nomeParceiro + " aplicado: 10% de desconto!";
             btnValidar.classList.add('btn-success');
             atualizarResumoTela();
-            
+
         } else {
             // Se o novo cupom falhar, zeramos o desconto anterior por segurança
             descontoAplicado = 0;
-            document.getElementById("txtDesconto").style.display = 'none';
+            valorDesconto.style.display = 'none';
             atualizarResumoTela();
+
             textoCupom.style.display = 'block';
             textoCupom.style.color = 'red';
             textoCupom.innerHTML = "Cupom inválido ou expirado.";
         }
-    } catch (e) { 
-        alert("Erro ao conectar com o servidor para validar cupom."); 
+    } catch (e) {
+        alert("Erro ao conectar com o servidor para validar cupom.");
     } finally {
         btnValidar.innerText = "Validar";
     }
@@ -160,16 +174,16 @@ btnConfirmar.addEventListener('click', async () => {
 
     const jsonVendaFinal = carrinho.map(item => {
         const valorItemOriginal = gr(parseFloat(item.preco));
-        
+
         // Calcula quanto este item representa no total para ratear o desconto e o saldo
         const proporcao = valorItemOriginal / totalOriginal;
-        
+
         // Aplica o desconto do cupom proporcionalmente ao item
         const valorComDescontoCupom = gr(valorItemOriginal - (descontoAplicado * proporcao));
-        
+
         // Abate o saldo (se houver) do valor já com desconto do cupom
         const saldoDesteItem = gr(saldoUtilizadoTotal * proporcao);
-        
+
         // Valor que será enviado para a maquininha
         const valorPagoDesteItem = gr(Math.max(0, valorComDescontoCupom - saldoDesteItem));
 
@@ -178,21 +192,21 @@ btnConfirmar.addEventListener('click', async () => {
             comissao = -saldoDesteItem; // Se usou saldo, registra como débito
         } else if (descontoAplicado > 0) {
             // Se houve cupom, calculamos a comissão de 15% (ou o valor que você desejar)
-            comissao = gr(valorItemOriginal * 0.10); 
+            comissao = gr(valorItemOriginal * 0.10);
         }
 
         return {
-            "ID Venda": idVendaUnico, 
-            "Data/Hora": dataHora, 
+            "ID Venda": idVendaUnico,
+            "Data/Hora": dataHora,
             "CPF": cpfUsuario.replace(/\D/g, ""),
-            "Nome": nomeUsuario, 
-            "Tipo": tipoUsuario, 
-            "Cod": item.codigo, 
+            "Nome": nomeUsuario,
+            "Tipo": tipoUsuario,
+            "Cod": item.codigo,
             "Produto": item.nome,
-            "Valor Item": gr(valorItemOriginal), 
-            "cupom": descontoAplicado > 0 ? cupomTexto : "NENHUM", 
+            "Valor Item": gr(valorItemOriginal),
+            "cupom": descontoAplicado > 0 ? cupomTexto : "NENHUM",
             "ValoremSaldo": gr(saldoDesteItem),
-            "ValorPAgo": gr(valorPagoDesteItem), 
+            "ValorPAgo": gr(valorPagoDesteItem),
             "Valor parceiro": gr(comissao),
             "Valor liquido": gr(Math.max(0, valorPagoDesteItem - (comissao > 0 ? comissao : 0)))
         };
@@ -200,7 +214,7 @@ btnConfirmar.addEventListener('click', async () => {
 
     // --- CONVERSÃO PARA CENTAVOS INTEIROS ---
     const valorTotalReais = jsonVendaFinal.reduce((acc, i) => acc + i["ValorPAgo"], 0);
-    const valorTotalCentavos = Math.round(valorTotalReais * 100); 
+    const valorTotalCentavos = Math.round(valorTotalReais * 100);
 
     try {
         btnConfirmar.disabled = true;
@@ -208,17 +222,17 @@ btnConfirmar.addEventListener('click', async () => {
 
         // VERIFICAÇÃO DE AMBIENTE
         if (AMBIENTE === 'PROD' && valorTotalCentavos > 0) {
-            
+
             btnConfirmar.innerText = "Modo Produção: Chamando Point...";
-            
+
             const payloadParaEnvio = {
                 config: { ...configMP, amount: valorTotalCentavos },
                 itens: jsonVendaFinal
             };
 
-                                // --- LINHA ADICIONADA PARA VERIFICAÇÃO ---
-console.log("--- DEBUG: ENVIANDO PARA GOOGLE SCRIPT ---");
-console.log(JSON.stringify(payloadParaEnvio, null, 2));
+            // --- LINHA ADICIONADA PARA VERIFICAÇÃO ---
+            console.log("--- DEBUG: ENVIANDO PARA GOOGLE SCRIPT ---");
+            console.log(JSON.stringify(payloadParaEnvio, null, 2));
 
             const response = await fetch(URL_SCRIPT, {
                 method: 'POST',
@@ -228,13 +242,13 @@ console.log(JSON.stringify(payloadParaEnvio, null, 2));
 
             if (resIntent.status === "success" && resIntent.intent_id) {
                 btnConfirmar.innerText = "Pague na Maquininha...";
-                
+
                 let statusPagamento = "OPEN";
                 while (statusPagamento === "OPEN") {
                     await new Promise(r => setTimeout(r, 3000));
                     const check = await fetch(`${URL_SCRIPT}?verificarPagamento=${resIntent.intent_id}&token=${configMP.token}`);
                     const statusMP = await check.json();
-                    statusPagamento = statusMP.state; 
+                    statusPagamento = statusMP.state;
 
                     if (statusPagamento === "FINISHED") prosseguirParaGravacao = true;
                     if (statusPagamento === "CANCELED") {

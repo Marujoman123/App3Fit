@@ -86,9 +86,9 @@ function buscarProduto(barcode, ss) {
       return respostaJSON({
         status: "success",
         nome: dados[i][1],
-        precoCliente: dados[i][2],
-        precoParceiro: dados[i][3],
-        estoque: dados[i][4] 
+        precoCliente: dados[i][4],
+        precoParceiro: dados[i][5],
+        estoque: dados[i][6] 
       });
     }
   }
@@ -127,9 +127,9 @@ function atualizarEstoque(codProduto, quantidadeVendida, ss) {
   var dados = sheetProdutos.getDataRange().getValues();
   for (var i = 1; i < dados.length; i++) {
     if (dados[i][0].toString() === codProduto.toString()) { 
-      var estoqueAtual = Number(dados[i][4]) || 0;
+      var estoqueAtual = Number(dados[i][6]) || 0;
       var novoEstoque = estoqueAtual - quantidadeVendida;
-      sheetProdutos.getRange(i + 1, 5).setValue(novoEstoque); 
+      sheetProdutos.getRange(i + 1, 7).setValue(novoEstoque); 
       break;
     }
   }

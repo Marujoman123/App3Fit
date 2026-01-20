@@ -20,6 +20,8 @@ async function carregarDados() {
         const res = await fetch(URL_SCRIPT + "?todosProdutos=true");
         const json = await res.json();
 
+        console.table(json);
+
         if (json.status === "success") {
             listaLocalProdutos = json.produtos;
 
@@ -64,16 +66,18 @@ formBarcode.addEventListener('submit', (e) => {
         if (produto) {
             const codigoProduto = produto[0]; // <--- PEGA O CÓDIGO (Coluna 0)
             const nome = produto[1];
-            const preco = (tipoUsuario === "Parceiro") ? produto[3] : produto[2];
+            const kg = produto[2];
+            const preco = (tipoUsuario === "Parceiro") ? produto[5] : produto[4];
 
             // MODIFICADO: Salva o código junto com nome e preco
             carrinho.push({
                 codigo: codigoProduto, // <--- ADICIONADO NA PONTE
                 nome: nome,
+                kg:kg,
                 preco: parseFloat(preco)
             });
 
-            adicionarNaTela(nome, preco);
+            adicionarNaTela(nome, preco,kg);
         } else {
             alert("Produto não cadastrado!");
         }
@@ -81,13 +85,13 @@ formBarcode.addEventListener('submit', (e) => {
     }
 });
 
-function adicionarNaTela(nome, preco) {
+function adicionarNaTela(nome, preco, kg) {
     const itemDiv = document.createElement('div');
     itemDiv.className = 'item-carrinho';
 
     itemDiv.innerHTML = `  
-            <span class="item-nome">${nome}</span>
-            <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>                
+            <span class="item-nome">${nome} - <b>${kg}</b></span>
+            <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>      
           <button class="btn-remover">×</button>
     `;
 
