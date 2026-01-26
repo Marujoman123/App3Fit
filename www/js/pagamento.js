@@ -69,6 +69,7 @@ function atualizarResumoTela() {
     const elSaldoUsado = document.getElementById('txtSaldoUsado');
     if (elSaldoUsado) {
         elSaldoUsado.style.display = saldoUtilizadoTotal > 0 ? 'block' : 'none';
+        elSaldoUsado.innerHTML = 'Saldo de ' + saldoUtilizadoTotal + ' aplicado !' 
         document.getElementById('valorSaldoAbatido').innerText = saldoUtilizadoTotal.toFixed(2);
     }
 }
@@ -191,7 +192,8 @@ async function processarVendaFinal() {
             "ValoremSaldo": saldoDesteItem,
             "ValorPAgo": valorPagoDesteItem,
             "Valor parceiro": comissao,
-            "Valor_liquido": (valorPagoDesteItem - comissao)
+            "Valor liquido": gr(Math.max(0, valorPagoDesteItem - (comissao > 0 ? comissao : 0))),
+            "Tipo Pagamento": configMP.paymentType
         };
     });
 
