@@ -128,33 +128,37 @@
                 <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
                 <button id="btnConfirmarPagamento" style="background-color: #28a745; margin-top: 20px;">Confirmar e
                     Finalizar</button>
-
-
-
-
-
-
             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         </div>
 
     </div>
+
+    <div id="modalPagamento" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2>Selecione a Forma de Pagamento</h2>
+        <div class="grid-pagamentos">
+            <button class="btn-pagamento" onclick="selecionarPagamento('CREDIT_CARD')">
+                <i class="fas fa-credit-card"></i> Crédito
+            </button>
+            <button class="btn-pagamento" onclick="selecionarPagamento('DEBIT_CARD')">
+                <i class="fas fa-money-check"></i> Débito
+            </button>
+            <button class="btn-pagamento" onclick="selecionarPagamento('PIX')">
+                <i class="fas fa-qrcode"></i> Pix
+            </button>
+            <button class="btn-pagamento" onclick="selecionarPagamento('VOUCHER')">
+                <i class="fas fa-ticket-alt"></i> Voucher (Ticket)
+            </button>
+        </div>
+        <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+    </div>
+</div>
+
+
+
+
 </body>
 
 </html>

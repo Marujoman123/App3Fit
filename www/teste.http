@@ -38,6 +38,9 @@ Content-Type: application/json
 }
 
 
+GET https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
+Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+
 
 ### Enviar Cobrança de Teste para o Terminal
 POST https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
@@ -57,3 +60,10 @@ Content-Type: application/json
         "print_on_terminal": false
     }
 }
+
+
+
+
+### Listar meios de pagamento disponíveis
+GET https://api.mercadopago.com/v1/payment_methods
+Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
