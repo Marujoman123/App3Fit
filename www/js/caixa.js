@@ -33,7 +33,7 @@ async function carregarDados() {
                     window.location.href = "relatorio.html";
                 });
 
-                btnRelatorio.style.display='flex';
+                btnRelatorio.style.display = 'flex';
 
 
             } else {
@@ -61,23 +61,29 @@ formBarcode.addEventListener('submit', (e) => {
     const codigo = barcodeInput.value.trim();
 
     if (codigo) {
-        const produto = listaLocalProdutos.find(p => p[0].toString() === codigo);
+        const produtoInfo = listaLocalProdutos.find(p => p[0].toString() === codigo);
 
-        if (produto) {
-            const codigoProduto = produto[0]; // <--- PEGA O CÓDIGO (Coluna 0)
-            const nome = produto[1];
-            const kg = produto[2];
-            const preco = (tipoUsuario === "Parceiro") ? produto[5] : produto[4];
+        if (produtoInfo) {
+            const precoVenda = (tipoUsuario === "Parceiro") ? parseFloat(produtoInfo[5]) : parseFloat(produtoInfo[4]);
 
-            // MODIFICADO: Salva o código junto com nome e preco
-            carrinho.push({
-                codigo: codigoProduto, // <--- ADICIONADO NA PONTE
-                nome: nome,
-                kg:kg,
-                preco: parseFloat(preco)
-            });
+            // Verifica se o produto já existe no carrinho
+            const itemExistente = carrinho.find(item => item.codigo === produtoInfo[0]);
 
-            adicionarNaTela(nome, preco,kg);
+            if (itemExistente) {
+                // Se existe, aumenta a quantidade
+                itemExistente.quantidade += 1;
+            } else {
+                // Se não existe, adiciona novo objeto com quantidade 1
+                carrinho.push({
+                    codigo: produtoInfo[0],
+                    nome: produtoInfo[1],
+                    kg: produtoInfo[2],
+                    preco: precoVenda,
+                    quantidade: 1
+                });
+            }
+
+            renderizarCarrinho();
         } else {
             alert("Produto não cadastrado!");
         }
@@ -85,41 +91,86 @@ formBarcode.addEventListener('submit', (e) => {
     }
 });
 
-function adicionarNaTela(nome, preco, kg) {
-    const itemDiv = document.createElement('div');
-    itemDiv.className = 'item-carrinho';
+// FUNÇÃO PARA DESENHAR O CARRINHO NA TELA
+function renderizarCarrinho() {
+    listaProdutosDiv.innerHTML = '';
+    totalGeral = 0;
 
-    itemDiv.innerHTML = `  
-            <span class="item-nome">${nome} - <b>${kg}</b></span>
-            <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>      
-          <button class="btn-remover">×</button>
-    `;
+    carrinho.forEach((item, index) => {
+        const subtotalItem = item.preco * item.quantidade;
+        totalGeral += subtotalItem;
 
-    itemDiv.querySelector('.btn-remover').addEventListener('click', (e) => {
-        e.stopPropagation();
-
-        // MODIFICADO: Agora buscamos também pelo código para ser mais preciso
-        const index = carrinho.findIndex(item => item.nome === nome && item.preco === parseFloat(preco));
-
-        if (index > -1) {
-            carrinho.splice(index, 1);
-        }
-
-        totalGeral -= parseFloat(preco);
-        if (totalGeral < 0) totalGeral = 0;
-
-        valorTotalTxt.innerText = totalGeral.toFixed(2);
-        itemDiv.remove();
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'linha-carrinho'; // Use a mesma classe do header
+itemDiv.innerHTML = `
+    <span class="col-nome">${item.nome} - <b>${item.kg}</b></span>
+    <span class="col-qtd">${item.quantidade}x</span>
+    <span class="col-preco">R$ ${subtotalItem.toFixed(2)}</span>
+    <div class="col-acao">
+        <button class="btn-remover" onclick="removerItem(${index})">×</button>
+    </div>
+`;
+        listaProdutosDiv.appendChild(itemDiv);
     });
 
-    listaProdutosDiv.append(itemDiv);
-
-    // NOVO: Faz o scroll descer automaticamente ao adicionar um produto
-    listaProdutosDiv.scrollTop = listaProdutosDiv.scrollHeight;
-
-    totalGeral += parseFloat(preco);
     valorTotalTxt.innerText = totalGeral.toFixed(2);
+    listaProdutosDiv.scrollTop = listaProdutosDiv.scrollHeight;
 }
+
+
+
+// FUNÇÃO PARA REMOVER OU DIMINUIR QUANTIDADE
+function removerItem(index) {
+    if (carrinho[index].quantidade > 1) {
+        carrinho[index].quantidade -= 1;
+    } else {
+        carrinho.splice(index, 1);
+    }
+    renderizarCarrinho();
+}
+
+
+
+
+
+
+// function adicionarNaTela(nome, preco, kg) {
+//     const itemDiv = document.createElement('div');
+//     itemDiv.className = 'item-carrinho';
+
+//     itemDiv.innerHTML = `  
+//             <span class="item-nome">${nome} - <b>${kg}</b></span>
+//             <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>      
+//           <button class="btn-remover">×</button>
+//     `;
+
+//     itemDiv.querySelector('.btn-remover').addEventListener('click', (e) => {
+//         e.stopPropagation();
+
+//         // MODIFICADO: Agora buscamos também pelo código para ser mais preciso
+//         const index = carrinho.findIndex(item => item.nome === nome && item.preco === parseFloat(preco));
+
+//         if (index > -1) {
+//             carrinho.splice(index, 1);
+//         }
+
+//         totalGeral -= parseFloat(preco);
+//         if (totalGeral < 0) totalGeral = 0;
+
+//         valorTotalTxt.innerText = totalGeral.toFixed(2);
+//         itemDiv.remove();
+//     });
+
+//     listaProdutosDiv.append(itemDiv);
+
+//     // NOVO: Faz o scroll descer automaticamente ao adicionar um produto
+//     listaProdutosDiv.scrollTop = listaProdutosDiv.scrollHeight;
+
+//     totalGeral += parseFloat(preco);
+//     valorTotalTxt.innerText = totalGeral.toFixed(2);
+// }
+
+
 
 // 4. Botão Continuar
 document.getElementById('btnContinuar').addEventListener('click', () => {

@@ -67,7 +67,7 @@ input:focus {
 .item-carrinho {
     display: flex;
     align-items: center;
-    padding: 5px;
+    padding: 0px;
     border-bottom: 1px solid #eee;
     animation: fadeIn 0.3s ease;
 }
@@ -86,51 +86,67 @@ input:focus {
 
 
 
-.header-produto { flex: 1; text-align: left; }
+.header-produto { flex: 1; text-align: left; padding-left: 5px;}
 .header-preco { width: 80px; text-align: right; margin-right: 40px; }
-.header-vazio { width: 30px; } /* Espaço compensando o botão remover */
+.header-qtd { width: 80px; text-align: right;  }
+.header-vazio { width: 30px; } /*Espaço compensando o botão remover */
 
-.item-nome {
-    flex: 1;
-    text-align: left;
-    /* white-space: nowrap;
-    overflow: hidden; */
-    text-overflow: ellipsis; /* Evita que nomes longos quebrem o layout */
+
+/* Estrutura de Linha (Usada tanto no Header quanto no Item) */
+.linha-carrinho {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
 }
 
-.item-preco {
-    flex: 1;
-    width: 80px;
+/* 1. Coluna Nome: Cresce para ocupar o espaço */
+.col-nome {
+    flex: 2; /* Dá mais peso para o nome */
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 5px;
+}
+
+/* 2. Coluna Quantidade: Largura Fixa */
+.col-qtd {
+    width: 60px;
     text-align: right;
-    margin-right: 30px;     
+    font-weight: bold;
+}
+
+/* 3. Coluna Preço: Largura Fixa */
+.col-preco {
+    width: 100px;
+    text-align: right;
     color: #28a745;
     font-weight: bold;
 }
 
-/* .total-fundo {
-    color: #000000;
-1
-} */
+/* 4. Coluna Ação (Botão ou Espaço Vazio no Header) */
+.col-acao {
+    width: 40px;
+    display: flex;
+    justify-content: flex-end;
+}
 
+/* Ajuste específico para o Botão Remover */
 .btn-remover {
     background: #ffebee;
     color: #c62828;
     border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    border-radius: 75%;
+    width: 25px;
+    height: 25px;
     cursor: pointer;
     font-weight: bold;
     display: flex;
-    /* Alinha conteúdo */
-    justify-content: center;
-    /* Centraliza horizontalmente */
     align-items: center;
-    /* Centraliza verticalmente */
-    margin-left: auto;
-    /* Mantém ele na direita */
-    padding: 0;
-    /* Evita deslocamento */
+    justify-content: center;
 }
 
 .total-container {

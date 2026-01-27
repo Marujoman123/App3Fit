@@ -12,17 +12,26 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-navigation href="https://script.google.com/*" />
+      <allow-navigation href="https://script.googleusercontent.com/*" />
+
+      <plugin name="cordova-plugin-whitelist" version="1" />
+<access origin="https://script.google.com" />
+<access origin="https://script.googleusercontent.com" />
 
     <platform name="android"> 
 
-    <!-- <splash src="res/www/img/01.webp" />
-    <preference name="SplashScreen" value="screen" />
-    <preference name="SplashScreenDelay" value="3000" /> <preference name="FadeSplashScreenDuration" value="300" /> -->
+      <preference name="Fullscreen" value="true" />
+      <preference name="HideKeyboardFormAccessoryBar" value="true" />
+      <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
+      <preference name="KeepRunning" value="true" />
+      <preference name="DisallowOverscroll" value="true" />
 
-<preference name="Fullscreen" value="true" />
-    <preference name="HideKeyboardFormAccessoryBar" value="true" />
-    <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
-
+      <queries>
+            <package name="com.mercadopago.android.point" />
+            <intent>
+                  <action name="android.intent.action.MAIN" />
+            </intent>
+      </queries>
     
 
     <icon src="res/mipmap-anydpi-v26/icon_3fit.xml" />
@@ -47,4 +56,22 @@
           density="xxxhdpi" 
           foreground="res/mipmap-xxxhdpi/icon_3fit_foreground.png" />
 </platform>
+
+<platform name="ios">
+    <config-file platform="ios" target="*-Info.plist" parent="LSApplicationQueriesSchemes">
+        <array>
+            <string>mp-point</string>
+            <string>mercadopago</string>
+        </array>
+    </config-file>
+
+    <preference name="Orientation" value="landscape" />
+    <preference name="Fullscreen" value="true" />
+    <preference name="DisallowOverscroll" value="true" />
+    
+    <icon src="res/ios/icon-1024.png" width="1024" height="1024" />
+</platform>
+
+
+
 </widget>
