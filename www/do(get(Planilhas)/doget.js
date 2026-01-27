@@ -208,9 +208,9 @@ function registrarVendaNaPlanilha(data) {
       
       sheetVendas.appendRow([
         proximoID, item["Data/Hora"], item["CPF"], item["Nome"],
-        item["Tipo"], item["Cod"], item["Produto"], item["Valor Item"],
+        item["Tipo"], item["Cod"], item["Produto"], item["Quantidade"], item["Valor Unit"],item["Valor Total Item"],
         item["cupom"], item["ValoremSaldo"], item["ValorPAgo"],
-        item["Valor parceiro"], item["Valor liquido"]
+        item["Valor parceiro"], item["Valor liquido"], item["Tipo Pagamento"]
       ]);
 
       atualizarEstoque(item["Cod"], 1, ss); 
