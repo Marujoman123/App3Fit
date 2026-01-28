@@ -61,7 +61,14 @@ formBarcode.addEventListener('submit', (e) => {
     const codigo = barcodeInput.value.trim();
 
     if (codigo) {
-        const produtoInfo = listaLocalProdutos.find(p => p[0].toString() === codigo);
+        const produtoInfo = listaLocalProdutos.find(p => p.codigo.toString() === codigo);
+
+        if (produtoInfo) {
+            // Acesse pelas propriedades
+            const nome = produtoInfo.nome;
+            const qtdEstoque = produtoInfo.quantidade;
+            // ... restante da lógica
+        }
 
         if (produtoInfo) {
             const precoVenda = (tipoUsuario === "Parceiro") ? parseFloat(produtoInfo[5]) : parseFloat(produtoInfo[4]);
@@ -102,7 +109,7 @@ function renderizarCarrinho() {
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'linha-carrinho'; // Use a mesma classe do header
-itemDiv.innerHTML = `
+        itemDiv.innerHTML = `
     <span class="col-nome">${item.nome} - <b>${item.kg}</b></span>
     <span class="col-qtd">${item.quantidade}x</span>
     <span class="col-preco">R$ ${subtotalItem.toFixed(2)}</span>

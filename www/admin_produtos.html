@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque Disponível - 3Fit</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .container-relatorio { padding: 20px; font-family: sans-serif; }
+        .tabela-estoque { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; }
+        .tabela-estoque th, .tabela-estoque td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .tabela-estoque th { background-color: #007bff; color: white; text-transform: uppercase; font-size: 0.9rem; }
+        .qtd-baixo { color: #d9534f; font-weight: bold; } /* Destaque para estoque baixo */
+        .btn-voltar { padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+<body>
+    <div class="container-relatorio">
+        <button class="btn-voltar"  onclick="location.href='admin.html'">← Voltar</button>
+        <h1 style="color: white;">Estoque Atual</h1>
+        
+        <div id="loadingEstoque" style="color: white;">Carregando produtos...</div>
+
+        
+        <button id="btnPDF" class="btn-pdf" style="display:none; background: #d32f2f; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-top: 10px; cursor: pointer;">
+    PDF Gerar Relatório
+</button>
+        <table class="tabela-estoque" id="tabelaEstoque" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Linha</th>
+                    <th>Produto</th>
+                    <th>Qtd</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela">
+                </tbody>
+        </table>
+    </div>
+
+    <script src="js/admin_produtos.js"></script>
+</body>
+</html>

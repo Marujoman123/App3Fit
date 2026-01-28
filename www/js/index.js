@@ -1,12 +1,15 @@
 
 // 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
-localStorage.clear(); 
+localStorage.clear();
 
 const btnEntrar = document.getElementById('btnEntrar');
 const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');
 const inputs = document.querySelectorAll('input');
-const loginContainer  = document.getElementById('loginContainer');
+const loginContainer = document.getElementById('loginContainer');
+const CPF_JE = "31806722852";
+const CPF_HUGO = "41471613836";
+const SENHA_ADMIN = "1234"; // Defina sua senha aqui
 
 inputs.forEach(input => {
     input.addEventListener('focus', () => {
@@ -31,7 +34,29 @@ btnEntrar.addEventListener('click', async () => {
         return; // Para a execução aqui
     }
 
-    // 2. Se a matemática estiver OK, chama a validação na Planilha
+    
+
+    // 2. Verificação de Administrador com Senha
+    const cpfLimpo = cpfInput.value.replace(/\D/g, "");
+    if (cpfLimpo === CPF_JE || cpfLimpo === CPF_HUGO) {
+        const senhaDigitada = prompt("Digite a senha de administrador:");
+        const nome = (cpfLimpo === CPF_JE) ? 'JEFERSON' : (cpfLimpo === CPF_HUGO) ? 'HUGO' : 'Visitante';
+
+        if (senhaDigitada === SENHA_ADMIN) {
+            console.log("Acesso Admin Autorizado");
+            localStorage.setItem('usuario_tipo', 'Admin');
+            localStorage.setItem('usuario_nome', nome);
+            localStorage.setItem('usuario_cpf', cpfLimpo);
+            window.location.href = "admin.html";
+        } else {
+            alert("Senha incorreta!");
+            cpfInput.value = '';
+            cpfInput.focus();
+        }
+        return; // Para a execução para não validar no Google Sheets
+    } 
+
+    // 3. Fluxo normal para usuários comuns
     await ValidarNoGoogleSheets();
 });
 
@@ -87,15 +112,15 @@ async function ValidarNoGoogleSheets() {
 
     try {
         const response = await fetch(`${urlScript}?cpf=${cpfLimpo}`);
-        
+
         if (!response.ok) throw new Error("Erro na rede");
-        
+
         resultado = await response.json();
     } catch (error) {
         // O erro só aparece se a requisição REALMENTE falhar antes do redirecionamento
         console.error("Erro na consulta:", error);
         alert("Erro ao consultar servidor.");
-        
+
         // Se deu erro, volta o botão
         loginContainer.style.display = 'block';
         loadingLogin.style.display = 'none';
@@ -106,8 +131,8 @@ async function ValidarNoGoogleSheets() {
     // Agora tratamos os dados fora do try/catch para evitar o falso erro de rede.
     if (resultado.status === "exists") {
         // ADICIONE ESTA LINHA ABAIXO:
-        localStorage.setItem('usuario_cpf', cpfLimpo); 
-        
+        localStorage.setItem('usuario_cpf', cpfLimpo);
+
         localStorage.setItem('usuario_nome', resultado.nome);
         localStorage.setItem('usuario_tipo', resultado.tipo);
 
@@ -120,7 +145,7 @@ async function ValidarNoGoogleSheets() {
         }
     } else {
         // Se o usuário não existe, também é bom salvar o CPF para o cadastro
-        localStorage.setItem('usuario_cpf', cpfLimpo); 
+        localStorage.setItem('usuario_cpf', cpfLimpo);
         localStorage.setItem('cpfParaCadastro', cpfLimpo);
         window.location.href = "cadastro.html?cpf=" + cpfLimpo;
     }
@@ -131,8 +156,8 @@ function forcarTeclado() {
     const inputs = document.querySelectorAll('input:not(#barcodeInput)');
     inputs.forEach(input => {
         // O atributo decimal ou numeric costuma forçar a chamada do teclado no Android
-        if(!input.getAttribute('inputmode')) {
-            input.setAttribute('inputmode', 'numeric'); 
+        if (!input.getAttribute('inputmode')) {
+            input.setAttribute('inputmode', 'numeric');
         }
     });
 }

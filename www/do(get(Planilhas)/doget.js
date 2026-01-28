@@ -5,12 +5,37 @@ function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // --- ROTA 1: Listar TODOS os produtos ---
+    // --- ROTA 1: Listar TODOS os produtos com Estoque Atualizado ---
     if (e.parameter.todosProdutos) {
       var abaProd = ss.getSheetByName("produtos"); 
-      var dados = abaProd.getDataRange().getValues();
-      dados.shift(); 
-      return respostaJSON({ status: "success", produtos: dados });
+      var abaEstoque = ss.getSheetByName("Estoque");
+      
+      var dadosProd = abaProd.getDataRange().getValues();
+      var dadosEstoque = abaEstoque.getDataRange().getValues();
+      
+      // Criamos um "mapa" de estoque para busca rápida: { "Cod": Quantidade }
+      var mapaEstoque = {};
+      for (var i = 1; i < dadosEstoque.length; i++) {
+        mapaEstoque[dadosEstoque[i][0].toString()] = dadosEstoque[i][1];
+      }
+      
+      // Montamos a lista final unindo Nome + Quantidade
+      var listaFinal = [];
+      for (var j = 1; j < dadosProd.length; j++) {
+        var cod = dadosProd[j][0].toString();
+        var linha = dadosProd[j][6];
+        var nome = dadosProd[j][7];
+        var estoqueAtual = mapaEstoque[cod] || 0; // Se não achar no estoque, assume 0
+        
+        listaFinal.push({
+          codigo: cod,
+          nome: nome,
+          linha: linha,
+          quantidade: estoqueAtual
+        });
+      }
+      
+      return respostaJSON({ status: "success", produtos: listaFinal });
     }
     
     // --- ROTA 2: Validar Cupom ---
@@ -122,15 +147,29 @@ function realizarLogin(cpfOriginal, ss) {
 }
 
 function atualizarEstoque(codProduto, quantidadeVendida, ss) {
-  var sheetProdutos = ss.getSheetByName("produtos"); 
+  var sheetProdutos = ss.getSheetByName("Estoque"); 
   if (!sheetProdutos) return;
+  
   var dados = sheetProdutos.getDataRange().getValues();
+  
   for (var i = 1; i < dados.length; i++) {
+    // Usamos == para comparar, ou toString() como você fez, para evitar erro de tipo (número vs texto)
     if (dados[i][0].toString() === codProduto.toString()) { 
-      var estoqueAtual = Number(dados[i][6]) || 0;
+      
+      var estoqueAtual = Number(dados[i][1]) || 0;
       var novoEstoque = estoqueAtual - quantidadeVendida;
-      sheetProdutos.getRange(i + 1, 7).setValue(novoEstoque); 
-      break;
+      
+      // Ajuste de segurança: Evitar que o estoque fique negativo se você não quiser
+      if (novoEstoque < 0) novoEstoque = 0; 
+
+      // i + 1 porque o array começa em 0 e a planilha em 1
+      // Coluna 2 é a Coluna B (Quantidade)
+      sheetProdutos.getRange(i + 1, 2).setValue(novoEstoque); 
+      
+      // Opcional: Registrar no console para debug do Apps Script
+      console.log("Produto: " + codProduto + " | Estoque anterior: " + estoqueAtual + " | Novo: " + novoEstoque);
+      
+      return; // Encerra a função após encontrar e atualizar
     }
   }
 }
@@ -213,7 +252,7 @@ function registrarVendaNaPlanilha(data) {
         item["Valor parceiro"], item["Valor liquido"], item["Tipo Pagamento"]
       ]);
 
-      atualizarEstoque(item["Cod"], 1, ss); 
+      tualizarEstoque(item["Cod"], item["Quantidade"], ss); 
     });
 
     var dadosPar = sheetParceiros.getDataRange().getValues();
