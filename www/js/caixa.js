@@ -25,6 +25,8 @@ async function carregarDados() {
         if (json.status === "success") {
             listaLocalProdutos = json.produtos;
 
+            console.log(listaLocalProdutos)
+
             if (tipoUsuario === "Parceiro") {
                 document.getElementById('header-nome').innerText = primeiroNome + " (Parceiro)";
 
@@ -71,20 +73,21 @@ formBarcode.addEventListener('submit', (e) => {
         }
 
         if (produtoInfo) {
-            const precoVenda = (tipoUsuario === "Parceiro") ? parseFloat(produtoInfo[5]) : parseFloat(produtoInfo[4]);
+            // 1. Pegar o preço correto (usando propriedades, não índices)
+            // No novo formato, certifique-se que o doGet envia 'precoCliente' e 'precoParceiro'
+            // ou ajuste conforme o objeto que você montou na Rota 1 do doGet
+            const precoVenda = (tipoUsuario === "Parceiro") ? parseFloat(produtoInfo.precoParceiro || 0) : parseFloat(produtoInfo.precoCliente || 0);
 
-            // Verifica se o produto já existe no carrinho
-            const itemExistente = carrinho.find(item => item.codigo === produtoInfo[0]);
+            // 2. Verifica se o produto já existe no carrinho (usando .codigo)
+            const itemExistente = carrinho.find(item => item.codigo === produtoInfo.codigo);
 
             if (itemExistente) {
-                // Se existe, aumenta a quantidade
                 itemExistente.quantidade += 1;
             } else {
-                // Se não existe, adiciona novo objeto com quantidade 1
                 carrinho.push({
-                    codigo: produtoInfo[0],
-                    nome: produtoInfo[1],
-                    kg: produtoInfo[2],
+                    codigo: produtoInfo.codigo,
+                    nome: produtoInfo.nome,
+                    kg: produtoInfo.kg || "", // Se o seu objeto não tiver kg, evita erro
                     preco: precoVenda,
                     quantidade: 1
                 });

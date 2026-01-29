@@ -17,7 +17,7 @@ async function carregarRelatorio() {
             json.produtos.forEach(prod => {
                 const tr = document.createElement('tr');
                 const classeQtd = prod.quantidade <= 2 ? 'style="color:red; font-weight:bold;"' : prod.quantidade <= 4 ? 'style="color:#CA9802; font-weight:bold;"' : '';
-                if (prod.linha!=""){ //REtirando os produtos usados para teste
+                if (prod.linha.toUpperCase() !== 'TESTE'){ //REtirando os produtos usados para teste
                 tr.innerHTML = `
                     <td>${prod.linha}</td>
                     <td>${prod.nome}</td>

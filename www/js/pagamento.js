@@ -3,7 +3,7 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs
 // ======================================================
 // CONFIGURAÇÃO DE AMBIENTE
 // ======================================================
-const AMBIENTE = 'DESENV'; 
+const AMBIENTE = 'DESENV'; // desen
 
 const configMP = {
     token: "APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591",
@@ -231,13 +231,24 @@ async function processarVendaFinal() {
 
         if (podeGravar) {
             exibirStatusPagamento("Registrando venda na planilha...");
-            const resFinal = await fetch(`${URL_SCRIPT}?registrarVendaFinal=${encodeURIComponent(JSON.stringify(jsonVendaFinal))}`);
+            
+            // MUDANÇA: Usando POST em vez de GET para evitar limite de URL
+            const resFinal = await fetch(URL_SCRIPT, {
+                method: 'POST',
+                body: JSON.stringify({
+                    acao: "registrarVendaFinal",
+                    dados: jsonVendaFinal
+                })
+            });
+            
             const finalData = await resFinal.json();
 
             if (finalData.status === "success") {
                 alert("Sucesso! Venda registrada.");
                 localStorage.removeItem('carrinho');
                 window.location.href = "index.html";
+            } else {
+                throw new Error(finalData.message || "Erro ao registrar na planilha.");
             }
         }
     } catch (e) {
