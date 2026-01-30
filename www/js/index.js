@@ -7,9 +7,14 @@ const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');
 const inputs = document.querySelectorAll('input');
 const loginContainer = document.getElementById('loginContainer');
+const modal = document.getElementById('modalSenha');
+const inputSenha = document.getElementById('inputSenhaAdmin');
+const btnConfirmar = document.getElementById('btnConfirmarSenha');
+const btnCancelar = document.getElementById('btnCancelarSenha');
+
 const CPF_JE = "31806722852";
 const CPF_HUGO = "41471613836";
-const SENHA_ADMIN = "1234"; // Defina sua senha aqui
+const SENHA_ADMIN = "4321"; // Defina sua senha aqui
 
 inputs.forEach(input => {
     input.addEventListener('focus', () => {
@@ -28,33 +33,35 @@ btnEntrar.addEventListener('click', async () => {
 
     if (!cpfValidoMatematicamente) {
         alert("O CPF " + cpfInput.value + " não é válido.");
-        cpfInput.value = '';
+       // cpfInput.value = '';
         mensagemErro.innerText = "Digite um CPF válido.";
         cpfInput.focus();
         return; // Para a execução aqui
     }
 
-    
-
     // 2. Verificação de Administrador com Senha
     const cpfLimpo = cpfInput.value.replace(/\D/g, "");
     if (cpfLimpo === CPF_JE || cpfLimpo === CPF_HUGO) {
-        const senhaDigitada = prompt("Digite a senha de administrador:");
-        const nome = (cpfLimpo === CPF_JE) ? 'JEFERSON' : (cpfLimpo === CPF_HUGO) ? 'HUGO' : 'Visitante';
+        const nome = (cpfLimpo === CPF_JE) ? 'JEFERSON MACHADO' : 'HUGO ROSA';
 
-        if (senhaDigitada === SENHA_ADMIN) {
-            console.log("Acesso Admin Autorizado");
-            localStorage.setItem('usuario_tipo', 'Admin');
-            localStorage.setItem('usuario_nome', nome);
-            localStorage.setItem('usuario_cpf', cpfLimpo);
-            window.location.href = "admin.html";
-        } else {
-            alert("Senha incorreta!");
-            cpfInput.value = '';
-            cpfInput.focus();
-        }
-        return; // Para a execução para não validar no Google Sheets
-    } 
+        modal.style.display = 'flex';
+        inputSenha.value = '';
+        inputSenha.focus();
+
+        btnConfirmar.onclick = () => {
+            if (inputSenha.value === SENHA_ADMIN) {
+                localStorage.setItem('usuario_tipo', 'Proprietário');
+                localStorage.setItem('usuario_nome', nome);
+                localStorage.setItem('usuario_cpf', cpfLimpo);
+                window.location.href = "admin.html";
+            } else {
+                alert("Senha incorreta!");
+                inputSenha.value = '';
+                inputSenha.focus();
+            }
+        };
+        return; // Para o fluxo aqui e espera o clique no modal
+    }
 
     // 3. Fluxo normal para usuários comuns
     await ValidarNoGoogleSheets();
@@ -76,6 +83,23 @@ cpfInput.addEventListener('keydown', (event) => {
         btnEntrar.click();
     }
 });
+
+inputSenha.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        btnConfirmar.click();
+    }
+});
+
+btnCancelar.addEventListener('click', async () => {
+     modal.style.display = 'none';
+    inputSenha.value = ''; // Limpa a senha por segurança
+
+    // Devolve o foco para o CPF para o Admin poder tentar de novo ou limpar
+    cpfInput.focus();
+
+    });
+
 
 // Função Matemática (Validada)
 function TestaCPF() {
@@ -165,9 +189,5 @@ function forcarTeclado() {
 document.addEventListener('DOMContentLoaded', forcarTeclado);
 
 // -----------------/FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
-
-
-
-
 
 cpfInput.focus();

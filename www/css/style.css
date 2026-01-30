@@ -228,6 +228,13 @@ button:hover {
     padding: 12px;
     margin: 2px
 }
+.backgroud-white{
+ background: #FFFFFF;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
 
 /* ----------------------------MODAL----------------------------- */
 .modal-overlay {

@@ -3,7 +3,7 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs
 // ======================================================
 // CONFIGURAÇÃO DE AMBIENTE
 // ======================================================
-const AMBIENTE = 'DESENV'; // desen
+const AMBIENTE = 'DESENV'; 
 
 const configMP = {
     token: "APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591",
@@ -12,12 +12,21 @@ const configMP = {
     paymentType: "debit_card" 
 };
 
-// RECUPERAÇÃO DE DADOS
-const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-const totalOriginal = gr(parseFloat(localStorage.getItem('total_venda')) || 0);
+// Função de Arredondamento Financeiro (Crucial)
+function gr(valor) {
+    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
+}
+
+
+
 const tipoUsuario = localStorage.getItem('usuario_tipo');
 const nomeUsuario = localStorage.getItem('usuario_nome');
 const cpfUsuario = localStorage.getItem('usuario_cpf');
+
+
+// RECUPERAÇÃO DE DADOS COM TRAVA DE CENTAVOS
+const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+const totalOriginal = gr(parseFloat(localStorage.getItem('total_venda')) || 0);
 const saldoDisponivel = gr(parseFloat(localStorage.getItem('usuario_saldo')) || 0);
 
 let saldoUtilizadoTotal = 0;
@@ -27,10 +36,6 @@ const btnValidar = document.getElementById('btnValidarCupom');
 const inputCupom = document.getElementById('inputCupom');
 const inputSaldo = document.getElementById('inputUsarSaldo');
 const btnConfirmar = document.getElementById('btnConfirmarPagamento');
-
-function gr(valor) {
-    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
-}
 
 // ======================================================
 // LÓGICA DE INTERFACE E RENDERIZAÇÃO
@@ -46,11 +51,11 @@ const containerLista = document.getElementById('listaItensPagamento');
 if (carrinho.length === 0) {
     containerLista.innerHTML = "<p>Carrinho vazio</p>";
 } else {
-    // ATUALIZADO: Mostra quantidade x preço no resumo
     carrinho.forEach(item => {
         const p = document.createElement('p');
         const qtd = item.quantidade || 1;
-        const subtotal = gr(parseFloat(item.preco) * qtd);
+        // CORREÇÃO: Arredondando subtotal do item
+        const subtotal = gr(gr(item.preco) * qtd);
         
         p.style.fontSize = "0.9rem"; p.style.margin = "5px 0";
         p.innerHTML = `• ${qtd}x ${item.nome} <span style="float:right;">R$ ${subtotal.toFixed(2)}</span>`;
@@ -77,7 +82,6 @@ function atualizarResumoTela() {
     }
 }
 
-// (Eventos de Cupom e Saldo permanecem iguais...)
 btnValidar.addEventListener('click', async () => {
     const cupom = inputCupom.value.trim().toUpperCase();
     const textoCupom = document.getElementById("txtCumpom");
@@ -93,6 +97,7 @@ btnValidar.addEventListener('click', async () => {
         const data = await response.json();
         if (data.status === "success") {
             const nomeParceiro = data.parceiro ? data.parceiro.split(" ")[0] : "Parceiro";
+            // CORREÇÃO: Arredondando o desconto de 10%
             descontoAplicado = gr(totalOriginal * 0.10);
             valorDesconto.style.display = 'block';
             textoCupom.style.display = 'block';
@@ -115,7 +120,9 @@ btnValidar.addEventListener('click', async () => {
 });
 
 document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
+    // CORREÇÃO: Arredondando saldo manual
     saldoUtilizadoTotal = gr(parseFloat(inputSaldo.value) || 0);
+    if (saldoUtilizadoTotal > saldoDisponivel) saldoUtilizadoTotal = saldoDisponivel;
     atualizarResumoTela();
 });
 
@@ -151,20 +158,25 @@ async function processarVendaFinal() {
     const dataHora = new Date().toLocaleString('pt-BR');
     const cupomTexto = (inputCupom.value.trim() !== "") ? inputCupom.value.toUpperCase() : "NENHUM";
 
-    // ATUALIZADO: Preparação dos itens com Quantidade e Valor Total por linha
     const jsonVendaFinal = carrinho.map(item => {
         const qtd = item.quantidade || 1;
         const valorUnitario = gr(parseFloat(item.preco));
         const valorLinhaOriginal = gr(valorUnitario * qtd);
         
-        // Proporção baseada no valor total da linha sobre o total da venda
+        // PROPORÇÃO COM ARREDONDAMENTO EM CADA ETAPA
         const proporcao = valorLinhaOriginal / totalOriginal;
-        const valorComDescontoCupom = gr(valorLinhaOriginal - (descontoAplicado * proporcao));
+        
+        const descDesteItem = gr(descontoAplicado * proporcao);
+        const valorComDescontoCupom = gr(valorLinhaOriginal - descDesteItem);
+        
         const saldoDesteItem = gr(saldoUtilizadoTotal * proporcao);
-        const valorPagoDesteItem = gr(Math.max(0, valorComDescontoCupom - saldoDesteItem));
+        const valorPagoDesteItem = gr(Math.max(0, gr(valorComDescontoCupom - saldoDesteItem)));
 
+        // Cálculo de Comissão/Parceiro arredondado
         let comissao = (descontoAplicado > 0) ? gr(valorLinhaOriginal * 0.10) : 0;
-        if (tipoUsuario === "Parceiro" && saldoDesteItem > 0) comissao = -saldoDesteItem;
+        if (tipoUsuario === "Parceiro" && saldoDesteItem > 0) {
+            comissao = gr(-saldoDesteItem);
+        }
 
         return {
             "ID Venda": idVendaUnico,
@@ -181,12 +193,13 @@ async function processarVendaFinal() {
             "ValoremSaldo": saldoDesteItem,
             "ValorPAgo": valorPagoDesteItem,
             "Valor parceiro": comissao,
-            "Valor liquido": gr(Math.max(0, valorPagoDesteItem - (comissao > 0 ? comissao : 0))),
+            "Valor liquido": gr(Math.max(0, gr(valorPagoDesteItem - (comissao > 0 ? comissao : 0)))),
             "Tipo Pagamento": configMP.paymentType
         };
     });
 
-    const valorTotalPago = jsonVendaFinal.reduce((acc, i) => acc + i["ValorPAgo"], 0);
+    // Garante que a soma dos itens feche com o total esperado para a máquina
+    const valorTotalPago = gr(jsonVendaFinal.reduce((acc, i) => acc + i["ValorPAgo"], 0));
     const valorTotalCentavos = Math.round(valorTotalPago * 100);
 
     try {
@@ -204,7 +217,7 @@ async function processarVendaFinal() {
             if (resIntent.status === "success" && resIntent.intent_id) {
                 let pago = false;
                 let tentativas = 0;
-                const maxTentativas = 40; // 40 * 3s = 120s
+                const maxTentativas = 40; 
 
                 while (!pago && tentativas < maxTentativas) {
                     tentativas++;
@@ -224,15 +237,13 @@ async function processarVendaFinal() {
                 }
             }
         } else {
-            // MODO DESENV: Simula espera e libera gravação
-            await new Promise(r => setTimeout(r, 5000));
+            await new Promise(r => setTimeout(r, 2000));
             podeGravar = true;
         }
 
         if (podeGravar) {
             exibirStatusPagamento("Registrando venda na planilha...");
             
-            // MUDANÇA: Usando POST em vez de GET para evitar limite de URL
             const resFinal = await fetch(URL_SCRIPT, {
                 method: 'POST',
                 body: JSON.stringify({

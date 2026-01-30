@@ -9,7 +9,9 @@
     
     
 </head>
-<body class="admin-body">
+<body class="admin-body backgroud-white">
+
+    <div class=" backgroud-white">
     <h1>Painel Administrativo</h1>
     <p>Bem-vindo, Administrador</p>
 
@@ -20,7 +22,7 @@
 
         <button class="btn-panel verde" onclick="location.href='admin-produtos.html'">
             📦 Produtos Disponíveis
-        </div>
+        </button>
 
         <button class="btn-panel laranja" onclick="fazerRetirada()">
             📉 Fazer Retirada
@@ -30,11 +32,11 @@
             Sair do Painel
         </button>
     </div>
-
+</div>
     <script>
         function fazerRetirada() {
             localStorage.setItem('modo_venda', 'RETIRADA');
-            window.location.href = 'caixa.html';
+            window.location.href = 'retirada.html';
         }
     </script>
 </body>

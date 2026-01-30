@@ -9,6 +9,7 @@ async function iniciar() {
     if (json.status === "success") {
         produtosEstoque = json.produtos;
         renderizarSelecao();
+        document.getElementById('textLoading').style.display='none';
     }
 }
 
@@ -133,7 +134,9 @@ async function gerarPDFPedido() {
 
     // Mapeando dados para a tabela
     const body = carrinhoManual.map(i => [
-        `${i.linha} - ${i.nome} (${i.kg})`,
+        i.codigo,
+        i.linha,
+        `${i.nome} (${i.kg})`,
         i.quantidade,
         `R$ ${i.precoEfetivo.toFixed(2)}`,
         `R$ ${(i.precoEfetivo * i.quantidade).toFixed(2)}`
@@ -141,7 +144,7 @@ async function gerarPDFPedido() {
 
     doc.autoTable({
         startY: 45,
-        head: [['Produto / Linha', 'Qtd', 'Unitário', 'Subtotal']],
+        head: [['Cod','Linha','Produto', 'Qtd', 'Unitário', 'Subtotal']],
         body: body,
         theme: 'striped',
         headStyles: { fillColor: [255, 144, 69] },
@@ -153,12 +156,12 @@ async function gerarPDFPedido() {
             fontStyle: 'bold'
         },
         foot: [
-            ['', '', '', ''], // Linha vazia para respiro
+            ['', '', '',], // Linha vazia para respiro
             [
-                { content: `TOTAL DE MARMITAS: ${totalMarmitas}`, colSpan: 2 },
-                'TOTAL GERAL',
+                { content: `TOTAL DE MARMITAS: ${totalMarmitas}`, colSpan: 4 },
+                'Total',
                 document.getElementById('totalPedido').innerText.replace('Total: ', '')
-            ]
+            ],
         ]
     });
 

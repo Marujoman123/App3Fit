@@ -76,7 +76,8 @@ formBarcode.addEventListener('submit', (e) => {
             // 1. Pegar o preço correto (usando propriedades, não índices)
             // No novo formato, certifique-se que o doGet envia 'precoCliente' e 'precoParceiro'
             // ou ajuste conforme o objeto que você montou na Rota 1 do doGet
-            const precoVenda = (tipoUsuario === "Parceiro") ? parseFloat(produtoInfo.precoParceiro || 0) : parseFloat(produtoInfo.precoCliente || 0);
+            const precoBruto = (tipoUsuario === "Parceiro") ? (produtoInfo.precoParceiro || 0) : (produtoInfo.precoCliente || 0);
+            const precoVenda = gr(precoBruto); // Garante o arredondamento aqui
 
             // 2. Verifica se o produto já existe no carrinho (usando .codigo)
             const itemExistente = carrinho.find(item => item.codigo === produtoInfo.codigo);
@@ -107,24 +108,24 @@ function renderizarCarrinho() {
     totalGeral = 0;
 
     carrinho.forEach((item, index) => {
-        const subtotalItem = item.preco * item.quantidade;
-        totalGeral += subtotalItem;
+        // Aplica o gr() no subtotal do item
+        const subtotalItem = gr(item.preco * item.quantidade);
+        totalGeral = gr(totalGeral + subtotalItem); // Soma garantindo os centavos
 
         const itemDiv = document.createElement('div');
-        itemDiv.className = 'linha-carrinho'; // Use a mesma classe do header
+        itemDiv.className = 'linha-carrinho';
         itemDiv.innerHTML = `
-    <span class="col-nome">${item.nome} - <b>${item.kg}</b></span>
-    <span class="col-qtd">${item.quantidade}x</span>
-    <span class="col-preco">R$ ${subtotalItem.toFixed(2)}</span>
-    <div class="col-acao">
-        <button class="btn-remover" onclick="removerItem(${index})">×</button>
-    </div>
-`;
+            <span class="col-nome">${item.nome} - <b>${item.kg}</b></span>
+            <span class="col-qtd">${item.quantidade}x</span>
+            <span class="col-preco">R$ ${subtotalItem.toFixed(2)}</span>
+            <div class="col-acao">
+                <button class="btn-remover" onclick="removerItem(${index})">×</button>
+            </div>
+        `;
         listaProdutosDiv.appendChild(itemDiv);
     });
 
     valorTotalTxt.innerText = totalGeral.toFixed(2);
-    listaProdutosDiv.scrollTop = listaProdutosDiv.scrollHeight;
 }
 
 
@@ -141,44 +142,6 @@ function removerItem(index) {
 
 
 
-
-
-
-// function adicionarNaTela(nome, preco, kg) {
-//     const itemDiv = document.createElement('div');
-//     itemDiv.className = 'item-carrinho';
-
-//     itemDiv.innerHTML = `  
-//             <span class="item-nome">${nome} - <b>${kg}</b></span>
-//             <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>      
-//           <button class="btn-remover">×</button>
-//     `;
-
-//     itemDiv.querySelector('.btn-remover').addEventListener('click', (e) => {
-//         e.stopPropagation();
-
-//         // MODIFICADO: Agora buscamos também pelo código para ser mais preciso
-//         const index = carrinho.findIndex(item => item.nome === nome && item.preco === parseFloat(preco));
-
-//         if (index > -1) {
-//             carrinho.splice(index, 1);
-//         }
-
-//         totalGeral -= parseFloat(preco);
-//         if (totalGeral < 0) totalGeral = 0;
-
-//         valorTotalTxt.innerText = totalGeral.toFixed(2);
-//         itemDiv.remove();
-//     });
-
-//     listaProdutosDiv.append(itemDiv);
-
-//     // NOVO: Faz o scroll descer automaticamente ao adicionar um produto
-//     listaProdutosDiv.scrollTop = listaProdutosDiv.scrollHeight;
-
-//     totalGeral += parseFloat(preco);
-//     valorTotalTxt.innerText = totalGeral.toFixed(2);
-// }
 
 
 
@@ -219,6 +182,11 @@ if (inputScan) {
         inputScan.blur();
         setTimeout(() => inputScan.focus(), 10);
     });
+}
+
+// Função para evitar erros de ponto flutuante (centavos perdidos)
+function gr(valor) {
+    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
 }
 
 
