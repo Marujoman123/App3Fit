@@ -20,8 +20,12 @@ async function carregarDados() {
         const res = await fetch(URL_SCRIPT + "?todosProdutos=true");
         const json = await res.json();
 
+        console.table(json);
+
         if (json.status === "success") {
             listaLocalProdutos = json.produtos;
+
+            console.log(listaLocalProdutos)
 
             if (tipoUsuario === "Parceiro") {
                 document.getElementById('header-nome').innerText = primeiroNome + " (Parceiro)";
@@ -31,7 +35,7 @@ async function carregarDados() {
                     window.location.href = "relatorio.html";
                 });
 
-                btnRelatorio.style.display='flex';
+                btnRelatorio.style.display = 'flex';
 
 
             } else {
@@ -59,21 +63,38 @@ formBarcode.addEventListener('submit', (e) => {
     const codigo = barcodeInput.value.trim();
 
     if (codigo) {
-        const produto = listaLocalProdutos.find(p => p[0].toString() === codigo);
+        const produtoInfo = listaLocalProdutos.find(p => p.codigo.toString() === codigo);
 
-        if (produto) {
-            const codigoProduto = produto[0]; // <--- PEGA O CÓDIGO (Coluna 0)
-            const nome = produto[1];
-            const preco = (tipoUsuario === "Parceiro") ? produto[3] : produto[2];
+        if (produtoInfo) {
+            // Acesse pelas propriedades
+            const nome = produtoInfo.nome;
+            const qtdEstoque = produtoInfo.quantidade;
+            // ... restante da lógica
+        }
 
-            // MODIFICADO: Salva o código junto com nome e preco
-            carrinho.push({
-                codigo: codigoProduto, // <--- ADICIONADO NA PONTE
-                nome: nome,
-                preco: parseFloat(preco)
-            });
+        if (produtoInfo) {
+            // 1. Pegar o preço correto (usando propriedades, não índices)
+            // No novo formato, certifique-se que o doGet envia 'precoCliente' e 'precoParceiro'
+            // ou ajuste conforme o objeto que você montou na Rota 1 do doGet
+            const precoBruto = (tipoUsuario === "Parceiro") ? (produtoInfo.precoParceiro || 0) : (produtoInfo.precoCliente || 0);
+            const precoVenda = gr(precoBruto); // Garante o arredondamento aqui
 
-            adicionarNaTela(nome, preco);
+            // 2. Verifica se o produto já existe no carrinho (usando .codigo)
+            const itemExistente = carrinho.find(item => item.codigo === produtoInfo.codigo);
+
+            if (itemExistente) {
+                itemExistente.quantidade += 1;
+            } else {
+                carrinho.push({
+                    codigo: produtoInfo.codigo,
+                    nome: produtoInfo.nome,
+                    kg: produtoInfo.kg || "", // Se o seu objeto não tiver kg, evita erro
+                    preco: precoVenda,
+                    quantidade: 1
+                });
+            }
+
+            renderizarCarrinho();
         } else {
             alert("Produto não cadastrado!");
         }
@@ -81,41 +102,48 @@ formBarcode.addEventListener('submit', (e) => {
     }
 });
 
-function adicionarNaTela(nome, preco) {
-    const itemDiv = document.createElement('div');
-    itemDiv.className = 'item-carrinho';
+// FUNÇÃO PARA DESENHAR O CARRINHO NA TELA
+function renderizarCarrinho() {
+    listaProdutosDiv.innerHTML = '';
+    totalGeral = 0;
 
-    itemDiv.innerHTML = `  
-            <span class="item-nome">${nome}</span>
-            <span class="item-preco">R$ ${parseFloat(preco).toFixed(2)}</span>                
-          <button class="btn-remover">×</button>
-    `;
+    carrinho.forEach((item, index) => {
+        // Aplica o gr() no subtotal do item
+        const subtotalItem = gr(item.preco * item.quantidade);
+        totalGeral = gr(totalGeral + subtotalItem); // Soma garantindo os centavos
 
-    itemDiv.querySelector('.btn-remover').addEventListener('click', (e) => {
-        e.stopPropagation();
-
-        // MODIFICADO: Agora buscamos também pelo código para ser mais preciso
-        const index = carrinho.findIndex(item => item.nome === nome && item.preco === parseFloat(preco));
-
-        if (index > -1) {
-            carrinho.splice(index, 1);
-        }
-
-        totalGeral -= parseFloat(preco);
-        if (totalGeral < 0) totalGeral = 0;
-
-        valorTotalTxt.innerText = totalGeral.toFixed(2);
-        itemDiv.remove();
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'linha-carrinho';
+        itemDiv.innerHTML = `
+            <span class="col-nome">${item.nome} - <b>${item.kg}</b></span>
+            <span class="col-qtd">${item.quantidade}x</span>
+            <span class="col-preco">R$ ${subtotalItem.toFixed(2)}</span>
+            <div class="col-acao">
+                <button class="btn-remover" onclick="removerItem(${index})">×</button>
+            </div>
+        `;
+        listaProdutosDiv.appendChild(itemDiv);
     });
 
-    listaProdutosDiv.append(itemDiv);
-
-    // NOVO: Faz o scroll descer automaticamente ao adicionar um produto
-    listaProdutosDiv.scrollTop = listaProdutosDiv.scrollHeight;
-
-    totalGeral += parseFloat(preco);
     valorTotalTxt.innerText = totalGeral.toFixed(2);
 }
+
+
+
+// FUNÇÃO PARA REMOVER OU DIMINUIR QUANTIDADE
+function removerItem(index) {
+    if (carrinho[index].quantidade > 1) {
+        carrinho[index].quantidade -= 1;
+    } else {
+        carrinho.splice(index, 1);
+    }
+    renderizarCarrinho();
+}
+
+
+
+
+
 
 // 4. Botão Continuar
 document.getElementById('btnContinuar').addEventListener('click', () => {
@@ -156,6 +184,38 @@ if (inputScan) {
     });
 }
 
+// Função para evitar erros de ponto flutuante (centavos perdidos)
+function gr(valor) {
+    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
+}
+
+
+function manterLeitorAtivo() {
+    const inputScan = document.getElementById('barcodeInput');
+
+    // Tenta "re-focar" a cada 30 segundos para sinalizar atividade ao sistema
+    setInterval(() => {
+        if (document.activeElement !== inputScan) {
+            inputScan.focus();
+            console.log("Sinal de vida enviado ao input do leitor...");
+        }
+    }, 30000); 
+
+    // Truque: Ao detectar qualquer movimento do mouse ou toque, garante o foco
+    document.addEventListener('touchstart', () => inputScan.focus());
+}
+manterLeitorAtivo();
+
+
+let leitorConectando = false;
+
+document.getElementById('barcodeInput').addEventListener('keydown', (e) => {
+    // Se recebermos dados muito rápido após um período de silêncio, 
+    // pode ser o leitor acordando
+    if (e.target.value.length === 0) {
+        console.log("Leitor detectado enviando dados...");
+    }
+});
 
 
 

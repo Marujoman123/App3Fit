@@ -40,7 +40,7 @@ input:focus {
 .lista-itens {
     background: #ffffff;
     border-radius: 0 0 8px 8px; /* Arredonda apenas o fundo */
-    height: 250px; /* Ajuste a altura conforme seu tablet */
+    height: 215px; /* Ajuste a altura conforme seu tablet */
     width: auto;
     overflow-y: scroll; /* Força o aparecimento da barra se necessário */
     margin: 0 10px 10px 10px;

@@ -3,13 +3,13 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs
 // ======================================================
 // CONFIGURAÇÃO DE AMBIENTE
 // ======================================================
-const AMBIENTE = 'DESENV'; 
+const AMBIENTE = 'PROD'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
 
 const configMP = {
     token: "APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591",
     deviceId: "PAX_Q92__Q92-1733541950",
     installments: 1,
-    paymentType: "debit_card" 
+    paymentType: "debit_card"
 };
 
 // Função de Arredondamento Financeiro (Crucial)
@@ -56,7 +56,7 @@ if (carrinho.length === 0) {
         const qtd = item.quantidade || 1;
         // CORREÇÃO: Arredondando subtotal do item
         const subtotal = gr(gr(item.preco) * qtd);
-        
+
         p.style.fontSize = "0.9rem"; p.style.margin = "5px 0";
         p.innerHTML = `• ${qtd}x ${item.nome} <span style="float:right;">R$ ${subtotal.toFixed(2)}</span>`;
         containerLista.appendChild(p);
@@ -139,15 +139,13 @@ function fecharModal() {
     document.getElementById('modalPagamento').style.display = 'none';
 }
 
-async function selecionarPagamento(tipo) {
-    const mapaTipos = {
-        'CREDITO': 'credit_card',
-        'DEBITO': 'debit_card',
-        'PIX': 'bank_transfer',
-        'VOUCHER': 'voucher'
-    };
-    configMP.paymentType = mapaTipos[tipo] || 'debit_card';
-    exibirStatusPagamento("Aguardando pagamento na Máquina...");
+async function dispararPagamentoNaMaquina() {
+    if (carrinho.length === 0) return alert("Carrinho vazio!");
+
+    // Mostra o status imediatamente
+    exibirStatusPagamento("Aguardando ação na Maquininha...");
+
+    // Chamamos o processamento final
     await processarVendaFinal();
 }
 
@@ -158,21 +156,18 @@ async function processarVendaFinal() {
     const dataHora = new Date().toLocaleString('pt-BR');
     const cupomTexto = (inputCupom.value.trim() !== "") ? inputCupom.value.toUpperCase() : "NENHUM";
 
+    // 1. Mapeamento inicial dos itens
     const jsonVendaFinal = carrinho.map(item => {
         const qtd = item.quantidade || 1;
         const valorUnitario = gr(parseFloat(item.preco));
         const valorLinhaOriginal = gr(valorUnitario * qtd);
-        
-        // PROPORÇÃO COM ARREDONDAMENTO EM CADA ETAPA
         const proporcao = valorLinhaOriginal / totalOriginal;
-        
+
         const descDesteItem = gr(descontoAplicado * proporcao);
         const valorComDescontoCupom = gr(valorLinhaOriginal - descDesteItem);
-        
         const saldoDesteItem = gr(saldoUtilizadoTotal * proporcao);
         const valorPagoDesteItem = gr(Math.max(0, gr(valorComDescontoCupom - saldoDesteItem)));
 
-        // Cálculo de Comissão/Parceiro arredondado
         let comissao = (descontoAplicado > 0) ? gr(valorLinhaOriginal * 0.10) : 0;
         if (tipoUsuario === "Parceiro" && saldoDesteItem > 0) {
             comissao = gr(-saldoDesteItem);
@@ -194,20 +189,24 @@ async function processarVendaFinal() {
             "ValorPAgo": valorPagoDesteItem,
             "Valor parceiro": comissao,
             "Valor liquido": gr(Math.max(0, gr(valorPagoDesteItem - (comissao > 0 ? comissao : 0)))),
-            "Tipo Pagamento": configMP.paymentType
+            "Tipo Pagamento": "PROCESSANDO" 
         };
     });
 
-    // Garante que a soma dos itens feche com o total esperado para a máquina
     const valorTotalPago = gr(jsonVendaFinal.reduce((acc, i) => acc + i["ValorPAgo"], 0));
     const valorTotalCentavos = Math.round(valorTotalPago * 100);
 
     try {
         let podeGravar = false;
 
+        // --- AMBIENTE DE PRODUÇÃO COM PAGAMENTO ---
         if (AMBIENTE === 'PROD' && valorTotalCentavos > 0) {
             const payload = {
-                config: { ...configMP, amount: valorTotalCentavos },
+                config: {
+                    token: configMP.token,
+                    deviceId: configMP.deviceId,
+                    amount: valorTotalCentavos
+                },
                 itens: jsonVendaFinal
             };
 
@@ -217,7 +216,7 @@ async function processarVendaFinal() {
             if (resIntent.status === "success" && resIntent.intent_id) {
                 let pago = false;
                 let tentativas = 0;
-                const maxTentativas = 40; 
+                const maxTentativas = 40;
 
                 while (!pago && tentativas < maxTentativas) {
                     tentativas++;
@@ -229,21 +228,39 @@ async function processarVendaFinal() {
                     if (statusMP.state === "FINISHED") {
                         pago = true;
                         podeGravar = true;
+
+                        const tipoReal = (statusMP.payment && statusMP.payment.type) 
+                                         ? statusMP.payment.type.toUpperCase() 
+                                         : "CARTÃO";
+
+                        jsonVendaFinal.forEach(item => {
+                            item["Tipo Pagamento"] = tipoReal;
+                        });
                     } else if (statusMP.state === "CANCELED" || statusMP.state === "ERROR") {
-                        alert("Pagamento cancelado ou erro.");
+                        alert("Pagamento cancelado ou erro na maquininha.");
                         location.reload();
                         return;
                     }
                 }
             }
-        } else {
-            await new Promise(r => setTimeout(r, 2000));
+        } 
+        // --- AMBIENTE DE TESTE OU PAGAMENTO TOTAL COM SALDO ---
+        else {
+            console.log("Simulando aprovação (Modo DESENV ou Saldo)...");
+            await new Promise(r => setTimeout(r, 2000)); 
+            
+            const labelTeste = (valorTotalCentavos === 0) ? "SALDO_OU_CUPOM" : "MODO_TESTE";
+
+            jsonVendaFinal.forEach(item => {
+                item["Tipo Pagamento"] = labelTeste;
+            });
             podeGravar = true;
         }
 
+        // --- GRAVAÇÃO NA PLANILHA (SÓ OCORRE UMA VEZ) ---
         if (podeGravar) {
             exibirStatusPagamento("Registrando venda na planilha...");
-            
+
             const resFinal = await fetch(URL_SCRIPT, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -251,7 +268,7 @@ async function processarVendaFinal() {
                     dados: jsonVendaFinal
                 })
             });
-            
+
             const finalData = await resFinal.json();
 
             if (finalData.status === "success") {
@@ -263,7 +280,7 @@ async function processarVendaFinal() {
             }
         }
     } catch (e) {
-        alert("Erro: " + e.message);
+        alert("Erro no processo: " + e.message);
         location.reload();
     }
 }

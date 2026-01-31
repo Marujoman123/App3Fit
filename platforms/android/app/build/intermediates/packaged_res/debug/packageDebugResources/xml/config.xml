@@ -18,6 +18,15 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-navigation href="https://script.google.com/*" />
+    <allow-navigation href="https://script.googleusercontent.com/*" />
+    <access origin="https://script.google.com" />
+    <access origin="https://script.googleusercontent.com" />
+    <queries>
+        <package name="com.mercadopago.android.point" />
+        <intent>
+            <action name="android.intent.action.MAIN" />
+        </intent>
+    </queries>
     <icon src="res/mipmap-anydpi-v26/icon_3fit.xml" />
     <icon background="res/mipmap-mdpi/icon_3fit_background.png" density="mdpi" foreground="res/mipmap-mdpi/icon_3fit_foreground.png" monochrome="res/mipmap-mdpi/icon_3fit_monochrome.png" />
     <icon background="res/mipmap-hdpi/icon_3fit_background.png" density="hdpi" foreground="res/mipmap-hdpi/icon_3fit_foreground.png" monochrome="res/mipmap-hdpi/icon_3fit_monochrome.png" />
@@ -28,4 +37,6 @@
     <preference name="Fullscreen" value="true" />
     <preference name="HideKeyboardFormAccessoryBar" value="true" />
     <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
+    <preference name="KeepRunning" value="true" />
+    <preference name="DisallowOverscroll" value="true" />
 </widget>

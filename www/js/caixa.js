@@ -190,6 +190,33 @@ function gr(valor) {
 }
 
 
+function manterLeitorAtivo() {
+    const inputScan = document.getElementById('barcodeInput');
+
+    // Tenta "re-focar" a cada 30 segundos para sinalizar atividade ao sistema
+    setInterval(() => {
+        if (document.activeElement !== inputScan) {
+            inputScan.focus();
+            console.log("Sinal de vida enviado ao input do leitor...");
+        }
+    }, 30000); 
+
+    // Truque: Ao detectar qualquer movimento do mouse ou toque, garante o foco
+    document.addEventListener('touchstart', () => inputScan.focus());
+}
+manterLeitorAtivo();
+
+
+let leitorConectando = false;
+
+document.getElementById('barcodeInput').addEventListener('keydown', (e) => {
+    // Se recebermos dados muito rápido após um período de silêncio, 
+    // pode ser o leitor acordando
+    if (e.target.value.length === 0) {
+        console.log("Leitor detectado enviando dados...");
+    }
+});
+
 
 
 

@@ -29,21 +29,28 @@ body {
     overflow: auto;
 }
 
-body {
+body::before {
+    content: "";
     /* Caminho para a sua imagem */
     background-image: url('../img/01.webp');
-
-    /* Define que a imagem deve se repetir horizontalmente e verticalmente */
     background-repeat: repeat;
-
-    /* Mantém o fundo fixo enquanto você rola a página (opcional, mas fica elegante) */
     background-attachment: fixed;
-
-    /* Define o tamanho da imagem original (se estiver muito grande, use um valor em px) */
     background-size: 25% 25%;
+    background-color: #000;
+    /* Controle de Opacidade */
+    opacity: 1; /* Ajuste de 0 a 1 (ex: 0.5 é 50%) */
 
-    /* Cor de fundo reserva caso a imagem demore a carregar */
-    background-color: #000000;
+    /* Posicionamento para cobrir toda a tela */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Garante que a imagem fique atrás do conteúdo */
+}
+
+span {
+    display: inline-block;
 }
 
 .login-container {
@@ -221,3 +228,65 @@ button:hover {
     padding: 12px;
     margin: 2px
 }
+.backgroud-white{
+ background: #FFFFFF;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+
+/* ----------------------------MODAL----------------------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+}
+
+.grid-pagamentos {
+    display: grid;
+    grid-template-columns: 1-fr 1-fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.btn-pagamento {
+    padding: 20px;
+    font-size: 1.2rem;
+    border: 2px solid #007bff;
+    background: white;
+    color: #000;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-pagamento:active {
+    background: #007bff;
+    color: white;
+}
+
+.btn-cancelar {
+    margin-top: 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+.modal-content h3 {
+    color: #555;
+    margin-top: 15px;
+}
+/* ----------------------------/MODAL----------------------------- */

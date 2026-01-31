@@ -60,8 +60,8 @@
                     <img src="img/user-icon.png" alt="Usuário">
                 </div>
                 <div class="sair">
-                    <button  id="btnSair" style="padding: 0px; background-color: black;">
-                    <img src="img/arrow-right-from-bracket-solid-full.svg" alt="Sair"></button>
+                    <button id="btnSair" style="padding: 0px; background-color: black;">
+                        <img src="img/arrow-right-from-bracket-solid-full.svg" alt="Sair"></button>
                 </div>
             </div>
 
@@ -83,7 +83,7 @@
                     <label id="msgCupom" style="font-size: 0.8rem; margin-top: 5px; display: block;"></label>
                 </div>
 
-                 <div id="containerSaldo"
+                <div id="containerSaldo"
                     style="display: none; margin-top: 15px; border: 1px dashed #ccc; padding: 10px;">
                     <label style="color: #000;">Gostaria de pagar com saldo?</label>
                     <label>Saldo Disponível: <b>R$ <span id="txtSaldoDisponivel">0.00</span></b></label>
@@ -101,7 +101,7 @@
 
 
 
-                
+
 
 
 
@@ -114,46 +114,52 @@
             <div class="login-container-internal">
                 <div class="resumo-simples">
                     <p id="dtot">Total dos Itens: <b>R$ <span id="totalOriginal">0.00</span></b></p>
-                    <p id="txtDesconto" style="color: green; display: none;">Desconto Cupom: <b>- R$ <span
-                                id="valorDesconto">0.00</span></b></p>
+                        <p id="txtCumpom"> </p>
+                        <p id="valorDesconto" style="color: green; display: none;"> </p>
+                        <p id="txtSaldoUsado" style="color: green; display: none;"> </p>
+                 
                     <hr id="linhatot">
                     <p>Total a Pagar: R$ <span id="totalFinal">0.00</span></p>
                 </div>
 
 
 
-               
+
 
                 <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
-                <button id="btnConfirmarPagamento" style="background-color: #28a745; margin-top: 20px;">Confirmar e
+                <button id="btnConfirmarPagamento" onclick="dispararPagamentoNaMaquina()" style="background-color: #28a745; margin-top: 20px;">Confirmar e
                     Finalizar</button>
-
-                
-
-
-
-
             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         </div>
 
     </div>
+
+    <div id="modalPagamento" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2>Selecione a Forma de Pagamento</h2>
+        <div class="grid-pagamentos">
+            <button class="btn-pagamento" onclick="selecionarPagamento('CREDITO')">
+                <i class="fas fa-credit-card"></i> Crédito
+            </button>
+            <button class="btn-pagamento" onclick="selecionarPagamento('DEBITO')">
+                <i class="fas fa-money-check"></i> Débito
+            </button>
+            <button class="btn-pagamento" onclick="selecionarPagamento('PIX')">
+                <i class="fas fa-qrcode"></i> Pix
+            </button>
+            <button class="btn-pagamento" onclick="selecionarPagamento('VOUCHER')">
+                <i class="fas fa-ticket-alt"></i> Voucher (Ticket)
+            </button>
+        </div>
+        <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+    </div>
+</div>
+
+
+
+
 </body>
 
 </html>
