@@ -50,6 +50,9 @@ async function carregarDados() {
         alert("Erro ao sincronizar produtos. Verifique sua internet.");
         console.error(err);
     }
+
+    // Chame a função quando a página carregar
+ garantirFocoNoLeitor();
 }
 
 document.addEventListener('click', (e) => {
@@ -126,6 +129,8 @@ function renderizarCarrinho() {
     });
 
     valorTotalTxt.innerText = totalGeral.toFixed(2);
+    // GARANTIA FINAL: Sempre que mexer no carrinho, o leitor volta a "ouvir"
+    barcodeInput.focus();
 }
 
 
@@ -134,6 +139,7 @@ function renderizarCarrinho() {
 function removerItem(index) {
     if (carrinho[index].quantidade > 1) {
         carrinho[index].quantidade -= 1;
+
     } else {
         carrinho.splice(index, 1);
     }
@@ -178,10 +184,11 @@ if (inputScan) {
     });
 
     // 3. Forçar o fechamento se o teclado teimar em abrir
-    inputScan.addEventListener('click', () => {
-        inputScan.blur();
-        setTimeout(() => inputScan.focus(), 10);
-    });
+   inputScan.addEventListener('mousedown', (e) => {
+    // Impede o comportamento padrão que abre o teclado em dispositivos móveis
+    // mas mantém o foco lógico no campo.
+    setTimeout(() => inputScan.focus(), 10);
+});
 }
 
 // Função para evitar erros de ponto flutuante (centavos perdidos)
@@ -216,6 +223,31 @@ document.getElementById('barcodeInput').addEventListener('keydown', (e) => {
         console.log("Leitor detectado enviando dados...");
     }
 });
+
+
+
+function garantirFocoNoLeitor() {
+    
+    if (!barcodeInput) return;
+
+    // 1. Devolve o foco sempre que clicar em qualquer lugar da tela
+    document.addEventListener('click', () => {
+        // Pequeno delay para não interferir com a ação do clique em outros botões
+        setTimeout(() => barcodeInput.focus(), 100);
+    });
+
+    // 2. Devolve o foco após o uso do teclado (ex: apertar Enter ou Esc)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Enter') {
+            barcodeInput.focus();
+        }
+    });
+
+    // 3. Força o foco inicial
+    barcodeInput.focus();
+}
+
+
 
 
 

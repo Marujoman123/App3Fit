@@ -341,9 +341,7 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
 }
 
 function consultarStatusPagamento(intentId, token) {
-  // CORREÇÃO AQUI: A URL de consulta na V2 não usa "/devices/ID/..." 
-  // Ela usa diretamente o ID da intenção (payment-intent)
-  const url = `https://api.mercadopago.com/point/integration-api/payment-intents/${intentId}`;
+  const url = "https://api.mercadopago.com/point/integration-api/payment-intents/" + intentId;
 
   const options = {
     "method": "get",
@@ -354,16 +352,30 @@ function consultarStatusPagamento(intentId, token) {
     "muteHttpExceptions": true
   };
 
-  const response = UrlFetchApp.fetch(url, options);
-  const data = JSON.parse(response.getContentText());
+  try {
+    const response = UrlFetchApp.fetch(url, options);
+    const data = JSON.parse(response.getContentText());
 
-  // Log para debug caso precise ver no Google Script
-  Logger.log("Status da Consulta: " + response.getContentText());
+    // LOGICA DE STATUS:
+    // Na Point, 'FINISHED' significa que o dinheiro entrou e a transação acabou com sucesso.
+    var statusFinal = "pending";
+    
+    // Verificamos tanto 'status' quanto 'state' (a API do MP varia entre versões)
+    var mpStatus = (data.status || data.state || "").toUpperCase();
 
-  return respostaJSON(data);
-}
+    if (mpStatus === "FINISHED" || mpStatus === "PROCESSED" || mpStatus === "SUCCESS") {
+      statusFinal = "approved";
+    } else if (mpStatus === "CANCELED" || mpStatus === "ABORTED") {
+      statusFinal = "canceled";
+    }
 
-function respostaJSON(objeto) {
-  return ContentService.createTextOutput(JSON.stringify(objeto))
-    .setMimeType(ContentService.MimeType.JSON);
+    return respostaJSON({ 
+      status: statusFinal, 
+      id_mercado_pago: data.payment_id || null, // ID real do pagamento para conciliação
+      raw_status: mpStatus 
+    });
+
+  } catch (err) {
+    return respostaJSON({ status: "error", message: err.toString() });
+  }
 }

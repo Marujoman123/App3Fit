@@ -33,9 +33,15 @@ body::before {
     content: "";
     /* Caminho para a sua imagem */
     background-image: url('../img/01.webp');
-    background-repeat: repeat;
+
+     background-repeat: repeat;
+     /* background-repeat: no-repeat; */
+    
+    /* 2. Centraliza horizontalmente e verticalmente */
+    background-position: left top;
+   
     background-attachment: fixed;
-    background-size: 25% 25%;
+    background-size: 50% 50%;
     background-color: #000;
     /* Controle de Opacidade */
     opacity: 1; /* Ajuste de 0 a 1 (ex: 0.5 é 50%) */

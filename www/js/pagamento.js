@@ -189,7 +189,7 @@ async function processarVendaFinal() {
             "ValorPAgo": valorPagoDesteItem,
             "Valor parceiro": comissao,
             "Valor liquido": gr(Math.max(0, gr(valorPagoDesteItem - (comissao > 0 ? comissao : 0)))),
-            "Tipo Pagamento": "PROCESSANDO" 
+            "Tipo Pagamento": "PROCESSANDO"
         };
     });
 
@@ -214,41 +214,52 @@ async function processarVendaFinal() {
             const resIntent = await response.json();
 
             if (resIntent.status === "success" && resIntent.intent_id) {
+
+                exibirStatusPagamento("Enviado para a Maquininha... <br><br> <b style='color:green'>Se a tela não acender, aperte o botão 'VERDE' na máquina!</b>");
                 let pago = false;
                 let tentativas = 0;
                 const maxTentativas = 40;
+
+
 
                 while (!pago && tentativas < maxTentativas) {
                     tentativas++;
                     await new Promise(r => setTimeout(r, 3000));
 
+                    // Chamada para o Apps Script
                     const check = await fetch(`${URL_SCRIPT}?verificarPagamento=${resIntent.intent_id}&token=${configMP.token}`);
                     const statusMP = await check.json();
 
-                    if (statusMP.state === "FINISHED") {
+                    // LOGICA ATUALIZADA: 
+                    // O Apps Script agora envia "approved" quando o Pix ou Cartão terminam com sucesso
+                    if (statusMP.status === "approved") {
                         pago = true;
                         podeGravar = true;
 
-                        const tipoReal = (statusMP.payment && statusMP.payment.type) 
-                                         ? statusMP.payment.type.toUpperCase() 
-                                         : "CARTÃO";
+                        // Tenta pegar o tipo de pagamento real (PIX, CREDIT_CARD, etc)
+                        // Se o Apps Script não mandou o raw_status, usamos "FINALIZADO"
+                        const tipoReal = statusMP.raw_status || "FINALIZADO";
 
                         jsonVendaFinal.forEach(item => {
                             item["Tipo Pagamento"] = tipoReal;
                         });
-                    } else if (statusMP.state === "CANCELED" || statusMP.state === "ERROR") {
+
+                        console.log("Pagamento aprovado!");
+
+                    } else if (statusMP.status === "canceled") {
                         alert("Pagamento cancelado ou erro na maquininha.");
                         location.reload();
                         return;
                     }
+                    // Se for "pending", o loop continua...
                 }
             }
-        } 
+        }
         // --- AMBIENTE DE TESTE OU PAGAMENTO TOTAL COM SALDO ---
         else {
             console.log("Simulando aprovação (Modo DESENV ou Saldo)...");
-            await new Promise(r => setTimeout(r, 2000)); 
-            
+            await new Promise(r => setTimeout(r, 2000));
+
             const labelTeste = (valorTotalCentavos === 0) ? "SALDO_OU_CUPOM" : "MODO_TESTE";
 
             jsonVendaFinal.forEach(item => {
