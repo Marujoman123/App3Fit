@@ -3,6 +3,12 @@ let produtosEstoque = [];
 let carrinhoManual = [];
 let tipoPreco = 'Cliente';
 
+
+// Função para evitar erros de ponto flutuante
+function gr(valor) {
+    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
+}
+
 async function iniciar() {
     const res = await fetch(URL_SCRIPT + "?todosProdutos=true");
     const json = await res.json();
@@ -46,7 +52,7 @@ function adicionarManual(codigo) {
     if (!p) return;
 
     const existente = carrinhoManual.find(x => x.codigo === codigo);
-    const preco = (tipoPreco === 'Parceiro') ? parseFloat(p.precoParceiro) : parseFloat(p.precoCliente);
+    const preco = (tipoPreco === 'Parceiro') ? gr(p.precoParceiro) : gr(p.precoCliente);
 
     if (existente) {
         existente.quantidade++;
@@ -63,34 +69,27 @@ function adicionarManual(codigo) {
     renderizarCarrinho();
 }
 
+// Atualize sua função de renderizarCarrinho para atualizar o contador
 function renderizarCarrinho() {
     const div = document.getElementById('resumoPedido');
     let total = 0;
-
-    if (carrinhoManual.length === 0) {
-        div.innerHTML = '<p style="color: #888; text-align: center;">Nenhum item selecionado</p>';
-        document.getElementById('totalPedido').innerText = `Total: R$ 0.00`;
-        return;
-    }
+    let totalItens = 0;
 
     div.innerHTML = carrinhoManual.map((item, idx) => {
-        const sub = item.precoEfetivo * item.quantidade;
-        total += sub;
+        const sub = gr(item.precoEfetivo * item.quantidade);
+       total = gr(total + sub);
+        totalItens += item.quantidade;
         return `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px dashed #eee;">
-                <div style="flex: 1;">
-                    <span style="font-weight: bold;">${item.quantidade}x</span> ${item.nome}
-                    <br><small style="color: #666;">R$ ${item.precoEfetivo.toFixed(2)} cada</small>
-                </div>
-                <div style="text-align: right; margin-right: 10px;">
-                    <span style="font-weight: bold;">R$ ${sub.toFixed(2)}</span>
-                </div>
-                <button onclick="removerItemManual(${idx})" style="background: #ffcdd2; color: #c62828; border: none; border-radius: 5px; width: 30px; height: 30px; flex-shrink: 0; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;">×</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span><b>${item.quantidade}x</b> ${item.nome}</span>
+                <span>R$ ${sub.toFixed(2)}</span>
+                <button onclick="removerItemManual(${idx})" style="border:none; background:#ffcdd2; color:#c62828; border-radius:5px; padding:2px 8px; width: 40px; height: 40px;">×</button>
             </div>
         `;
     }).join('');
 
     document.getElementById('totalPedido').innerText = `Total: R$ ${total.toFixed(2)}`;
+    document.getElementById('countItens').innerText = totalItens; // Atualiza o botão flutuante
 }
 
 async function gerarPDFPedido() {
@@ -133,14 +132,17 @@ async function gerarPDFPedido() {
     doc.text(`Tipo de Preço: ${tipoPreco}`, 14, 37);
 
     // Mapeando dados para a tabela
-    const body = carrinhoManual.map(i => [
+    const body = carrinhoManual.map(i => {
+    const subtotalItem = gr(i.precoEfetivo * i.quantidade);
+    return [
         i.codigo,
         i.linha,
         `${i.nome} (${i.kg})`,
         i.quantidade,
         `R$ ${i.precoEfetivo.toFixed(2)}`,
-        `R$ ${(i.precoEfetivo * i.quantidade).toFixed(2)}`
-    ]);
+        `R$ ${subtotalItem.toFixed(2)}`
+    ];
+});
 
     doc.autoTable({
         startY: 45,
@@ -188,8 +190,8 @@ function atualizarPrecosCarrinho() {
         if (produtoOriginal) {
             // Define o novo preço efetivo baseado no botão que foi clicado
             const novoPreco = (tipoPreco === 'Parceiro')
-                ? parseFloat(produtoOriginal.precoParceiro)
-                : parseFloat(produtoOriginal.precoCliente);
+                ? gr(produtoOriginal.precoParceiro)
+                : gr(produtoOriginal.precoCliente);
 
             return { ...item, precoEfetivo: novoPreco };
         }
@@ -217,6 +219,14 @@ function limparPedidoCompleto() {
         document.getElementById('nomePedido').value = '';
         renderizarCarrinho();
     }
+}
+
+function abrirModalResumo() {
+    document.getElementById('modalResumo').style.display = 'flex';
+}
+
+function fecharModalResumo() {
+    document.getElementById('modalResumo').style.display = 'none';
 }
 
 iniciar();
