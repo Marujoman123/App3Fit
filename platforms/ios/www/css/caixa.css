@@ -1,0 +1,199 @@
+h2 {
+    text-align: center;
+    color: #333;
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+input:focus {
+    border-color: #007bff;
+}
+
+/* Cabeçalho Fixo da Lista */
+.lista-header {
+    display: flex;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px 8px 0 0; /* Arredonda apenas o topo */
+    margin: 0 10px; /* Alinha com a margem da lista-itens */
+}
+
+
+/* Área da Lista com Scroll */
+.lista-itens {
+    background: #ffffff;
+    border-radius: 0 0 8px 8px; /* Arredonda apenas o fundo */
+    height: 215px; /* Ajuste a altura conforme seu tablet */
+    width: auto;
+    overflow-y: scroll; /* Força o aparecimento da barra se necessário */
+    margin: 0 10px 10px 10px;
+    border: 1px solid #ddd;
+    border-top: none; /* Une visualmente com o header azul */
+}
+
+/* Estilização da Barra de Rolagem (Chrome/Android) */
+.lista-itens::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lista-itens::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 0 0 8px 0;
+}
+
+.lista-itens::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+/* Ajuste no item interno para alinhar com o cabeçalho */
+.item-carrinho {
+    display: flex;
+    align-items: center;
+    padding: 0px;
+    border-bottom: 1px solid #eee;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+.header-produto { flex: 1; text-align: left; padding-left: 5px;}
+.header-preco { width: 80px; text-align: right; margin-right: 40px; }
+.header-qtd { width: 80px; text-align: right;  }
+.header-vazio { width: 30px; } /*Espaço compensando o botão remover */
+
+
+/* Estrutura de Linha (Usada tanto no Header quanto no Item) */
+.linha-carrinho {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* 1. Coluna Nome: Cresce para ocupar o espaço */
+.col-nome {
+    flex: 2; /* Dá mais peso para o nome */
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 5px;
+}
+
+/* 2. Coluna Quantidade: Largura Fixa */
+.col-qtd {
+    width: 60px;
+    text-align: right;
+    font-weight: bold;
+}
+
+/* 3. Coluna Preço: Largura Fixa */
+.col-preco {
+    width: 100px;
+    text-align: right;
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* 4. Coluna Ação (Botão ou Espaço Vazio no Header) */
+.col-acao {
+    width: 40px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Ajuste específico para o Botão Remover */
+.btn-remover {
+    background: #ffebee;
+    color: #c62828;
+    border: none;
+    border-radius: 75%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.total-container {
+    text-align: right;
+    padding: 5px 0;
+    border-bottom: 2px solid #eee;
+}
+
+
+
+
+.error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    min-height: 1.2rem;
+}
+
+
+
+
+.btnContinuar {
+    position: relative;
+    margin-top: auto;
+    /* Empurra o botão para o fim do conteúdo, mas permite scroll */
+}
+
+
+
+
+
+/* O Modal Bottom Sheet */
+.modal-bottom-sheet {
+    width: 100%;
+    background: rgb(145, 145, 145);
+    border-radius: 10px;
+    padding: 1px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease-out; /* Efeito de subir */
+     margin-top: 10px;
+}
+
+
+
+
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}

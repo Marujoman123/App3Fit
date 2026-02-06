@@ -1,0 +1,298 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+    margin-bottom: 0.5rem;
+    color: #000000;
+}
+h2 {
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+}
+
+body {
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 0;
+    margin: 0;
+    overflow-y: auto;
+    height: 100%;
+    overflow: auto;
+}
+
+body::before {
+    content: "";
+    /* Caminho para a sua imagem */
+    background-image: url('../img/01.webp');
+
+     background-repeat: repeat;
+     /* background-repeat: no-repeat; */
+    
+    /* 2. Centraliza horizontalmente e verticalmente */
+    background-position: left top;
+   
+    background-attachment: fixed;
+    background-size: 50% 50%;
+    background-color: #000;
+    /* Controle de Opacidade */
+    opacity: 1; /* Ajuste de 0 a 1 (ex: 0.5 é 50%) */
+
+    /* Posicionamento para cobrir toda a tela */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Garante que a imagem fique atrás do conteúdo */
+}
+
+span {
+    display: inline-block;
+}
+
+.login-container {
+    background: white; 
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: line;
+    min-height: 100%;
+    /* padding-bottom: 20px; /* Espaço extra no fim */
+    
+    /* Adicione isso para dar um espaço do topo */
+    /* margin-top: 20px;  */ 
+
+}
+
+.login-container-sem-Fundo {
+
+
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: line;
+    min-height: 100%;
+    padding-bottom: 20px; /* Espaço extra no fim */
+    
+    /* Adicione isso para dar um espaço do topo */
+    margin-top: 20px; 
+
+}
+
+.login-container-sem-margem {
+    background: white; 
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: line;
+    min-height: 100%;
+    /* padding-bottom: 20px; Espaço extra no fim */
+
+}
+
+.login-container-internal {
+    padding: 1rem;
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+
+/* Spinner */
+.loading-container {
+    text-align: center;
+    margin-top: 100px;
+    width: 50%;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+     
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, .1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border-left-color: #09f;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
+/* ---------------------HEADER USUARIO----------------------------- */
+.user-header {
+    width: 100%;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: flex-end; /* Alinha tudo à direita */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+#header-nome {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #ffffff;
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+}
+
+.saldo-badge {
+    font-size: 0.8rem;
+    color: #28a745; /* Verde para o saldo */
+    font-weight: bold;
+      text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+
+}
+
+.user-icon img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #007bff;
+    padding: 2px;
+}
+
+
+.sair img {
+    width: 35px;
+    height: 35px;
+}
+
+/* ---------------------/HEADER USUARIO----------------------------- */
+
+
+button {
+
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    /* transition: background 0.3s; */
+    width: 100%;
+    margin: 2px
+}
+
+button:hover {
+    background-color: #045fc0;
+}
+
+.btn-secundario {
+    background: #f0f0f0;
+    color: #333;
+    padding: 12px;
+    margin: 2px
+}
+.backgroud-white{
+ background: #FFFFFF;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+
+/* ----------------------------MODAL----------------------------- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+}
+
+.grid-pagamentos {
+    display: grid;
+    grid-template-columns: 1-fr 1-fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.btn-pagamento {
+    padding: 20px;
+    font-size: 1.2rem;
+    border: 2px solid #007bff;
+    background: white;
+    color: #000;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-pagamento:active {
+    background: #007bff;
+    color: white;
+}
+
+.btn-cancelar {
+    margin-top: 10px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+.modal-content h3 {
+    color: #555;
+    margin-top: 15px;
+}
+/* ----------------------------/MODAL----------------------------- */

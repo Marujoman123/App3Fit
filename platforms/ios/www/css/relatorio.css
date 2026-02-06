@@ -1,0 +1,126 @@
+.resumo-cards {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.card {
+    flex: 1;
+    min-width: 120px; /* Garante que não fiquem espremidos */
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-bottom: 4px solid #28a745; /* Azul para padrão */
+}
+
+.card-azul {
+    border-bottom: 4px solid #007bff; /* Verde para destacar o ganho do período */
+}
+
+.card span {
+    font-size: 0.8rem;
+    color: #666;
+    display: block;
+}
+
+.card strong {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+/* Container para controlar o tamanho e a rolagem */
+.table-container {
+    max-height: 400px;        /* Altura máxima antes de aparecer o scroll */
+    overflow-y: auto;         /* Barra de rolagem vertical */
+    overflow-x: auto;         /* Barra de rolagem horizontal para telas pequenas */
+    border: 1px solid black;  /* Borda externa no container */
+    border-radius: 8px;       /* O arredondamento agora funciona aqui */
+}
+
+.tabela-relatorio {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    color: #000;
+    font-family: sans-serif;
+}
+
+/* Unificando a estilização das células */
+.tabela-relatorio th, 
+.tabela-relatorio td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+/* Estilo específico do cabeçalho */
+.tabela-relatorio th {
+    background: #007bff;
+    color: #ffffff;
+    position: sticky;    /* Faz o cabeçalho ficar fixo ao rolar */
+    top: 0;              /* Garante que ele grude no topo */
+    z-index: 1;
+}
+
+
+
+/* Container principal dos filtros */
+.filtros {
+    display: flex;
+ 
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-bottom: 5px;
+}
+
+/* Agrupamento de cada campo (Label + Input) */
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1; /* Faz os campos crescerem proporcionalmente */
+}
+
+/* Estilo da Label (Texto acima do campo) */
+.campo label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Estilo do Input de Data */
+.campo input[type="date"] {
+    padding: 12px 16px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #212529;
+    background-color: #ffffff;
+    transition: all 0.3s ease; /* Animação suave */
+    outline: none;
+    cursor: pointer;
+}
+
+/* Efeito ao clicar ou selecionar o campo */
+.campo input[type="date"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+    background-color: #fff;
+}
+
+/* Estilizando o ícone do calendário (opcional, para navegadores Webkit) */
+.campo input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.4); /* Deixa o ícone um pouco mais suave */
+    transition: filter 0.3s;
+}
+
+.campo input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    filter: invert(0.2); /* Escurece o ícone no hover */
+}

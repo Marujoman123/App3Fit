@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - 3Fit</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    
+    
+</head>
+<body class="admin-body backgroud-white">
+
+    <div class=" backgroud-white">
+    <h1>Painel Administrativo</h1>
+    <p>Bem-vindo, Administrador</p>
+
+    <div class="admin-grid">
+        <button class="btn-panel azul" onclick="location.href='admin-pedidos.html'">
+            🛒 Criar Pedido
+        </button>
+
+        <button class="btn-panel verde" onclick="location.href='admin-produtos.html'">
+            📦 Produtos Disponíveis
+        </button>
+
+        <button class="btn-panel laranja" onclick="fazerRetirada()">
+            📉 Fazer Retirada
+        </button>
+
+        <button class="btn-panel sair" onclick="location.href='index.html'">
+            Sair do Painel
+        </button>
+    </div>
+</div>
+    <script>
+        function fazerRetirada() {
+            localStorage.setItem('modo_venda', 'RETIRADA');
+            window.location.href = 'retirada.html';
+        }
+    </script>
+</body>
+</html>
