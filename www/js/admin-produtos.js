@@ -60,10 +60,18 @@ document.getElementById('btnPDF').addEventListener('click', () => {
         headStyles: { fillColor: [255, 144, 69] }
     });
 
-    // --- MUDANÇA AQUI: Visualizar em vez de Baixar ---
-    // Gera um link temporário (Blob URL) para o PDF
-    const blob = doc.output('bloburl');
+    // --- LÓGICA HÍBRIDA: PC vs MOBILE ---
     
-    // Abre em uma nova aba/janela do navegador
-    window.open(blob, '_blank');
+    // Detecta se é um dispositivo móvel
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // No Mobile, força o download direto. 
+        // O Android baixa e o iOS abre uma tela de visualização própria.
+        doc.save(`estoque_3fit_${Date.now()}.pdf`);
+    } else {
+        // No PC, mantém a abertura na nova aba
+        const blob = doc.output('bloburl');
+        window.open(blob, '_blank');
+    }
 });

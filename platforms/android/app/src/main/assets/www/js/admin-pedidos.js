@@ -3,13 +3,19 @@ let produtosEstoque = [];
 let carrinhoManual = [];
 let tipoPreco = 'Cliente';
 
+
+// Função para evitar erros de ponto flutuante
+function gr(valor) {
+    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
+}
+
 async function iniciar() {
     const res = await fetch(URL_SCRIPT + "?todosProdutos=true");
     const json = await res.json();
     if (json.status === "success") {
         produtosEstoque = json.produtos;
         renderizarSelecao();
-        document.getElementById('textLoading').style.display='none';
+        document.getElementById('textLoading').style.display = 'none';
     }
 }
 
@@ -46,7 +52,7 @@ function adicionarManual(codigo) {
     if (!p) return;
 
     const existente = carrinhoManual.find(x => x.codigo === codigo);
-    const preco = (tipoPreco === 'Parceiro') ? parseFloat(p.precoParceiro) : parseFloat(p.precoCliente);
+    const preco = (tipoPreco === 'Parceiro') ? gr(p.precoParceiro) : gr(p.precoCliente);
 
     if (existente) {
         existente.quantidade++;
@@ -63,34 +69,27 @@ function adicionarManual(codigo) {
     renderizarCarrinho();
 }
 
+// Atualize sua função de renderizarCarrinho para atualizar o contador
 function renderizarCarrinho() {
     const div = document.getElementById('resumoPedido');
     let total = 0;
-
-    if (carrinhoManual.length === 0) {
-        div.innerHTML = '<p style="color: #888; text-align: center;">Nenhum item selecionado</p>';
-        document.getElementById('totalPedido').innerText = `Total: R$ 0.00`;
-        return;
-    }
+    let totalItens = 0;
 
     div.innerHTML = carrinhoManual.map((item, idx) => {
-        const sub = item.precoEfetivo * item.quantidade;
-        total += sub;
+        const sub = gr(item.precoEfetivo * item.quantidade);
+        total = gr(total + sub);
+        totalItens += item.quantidade;
         return `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px dashed #eee;">
-                <div style="flex: 1;">
-                    <span style="font-weight: bold;">${item.quantidade}x</span> ${item.nome}
-                    <br><small style="color: #666;">R$ ${item.precoEfetivo.toFixed(2)} cada</small>
-                </div>
-                <div style="text-align: right; margin-right: 10px;">
-                    <span style="font-weight: bold;">R$ ${sub.toFixed(2)}</span>
-                </div>
-                <button onclick="removerItemManual(${idx})" style="background: #ffcdd2; color: #c62828; border: none; border-radius: 5px; width: 30px; height: 30px; flex-shrink: 0; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;">×</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span><b>${item.quantidade}x</b> ${item.nome}</span>
+                <span>R$ ${sub.toFixed(2)}</span>
+                <button onclick="removerItemManual(${idx})" style="border:none; background:#ffcdd2; color:#c62828; border-radius:5px; padding:2px 8px; width: 40px; height: 40px;">×</button>
             </div>
         `;
     }).join('');
 
     document.getElementById('totalPedido').innerText = `Total: R$ ${total.toFixed(2)}`;
+    document.getElementById('countItens').innerText = totalItens; // Atualiza o botão flutuante
 }
 
 async function gerarPDFPedido() {
@@ -100,30 +99,26 @@ async function gerarPDFPedido() {
     // 1. Verificação de Nome Obrigatório
     if (nomeCliente === "") {
         alert("⚠️ Por favor, digite o nome do cliente antes de gerar o PDF.");
-        nomeInput.style.border = "2px solid red"; // Destaca o erro
+        nomeInput.style.border = "2px solid red";
         nomeInput.focus();
-        return; // Interrompe a função aqui
+        return;
     }
 
-    // 2. Verificação de Carrinho Vazio (Opcional, mas recomendado)
+    // 2. Verificação de Carrinho Vazio
     if (carrinhoManual.length === 0) {
         alert("⚠️ O pedido está vazio. Adicione pelo menos um produto.");
         return;
     }
 
-    // Se passou pelas validações, limpa o destaque vermelho e segue o fluxo
     nomeInput.style.border = "1px solid #ccc";
-
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // 1. Calcular o total de unidades (marmitas)
     const adminResponsavel = localStorage.getItem('usuario_nome') || "Administrador";
     const dataHoje = new Date().toLocaleString('pt-BR');
     const totalMarmitas = carrinhoManual.reduce((acc, item) => acc + item.quantidade, 0);
 
-    
     // Título e Cabeçalho
     doc.setFontSize(18);
     doc.text("PEDIDO DE COMPRA - 3FIT", 14, 20);
@@ -132,15 +127,18 @@ async function gerarPDFPedido() {
     doc.text(`Nome: ${nomeCliente}`, 14, 30);
     doc.text(`Tipo de Preço: ${tipoPreco}`, 14, 37);
 
-    // Mapeando dados para a tabela
-    const body = carrinhoManual.map(i => [
-        i.codigo,
-        i.linha,
-        `${i.nome} (${i.kg})`,
-        i.quantidade,
-        `R$ ${i.precoEfetivo.toFixed(2)}`,
-        `R$ ${(i.precoEfetivo * i.quantidade).toFixed(2)}`
-    ]);
+    // Mapeando dados para a tabela com a trava de centavos gr()
+    const body = carrinhoManual.map(i => {
+        const subtotalItem = gr(i.precoEfetivo * i.quantidade);
+        return [
+            i.codigo,
+            i.linha,
+            `${i.nome} (${i.kg})`,
+            i.quantidade,
+            `R$ ${i.precoEfetivo.toFixed(2)}`,
+            `R$ ${subtotalItem.toFixed(2)}`
+        ];
+    });
 
     doc.autoTable({
         startY: 45,
@@ -148,15 +146,13 @@ async function gerarPDFPedido() {
         body: body,
         theme: 'striped',
         headStyles: { fillColor: [255, 144, 69] },
-        // --- AQUI VOCÊ MUDA A COR DO RODAPÉ ---
         footStyles: {
-            fillColor: [255, 144, 69], // Cor de fundo (Ex: Azul Escuro em RGB)
-            textColor: [255, 255, 255], // Cor do texto (Branco)
+            fillColor: [255, 144, 69],
+            textColor: [255, 255, 255],
             fontSize: 11,
             fontStyle: 'bold'
         },
         foot: [
-            ['', '', '',], // Linha vazia para respiro
             [
                 { content: `TOTAL DE MARMITAS: ${totalMarmitas}`, colSpan: 4 },
                 'Total',
@@ -165,17 +161,24 @@ async function gerarPDFPedido() {
         ]
     });
 
-    // --- RODAPÉ DE AUTORIA (Abaixo da tabela) ---
-    // doc.lastAutoTable.finalY nos dá a posição exata onde a tabela terminou
     const finalY = doc.lastAutoTable.finalY + 15;
-
     doc.setFontSize(9);
-    doc.setTextColor(100); // Cor cinza para o rodapé
+    doc.setTextColor(100);
     doc.text(`Pedido gerado por: ${adminResponsavel}`, 14, finalY);
     doc.text(`Data de emissão: ${dataHoje}`, 14, finalY + 7);
 
-    // Abrir visualização
-    window.open(doc.output('bloburl'), '_blank');
+    // --- LÓGICA HÍBRIDA: PC vs MOBILE ---
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // No Mobile: Baixa o arquivo (Android) ou abre visualização nativa (iOS)
+        // Substituímos espaços no nome por underline para evitar erro no arquivo
+        const nomeArquivo = `Pedido_${nomeCliente.replace(/\s+/g, '_')}.pdf`;
+        doc.save(nomeArquivo);
+    } else {
+        // No PC: Abre em nova aba
+        window.open(doc.output('bloburl'), '_blank');
+    }
 }
 
 
@@ -188,8 +191,8 @@ function atualizarPrecosCarrinho() {
         if (produtoOriginal) {
             // Define o novo preço efetivo baseado no botão que foi clicado
             const novoPreco = (tipoPreco === 'Parceiro')
-                ? parseFloat(produtoOriginal.precoParceiro)
-                : parseFloat(produtoOriginal.precoCliente);
+                ? gr(produtoOriginal.precoParceiro)
+                : gr(produtoOriginal.precoCliente);
 
             return { ...item, precoEfetivo: novoPreco };
         }
@@ -217,6 +220,14 @@ function limparPedidoCompleto() {
         document.getElementById('nomePedido').value = '';
         renderizarCarrinho();
     }
+}
+
+function abrirModalResumo() {
+    document.getElementById('modalResumo').style.display = 'flex';
+}
+
+function fecharModalResumo() {
+    document.getElementById('modalResumo').style.display = 'none';
 }
 
 iniciar();

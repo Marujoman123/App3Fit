@@ -1,91 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-    <link rel="stylesheet" href="css/caixa.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Pedido - Admin</title>
     <link rel="stylesheet" href="css/style.css">
-    <title>3Fit - Caixa</title>
+    <style>
+        .container-pedido {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .bloco {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-selecao {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .item-selecao:hover {
+            background: #f0f0f0;
+        }
+
+        .badge-estoque {
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .tipo-cliente {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            background: #eee;
+            /* Fundo cinza para parecer uma barra única */
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .btn-tipo {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        /* Estilo do Botão Selecionado */
+        .btn-tipo.active {
+            background: white;
+            color: #007bff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ajuste na Grid para ocupar tudo */
+.container-pedido {
+    display: block; /* Removemos a grid de 2 colunas */
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Estilo do Modal (Pop-up) */
+.modal-resumo {
+    display: none; /* Escondido por padrão */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 20px;
+    border-radius: 15px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Botão Flutuante para ver o carrinho */
+.btn-ver-resumo {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 900;
+}
+        
+
+        
+    </style>
 </head>
 
 <body>
+    <div class="container-pedido">
+        <div class="bloco">
+            <div class="header-admin">
+                <button onclick="location.href='admin.html'">← Voltar</button>
+                <h1>Criar Novo Pedido</h1>
+            </div>
 
-    <div id="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Sincronizando produtos...</p>
+            <h3>1. Escolha o Cliente</h3>
+            <div class="tipo-cliente">
+                <button class="btn-tipo active" id="btnCli" onclick="setTipo('Cliente')">Cliente Comum</button>
+                <button class="btn-tipo" id="btnPar" onclick="setTipo('Parceiro')">Parceiro</button>
+            </div>
+            <input type="text" id="nomePedido" placeholder="Nome do Cliente (Obrigatório)" style="width:100%; padding:10px; margin-bottom:15px;">
+
+            <h3>2. Selecione os Produtos</h3>
+            <span id="textLoading">Carregando produtos...</span>
+            <div id="listaSelecaoManual"></div>
+        </div>
     </div>
 
-    <div class="login-container-internal" id="conteudoCaixa" style="display: none;">
+    <button class="btn-ver-resumo" onclick="abrirModalResumo()">
+        Ver Resumo (<span id="countItens">0</span>)
+    </button>
 
-        <div id="user-header" class="user-header">
-            <h2 id="tituloCaixa" style="margin-right: auto;">Caixa</h2>
-
-            <div class="user-info-container">
-
-                <button id="btnRelatorio" style="flex: 1; text-align: left; display: none;">Relatório</button>
-                <div class="user-details">
-
-                    <span id="header-nome">Carregando...</span>
-                    <span id="header-saldo" class="saldo-badge" style="display: none;">Saldo: R$ 0.00</span>
-                </div>
-                <div class="user-icon">
-                    <img src="img/user-icon.png" alt="Usuário">
-                </div>
-                <div class="sair">
-                    <button id="btnSair" style="padding: 0px; background-color: black;">
-                        <img src="img/arrow-right-from-bracket-solid-full.svg" alt="Sair"></button>
-                </div>
-            </div>
-
+    <div id="modalResumo" class="modal-resumo">
+        <div class="modal-content">
+            <button onclick="fecharModalResumo()" style="float:right; border:none; color:rgb(0, 0, 0); background:none; font-size:20px; cursor:pointer;">&times;</button>
+            <h3>Resumo do Pedido</h3>
+            <hr>
+            <div id="resumoPedido" style="margin-top:15px;"></div>
+            <hr>
+            <h2 id="totalPedido">Total: R$ 0.00</h2>
+            
+            <button onclick="limparPedidoCompleto()" style="background:#666; color:white; border:none; padding:10px; border-radius:5px; margin-bottom:10px; width:100%;">
+                Limpar Todo o Pedido
+            </button>
+            <button onclick="gerarPDFPedido()" style="width:100%; padding:15px; background: #28a745; color:white; border:none; border-radius:5px; font-weight:bold;">
+                EXPORTAR PDF / FINALIZAR
+            </button>
         </div>
-
-        <div class="login-container-sem-margem">
-
-            <div class="login-container-internal">
-                <div class="linha-carrinho lista-header">
-                    <span class="header-produto">Produto</span>
-                    <span class="header-qtd">Qtd</span>
-                    <span class="header-preco">Preço</span>                    
-                    <span class="header-vazio"></span>
-                </div>
-
-                <div id="listaProdutos" class="lista-itens"> </div>
-
-                <div class="total-fundo">
-                    <h3> Total: R$ <span id="valorTotal">0.00</span></h3>
-                </div>
-            </div>
-        </div>
-
-
-        <div id="modalFooter" class="modal-bottom-sheet">
-            <div class="modal-handle"></div>
-            <div class="login-container-internal">
-                <div class="input-group">
-
-                    <form id="formBarcode">
-                        <div id="scanner-container"
-                            style="text-align: center;  border: 2px dashed #007bff; border-radius: 15px; background: #ffffff;">
-                            <img src="img/barcode-scan.gif" alt="Aguardando Leitura" style="width: 150px; opacity: 1;">
-                            <input type="text" id="barcodeInput" style="opacity: 0; pointer-events: none; height: 0.5px; border: 0px; padding: 0px;">
-                            <p style="color: #666;">Passe o produto no leitor de código de barras</p>                         
-                    </form>
-                    
-                </div>
-                <div class="login-container-sem-Fundo">
-
-                    <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
-                    <button id="btnFinalizarRetirada">Realizar Retirada</button>
-                </div>
-
-            </div> 
-                        </div>
-        </div>
-
-
-</body>
+    </div>
+    
+    </body>
 
 </html>
-<script src="js/auth.js"></script>
-<script src="js/retirada.js"></script>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/admin-pedidos.js"></script>

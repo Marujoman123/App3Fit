@@ -15,7 +15,7 @@ async function iniciar() {
     if (json.status === "success") {
         produtosEstoque = json.produtos;
         renderizarSelecao();
-        document.getElementById('textLoading').style.display='none';
+        document.getElementById('textLoading').style.display = 'none';
     }
 }
 
@@ -77,7 +77,7 @@ function renderizarCarrinho() {
 
     div.innerHTML = carrinhoManual.map((item, idx) => {
         const sub = gr(item.precoEfetivo * item.quantidade);
-       total = gr(total + sub);
+        total = gr(total + sub);
         totalItens += item.quantidade;
         return `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -99,30 +99,26 @@ async function gerarPDFPedido() {
     // 1. Verificação de Nome Obrigatório
     if (nomeCliente === "") {
         alert("⚠️ Por favor, digite o nome do cliente antes de gerar o PDF.");
-        nomeInput.style.border = "2px solid red"; // Destaca o erro
+        nomeInput.style.border = "2px solid red";
         nomeInput.focus();
-        return; // Interrompe a função aqui
+        return;
     }
 
-    // 2. Verificação de Carrinho Vazio (Opcional, mas recomendado)
+    // 2. Verificação de Carrinho Vazio
     if (carrinhoManual.length === 0) {
         alert("⚠️ O pedido está vazio. Adicione pelo menos um produto.");
         return;
     }
 
-    // Se passou pelas validações, limpa o destaque vermelho e segue o fluxo
     nomeInput.style.border = "1px solid #ccc";
-
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // 1. Calcular o total de unidades (marmitas)
     const adminResponsavel = localStorage.getItem('usuario_nome') || "Administrador";
     const dataHoje = new Date().toLocaleString('pt-BR');
     const totalMarmitas = carrinhoManual.reduce((acc, item) => acc + item.quantidade, 0);
 
-    
     // Título e Cabeçalho
     doc.setFontSize(18);
     doc.text("PEDIDO DE COMPRA - 3FIT", 14, 20);
@@ -131,18 +127,18 @@ async function gerarPDFPedido() {
     doc.text(`Nome: ${nomeCliente}`, 14, 30);
     doc.text(`Tipo de Preço: ${tipoPreco}`, 14, 37);
 
-    // Mapeando dados para a tabela
+    // Mapeando dados para a tabela com a trava de centavos gr()
     const body = carrinhoManual.map(i => {
-    const subtotalItem = gr(i.precoEfetivo * i.quantidade);
-    return [
-        i.codigo,
-        i.linha,
-        `${i.nome} (${i.kg})`,
-        i.quantidade,
-        `R$ ${i.precoEfetivo.toFixed(2)}`,
-        `R$ ${subtotalItem.toFixed(2)}`
-    ];
-});
+        const subtotalItem = gr(i.precoEfetivo * i.quantidade);
+        return [
+            i.codigo,
+            i.linha,
+            `${i.nome} (${i.kg})`,
+            i.quantidade,
+            `R$ ${i.precoEfetivo.toFixed(2)}`,
+            `R$ ${subtotalItem.toFixed(2)}`
+        ];
+    });
 
     doc.autoTable({
         startY: 45,
@@ -150,15 +146,13 @@ async function gerarPDFPedido() {
         body: body,
         theme: 'striped',
         headStyles: { fillColor: [255, 144, 69] },
-        // --- AQUI VOCÊ MUDA A COR DO RODAPÉ ---
         footStyles: {
-            fillColor: [255, 144, 69], // Cor de fundo (Ex: Azul Escuro em RGB)
-            textColor: [255, 255, 255], // Cor do texto (Branco)
+            fillColor: [255, 144, 69],
+            textColor: [255, 255, 255],
             fontSize: 11,
             fontStyle: 'bold'
         },
         foot: [
-            ['', '', '',], // Linha vazia para respiro
             [
                 { content: `TOTAL DE MARMITAS: ${totalMarmitas}`, colSpan: 4 },
                 'Total',
@@ -167,17 +161,24 @@ async function gerarPDFPedido() {
         ]
     });
 
-    // --- RODAPÉ DE AUTORIA (Abaixo da tabela) ---
-    // doc.lastAutoTable.finalY nos dá a posição exata onde a tabela terminou
     const finalY = doc.lastAutoTable.finalY + 15;
-
     doc.setFontSize(9);
-    doc.setTextColor(100); // Cor cinza para o rodapé
+    doc.setTextColor(100);
     doc.text(`Pedido gerado por: ${adminResponsavel}`, 14, finalY);
     doc.text(`Data de emissão: ${dataHoje}`, 14, finalY + 7);
 
-    // Abrir visualização
-    window.open(doc.output('bloburl'), '_blank');
+    // --- LÓGICA HÍBRIDA: PC vs MOBILE ---
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // No Mobile: Baixa o arquivo (Android) ou abre visualização nativa (iOS)
+        // Substituímos espaços no nome por underline para evitar erro no arquivo
+        const nomeArquivo = `Pedido_${nomeCliente.replace(/\s+/g, '_')}.pdf`;
+        doc.save(nomeArquivo);
+    } else {
+        // No PC: Abre em nova aba
+        window.open(doc.output('bloburl'), '_blank');
+    }
 }
 
 

@@ -183,7 +183,7 @@ input:focus {
     width: 100%;
     background: rgb(145, 145, 145);
     border-radius: 10px;
-    padding: 10px;
+    padding: 1px;
     box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
     animation: slideUp 0.3s ease-out; /* Efeito de subir */
      margin-top: 10px;
