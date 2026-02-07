@@ -114,6 +114,23 @@
     cursor: pointer;
     z-index: 900;
 }
+
+.item-esgotado {
+    opacity: 0.5;
+    background-color: #f8d7da !important;
+    cursor: not-allowed;
+}
+
+#nomePedido {
+    transition: all 0.3s ease;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#nomePedido[readonly] {
+    color: #666;
+    cursor: not-allowed;
+}
         
 
         
@@ -128,11 +145,12 @@
                 <h1>Criar Novo Pedido</h1>
             </div>
 
-            <h3>1. Escolha o Cliente</h3>
-            <div class="tipo-cliente">
-                <button class="btn-tipo active" id="btnCli" onclick="setTipo('Cliente')">Cliente Comum</button>
-                <button class="btn-tipo" id="btnPar" onclick="setTipo('Parceiro')">Parceiro</button>
-            </div>
+            <h3>1. Escolha o Tipo de Saída</h3>
+<div class="tipo-cliente">
+    <button class="btn-tipo active" id="btnCli" onclick="setTipo('Cliente')">Cliente Comum</button>
+    <button class="btn-tipo" id="btnPar" onclick="setTipo('Parceiro')">Parceiro</button>
+    <button class="btn-tipo" id="btnRet" onclick="setTipo('Retirada')">Retirada</button>
+</div>
             
 
             <h3>2. Selecione os Produtos</h3>
@@ -151,6 +169,9 @@
             <h3>Resumo do Pedido</h3>
 
             <input type="text" id="nomePedido" placeholder="Nome do Cliente (Obrigatório)" style="width:100%; padding:10px; margin-bottom:15px;">
+            <button id="btnBuscarParceiro" style="display:none; margin-bottom:10px; padding:5px; background:#ff9045; color:white; border:none; border-radius:5px; cursor:pointer;">
+    🔍 Verificar Saldo do Parceiro
+</button>
             <hr>
             <div id="resumoPedido" style="margin-top:15px;"></div>
             <hr>
@@ -162,6 +183,10 @@
             <button onclick="gerarPDFPedido()" style="width:100%; padding:15px; background: #28a745; color:white; border:none; border-radius:5px; font-weight:bold;">
                 EXPORTAR PDF / FINALIZAR
             </button>
+
+            <button onclick="realizarVendaManual()" style="width:100%; padding:15px; background: #007bff; color:white; border:none; border-radius:5px; font-weight:bold; margin-top: 10px; cursor: pointer;">
+    REALIZAR VENDA (PAGAMENTO MANUAL)
+</button>
         </div>
     </div>
     

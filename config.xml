@@ -58,6 +58,7 @@
 </platform>
 
 <platform name="ios">
+
     <config-file platform="ios" target="*-Info.plist" parent="LSApplicationQueriesSchemes">
         <array>
             <string>mp-point</string>
@@ -70,6 +71,7 @@
     <preference name="DisallowOverscroll" value="true" />
     
     <icon src="res/ios/icon-1024.png" width="1024" height="1024" />
+    
 </platform>
 
 

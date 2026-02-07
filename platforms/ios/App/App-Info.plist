@@ -53,5 +53,10 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>mp-point</string>
+		<string>mercadopago</string>
+	</array>
 </dict>
 </plist>

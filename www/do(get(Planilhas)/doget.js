@@ -97,10 +97,13 @@ function validarCupom(cupomRecebido, ss) {
   var dados = abaParceiros.getDataRange().getValues();
 
   for (var i = 1; i < dados.length; i++) {
+    // Índice 0 = CPF, Índice 1 = Nome, Índice 3 = Cupom, Índice 4 = Saldo
     if (dados[i][3].toString().toUpperCase().trim() === cupomBuscado) {
       return respostaJSON({
-        status: "success",
-        parceiro: dados[i][1],
+        status: "success", // Mantemos "success" para o seu fetch reconhecer
+        nome: dados[i][1],
+        cpf: dados[i][0],
+        saldo: dados[i][4],
         mensagem: "Cupom válido"
       });
     }

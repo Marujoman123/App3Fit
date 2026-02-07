@@ -15,20 +15,25 @@ const listaProdutosDiv = document.getElementById('listaProdutos');
 const valorTotalTxt = document.getElementById('valorTotal');
 
 
+// Remova o carregarDados() solto e use este listener:
+document.addEventListener('DOMContentLoaded', () => {
+    carregarDados(); // Carrega os dados da API
+    
+});
+
 async function carregarDados() {
     try {
         const res = await fetch(URL_SCRIPT + "?todosProdutos=true");
         const json = await res.json();
 
-        console.table(json);
+        // console.table(json);
 
         if (json.status === "success") {
             listaLocalProdutos = json.produtos;
 
-            console.log(listaLocalProdutos)
-
             if (tipoUsuario === "Parceiro") {
                 document.getElementById('header-nome').innerText = primeiroNome + " (Parceiro)";
+
 
                 // Evento de Clique
                 btnRelatorio.addEventListener('click', async () => {
@@ -44,15 +49,14 @@ async function carregarDados() {
 
             loading.style.display = 'none';
             conteudoCaixa.style.display = 'flex';
-            barcodeInput.focus();
+           
+            // Ativa os listeners de foco
+            garantirFocoNoLeitor();
         }
     } catch (err) {
         alert("Erro ao sincronizar produtos. Verifique sua internet.");
         console.error(err);
     }
-
-    // Chame a função quando a página carregar
- garantirFocoNoLeitor();
 }
 
 document.addEventListener('click', (e) => {
@@ -65,8 +69,12 @@ formBarcode.addEventListener('submit', (e) => {
     e.preventDefault();
     const codigo = barcodeInput.value.trim();
 
+    // console.log("Código lido:", codigo); // Para debug
+
     if (codigo) {
-        const produtoInfo = listaLocalProdutos.find(p => p.codigo.toString() === codigo);
+        // CORREÇÃO CRÍTICA: Convertendo ambos para String para garantir que o "find" funcione
+        // mesmo se o código na planilha for interpretado como número.
+        const produtoInfo = listaLocalProdutos.find(p => p.codigo.toString() === codigo.toString());
 
         if (produtoInfo) {
             // Acesse pelas propriedades
@@ -83,7 +91,8 @@ formBarcode.addEventListener('submit', (e) => {
             const precoVenda = gr(precoBruto); // Garante o arredondamento aqui
 
             // 2. Verifica se o produto já existe no carrinho (usando .codigo)
-            const itemExistente = carrinho.find(item => item.codigo === produtoInfo.codigo);
+            // Também convertendo para String aqui para evitar erros de comparação
+            const itemExistente = carrinho.find(item => item.codigo.toString() === produtoInfo.codigo.toString());
 
             if (itemExistente) {
                 itemExistente.quantidade += 1;
@@ -101,7 +110,14 @@ formBarcode.addEventListener('submit', (e) => {
         } else {
             alert("Produto não cadastrado!");
         }
+
+        // LIMPEZA E REDIRECIONAMENTO DE FOCO
         barcodeInput.value = '';
+        
+        // Garante que o input receba o foco novamente para a próxima leitura imediata
+        setTimeout(() => {
+            barcodeInput.focus();
+        }, 10);
     }
 });
 
@@ -165,7 +181,7 @@ document.getElementById('btnContinuar').addEventListener('click', () => {
     window.location.href = "pagamento.html";
 });
 
-carregarDados();
+
 
 
 
@@ -204,7 +220,7 @@ function manterLeitorAtivo() {
     setInterval(() => {
         if (document.activeElement !== inputScan) {
             inputScan.focus();
-            console.log("Sinal de vida enviado ao input do leitor...");
+            // console.log("Sinal de vida enviado ao input do leitor...");
         }
     }, 30000); 
 
@@ -216,13 +232,13 @@ manterLeitorAtivo();
 
 let leitorConectando = false;
 
-document.getElementById('barcodeInput').addEventListener('keydown', (e) => {
-    // Se recebermos dados muito rápido após um período de silêncio, 
-    // pode ser o leitor acordando
-    if (e.target.value.length === 0) {
-        console.log("Leitor detectado enviando dados...");
-    }
-});
+// document.getElementById('barcodeInput').addEventListener('keydown', (e) => {
+//     // Se recebermos dados muito rápido após um período de silêncio, 
+//     // pode ser o leitor acordando
+//     if (e.target.value.length === 0) {
+//         console.log("Leitor detectado enviando dados...");
+//     }
+// });
 
 
 

@@ -4,7 +4,18 @@
     "uninstalled": []
   },
   "config_munge": {
-    "files": {}
+    "files": {
+      "*-Info.plist": {
+        "parents": {
+          "LSApplicationQueriesSchemes": [
+            {
+              "xml": "<array><string>mp-point</string><string>mercadopago</string></array>",
+              "count": 1
+            }
+          ]
+        }
+      }
+    }
   },
   "installed_plugins": {},
   "dependent_plugins": {}

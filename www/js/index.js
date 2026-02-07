@@ -16,6 +16,12 @@ const CPF_JE = "31806722852";
 const CPF_HUGO = "41471613836";
 const SENHA_ADMIN = "4321"; // Defina sua senha aqui
 
+
+// cpfInput.value="414.716.138-36"; // teste admin
+// cpfInput.value="458.488.840-05"; //teste cliente
+
+
+
 inputs.forEach(input => {
     input.addEventListener('focus', () => {
         // Aguarda 300ms para o teclado terminar de subir e centraliza o campo na tela

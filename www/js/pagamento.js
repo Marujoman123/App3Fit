@@ -3,7 +3,7 @@ const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs
 // ======================================================
 // CONFIGURAÇÃO DE AMBIENTE
 // ======================================================
-const AMBIENTE = 'DESENV'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
+const AMBIENTE = 'PROD'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
 
 const configMP = {
     token: "APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591",
@@ -62,6 +62,18 @@ if (carrinho.length === 0) {
         containerLista.appendChild(p);
     });
 }
+
+
+// Se for retirada, esconde a seção de cupom na interface
+if (localStorage.getItem('travar_cupom') === 'true') {
+    const containerCupom = document.getElementById('containerCupom');
+    if (containerCupom) {
+        containerCupom.style.display = 'none';
+        // console.log("Interface de cupom desabilitada para Retirada.");
+    }
+}
+
+
 
 function atualizarResumoTela() {
     const totalComDesconto = gr(totalOriginal - descontoAplicado);
@@ -193,14 +205,38 @@ async function processarVendaFinal() {
         };
     });
 
+    const modoManual = localStorage.getItem('modo_pagamento_manual') === 'true';
+    const isRetirada = localStorage.getItem('travar_cupom') === 'true'; // Identifica se veio do botão Retirada
     const valorTotalPago = gr(jsonVendaFinal.reduce((acc, i) => acc + i["ValorPAgo"], 0));
     const valorTotalCentavos = Math.round(valorTotalPago * 100);
 
     try {
         let podeGravar = false;
 
-        // --- AMBIENTE DE PRODUÇÃO COM PAGAMENTO ---
-        if (AMBIENTE === 'PROD' && valorTotalCentavos > 0) {
+        // --- ROTA A: LANÇAMENTO MANUAL OU SALDO TOTAL (Bypassa a Maquininha) ---
+        if (modoManual || valorTotalCentavos === 0) {
+            
+            // Lógica de nomes para o banco de dados
+            let labelTipo;
+            if (isRetirada) {
+                labelTipo = "RETIRADA_ESTOQUE";
+            } else if (modoManual) {
+                labelTipo = "MANUAL_DIN_PIX";
+            } else {
+                labelTipo = "SALDO_OU_CUPOM";
+            }
+
+            jsonVendaFinal.forEach(item => {
+                item["Tipo Pagamento"] = labelTipo;
+            });
+            
+            podeGravar = true;
+            localStorage.removeItem('modo_pagamento_manual');
+            localStorage.removeItem('travar_cupom'); 
+        } 
+        
+        // --- ROTA B: AMBIENTE DE PRODUÇÃO (Usa Maquininha Real) ---
+        else if (AMBIENTE === 'PROD') {
             const payload = {
                 config: {
                     token: configMP.token,
@@ -214,61 +250,47 @@ async function processarVendaFinal() {
             const resIntent = await response.json();
 
             if (resIntent.status === "success" && resIntent.intent_id) {
-
                 exibirStatusPagamento("Enviado para a Maquininha... <br><br> <b style='color:green'>Se a tela não acender, aperte o botão 'VERDE' na máquina!</b>");
+                
                 let pago = false;
                 let tentativas = 0;
                 const maxTentativas = 40;
-
-
 
                 while (!pago && tentativas < maxTentativas) {
                     tentativas++;
                     await new Promise(r => setTimeout(r, 3000));
 
-                    // Chamada para o Apps Script
                     const check = await fetch(`${URL_SCRIPT}?verificarPagamento=${resIntent.intent_id}&token=${configMP.token}`);
                     const statusMP = await check.json();
 
-                    // LOGICA ATUALIZADA: 
-                    // O Apps Script agora envia "approved" quando o Pix ou Cartão terminam com sucesso
                     if (statusMP.status === "approved") {
                         pago = true;
                         podeGravar = true;
-
-                        // Tenta pegar o tipo de pagamento real (PIX, CREDIT_CARD, etc)
-                        // Se o Apps Script não mandou o raw_status, usamos "FINALIZADO"
-                        const tipoReal = statusMP.raw_status || "FINALIZADO";
-
-                        jsonVendaFinal.forEach(item => {
-                            item["Tipo Pagamento"] = tipoReal;
-                        });
-
+                        const tipoReal = statusMP.raw_status || "CARTAO_MAQUININHA";
+                        jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = tipoReal; });
                         console.log("Pagamento aprovado!");
-
                     } else if (statusMP.status === "canceled") {
                         alert("Pagamento cancelado ou erro na maquininha.");
                         location.reload();
                         return;
                     }
-                    // Se for "pending", o loop continua...
                 }
+            } else {
+                throw new Error("Erro ao criar intenção de pagamento.");
             }
-        }
-        // --- AMBIENTE DE TESTE OU PAGAMENTO TOTAL COM SALDO ---
+        } 
+        
+        // --- ROTA C: AMBIENTE DE DESENVOLVIMENTO (Simulação) ---
         else {
-            console.log("Simulando aprovação (Modo DESENV ou Saldo)...");
+            console.log("Simulando aprovação (Modo DESENV)...");
             await new Promise(r => setTimeout(r, 2000));
-
-            const labelTeste = (valorTotalCentavos === 0) ? "SALDO_OU_CUPOM" : "MODO_TESTE";
-
             jsonVendaFinal.forEach(item => {
-                item["Tipo Pagamento"] = labelTeste;
+                item["Tipo Pagamento"] = "MODO_TESTE";
             });
             podeGravar = true;
         }
 
-        // --- GRAVAÇÃO NA PLANILHA (SÓ OCORRE UMA VEZ) ---
+        // --- FINALIZAÇÃO: GRAVAÇÃO NA PLANILHA ---
         if (podeGravar) {
             exibirStatusPagamento("Registrando venda na planilha...");
 
@@ -290,6 +312,7 @@ async function processarVendaFinal() {
                 throw new Error(finalData.message || "Erro ao registrar na planilha.");
             }
         }
+
     } catch (e) {
         alert("Erro no processo: " + e.message);
         location.reload();
