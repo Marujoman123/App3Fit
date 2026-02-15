@@ -60,7 +60,7 @@ btnEntrar.addEventListener('click', async () => {
                 localStorage.setItem('usuario_tipo', 'Proprietário');
                 localStorage.setItem('usuario_nome', nome);
                 localStorage.setItem('usuario_cpf', cpfLimpo);
-                window.location.href = "admin.html";
+                window.location.href = "www/admin.html";
             } else {
                 alert("Senha incorreta!");
                 inputSenha.value = '';
