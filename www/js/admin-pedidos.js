@@ -4,11 +4,9 @@ let carrinhoManual = [];
 let tipoPreco = 'Cliente';
 let dadosParceiroLocal = null;
 
-console.log(localStorage.getItem("origem_acesso"));
+
 
 iniciar();
-
-
 
 async function iniciar() {
     const res = await fetch(URL_SCRIPT + "?todosProdutos=true");

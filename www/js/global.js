@@ -13,9 +13,6 @@ function voltarParaPainel() {
             window.location.href = "admin.html";
         }
 
-
-
-
     } else {
 
 
