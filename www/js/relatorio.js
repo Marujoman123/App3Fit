@@ -138,31 +138,31 @@ function exibirNaTela(itens, comissaoFiltrada, qtdVendas) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px;">Sem movimentações no período.</td></tr>`;
     } else {
         itens.forEach(v => {
-            const tr = document.createElement('tr');
-            
-            let etiquetaExtra = "";
-            if (v.tipoPagto === "RETIRADA_ESTOQUE") {
-                etiquetaExtra = `<span style="font-size:10px; background:#6c757d; color:white; padding:2px 5px; border-radius:4px;">RETIRADA</span>`;
-            } else if (v.isCompraPropria) {
-                etiquetaExtra = `<span style="font-size:10px; background:#fff3cd; color:#856404; padding:2px 5px; border-radius:4px; border:1px solid #ffeeba;">COMPRA PRÓPRIA</span>`;
-            }
+    const tr = document.createElement('tr');
+    
+    let etiquetaExtra = "";
+    if (v.tipoPagto === "RETIRADA_ESTOQUE") {
+        etiquetaExtra = `<br><span style="font-size:10px; background:#6c757d; color:white; padding:2px 5px; border-radius:4px;">RETIRADA</span>`;
+    } else if (v.isCompraPropria) {
+        etiquetaExtra = `<br><span style="font-size:10px; background:#fff3cd; color:#856404; padding:2px 5px; border-radius:4px; border:1px solid #ffeeba;">COMPRA PRÓPRIA</span>`;
+    }
 
-            const corComissao = v.valorComissao < 0 ? "color: red;" : (v.valorComissao > 0 ? "color: green;" : "color: #666;");
-            
-            tr.innerHTML = `
-                <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
-                <td>${v.cliente} <br>${etiquetaExtra}</td>
-                <td>${v.produto} </td>
-                <td style="text-align:center;">${v.quantidade}x</td>
-                <td>R$ ${v.valorItem.toFixed(2)}</td>
-                <td style="font-size:11px; color:#666;">
-                    S: R$ ${v.pagoSaldo.toFixed(2)}<br>
-                    P: R$ ${v.pagoDinheiro.toFixed(2)}
-                </td>
-                <td style="${corComissao} font-weight: bold;">R$ ${v.valorComissao.toFixed(2)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+    const corComissao = v.valorComissao < 0 ? "color: red;" : (v.valorComissao > 0 ? "color: green;" : "color: #666;");
+    
+    // Adicionamos o data-label em cada TD para o CSS mobile funcionar
+    tr.innerHTML = `
+        <td data-label="Data">${new Date(v.data).toLocaleDateString('pt-BR')}</td>
+        <td data-label="Cliente"><b>${v.cliente}</b> ${etiquetaExtra}</td>
+        <td data-label="Produto">${v.produto}</td>
+        <td data-label="Qtd" style="text-align:center;">${v.quantidade}x</td>
+        <td data-label="Valor Total">R$ ${v.valorItem.toFixed(2)}</td>
+        <td data-label="Pagamento" style="font-size:11px; color:#666;">
+            S: R$ ${v.pagoSaldo.toFixed(2)} | P: R$ ${v.pagoDinheiro.toFixed(2)}
+        </td>
+        <td data-label="Comissão" style="${corComissao} font-weight: bold;">R$ ${v.valorComissao.toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
+});
     }
 
     // Mata o zero negativo na comissão do período
@@ -176,3 +176,6 @@ function exibirNaTela(itens, comissaoFiltrada, qtdVendas) {
     const saldoNoLogin = localStorage.getItem('usuario_saldo') || "0";
     if (elSaldoGeral) elSaldoGeral.innerText = `R$ ${parseFloat(saldoNoLogin).toFixed(2)}`;
 }
+
+
+
