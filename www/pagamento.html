@@ -88,8 +88,8 @@
                     <label style="color: #000;">Gostaria de pagar com saldo?</label>
                     <label>Saldo Disponível: <b>R$ <span id="txtSaldoDisponivel">0.00</span></b></label>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
-                        <input type="tel" id="inputUsarSaldo" placeholder="Quanto usar?">
-                        <button id="btnAplicarSaldo" style="width: auto;">Aplicar</button>
+                        <input type="number" id="inputUsarSaldo" step="0.01" inputmode="decimal" placeholder="0.00">
+                        <!-- <button id="btnAplicarSaldo" style="width: auto;">Aplicar</button> -->
                     </div>
                     <label id="msgSaldo" style="font-size: 0.8rem; display: block;"></label>
                 </div>

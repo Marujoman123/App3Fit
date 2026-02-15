@@ -345,7 +345,6 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
 
 function consultarStatusPagamento(intentId, token) {
   const url = "https://api.mercadopago.com/point/integration-api/payment-intents/" + intentId;
-
   const options = {
     "method": "get",
     "headers": {
@@ -358,24 +357,21 @@ function consultarStatusPagamento(intentId, token) {
   try {
     const response = UrlFetchApp.fetch(url, options);
     const data = JSON.parse(response.getContentText());
-
-    // LOGICA DE STATUS:
-    // Na Point, 'FINISHED' significa que o dinheiro entrou e a transação acabou com sucesso.
-    var statusFinal = "pending";
     
-    // Verificamos tanto 'status' quanto 'state' (a API do MP varia entre versões)
-    var mpStatus = (data.status || data.state || "").toUpperCase();
+    // O status real de sucesso na Point v2 é 'FINISHED'
+    var mpStatus = (data.status || "").toUpperCase();
+    var statusFinal = "pending";
 
-    if (mpStatus === "FINISHED" || mpStatus === "PROCESSED" || mpStatus === "SUCCESS") {
+    if (mpStatus === "FINISHED") {
       statusFinal = "approved";
-    } else if (mpStatus === "CANCELED" || mpStatus === "ABORTED") {
+    } else if (mpStatus === "CANCELED" || mpStatus === "ABANDONED") {
       statusFinal = "canceled";
     }
 
     return respostaJSON({ 
       status: statusFinal, 
-      id_mercado_pago: data.payment_id || null, // ID real do pagamento para conciliação
-      raw_status: mpStatus 
+      raw_status: mpStatus,
+      payment_id: data.payment ? data.payment.id : null 
     });
 
   } catch (err) {

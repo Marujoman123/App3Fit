@@ -40,6 +40,19 @@ async function carregarRelatorio() {
 document.addEventListener('DOMContentLoaded', carregarRelatorio);
 
 
+function btnVoltar() {
+    // Buscamos o tipo de usuário que salvamos no login
+    const tipoUsuario = localStorage.getItem('usuario_tipo');
+
+    if (tipoUsuario === "Parceiro") {
+        window.location.href = "parceiro-painel.html";
+    } else {
+        // Se for Admin ou qualquer outro, volta para o admin
+        window.location.href = "admin.html";
+    }
+}
+
+
 
 document.getElementById('btnPDF').addEventListener('click', () => {
     const { jsPDF } = window.jspdf;

@@ -14,6 +14,19 @@ function gr(valor) {
 }
 
 
+function btnVoltar() {
+    // Buscamos o tipo de usuário que salvamos no login
+    const tipoUsuario = localStorage.getItem('usuario_tipo');
+
+    if (tipoUsuario === "Parceiro") {
+        window.location.href = "parceiro-painel.html";
+    } else {
+        // Se for Admin ou qualquer outro, volta para o admin
+        window.location.href = "admin.html";
+    }
+}
+
+
 
 async function iniciar() {
     const res = await fetch(URL_SCRIPT + "?todosProdutos=true");

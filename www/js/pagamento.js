@@ -131,11 +131,37 @@ btnValidar.addEventListener('click', async () => {
     }
 });
 
-document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
-    // CORREÇÃO: Arredondando saldo manual
-    saldoUtilizadoTotal = gr(parseFloat(inputSaldo.value) || 0);
-    if (saldoUtilizadoTotal > saldoDisponivel) saldoUtilizadoTotal = saldoDisponivel;
-    atualizarResumoTela();
+// document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
+//     // Lê o valor formatado do input
+//     let valorDigitado = parseFloat(inputSaldo.value) || 0;
+
+//     // Proteção: não pode usar mais do que o saldo disponível
+//     if (valorDigitado > saldoDisponivel) {
+//         valorDigitado = saldoDisponivel;
+//         inputSaldo.value = saldoDisponivel.toFixed(2);
+//     }
+
+//     // Atualiza a variável global do cálculo
+//     saldoUtilizadoTotal = gr(valorDigitado);
+    
+//     // Atualiza a tela (totais, descontos, etc)
+//     atualizarResumoTela();
+// });
+
+// LÓGICA DE PREENCHIMENTO AUTOMÁTICO DO SALDO
+document.addEventListener('DOMContentLoaded', () => {
+    if (tipoUsuario === "Parceiro" && inputSaldo) {
+        // Cálculo: Usar o total da compra, mas limitado ao saldo disponível
+        // Se a compra é R$ 50 e o saldo é R$ 100 -> Preenche 50.00
+        // Se a compra é R$ 100 e o saldo é R$ 50 -> Preenche 50.00
+        let valorSugerido = Math.min(totalOriginal, saldoDisponivel);
+        
+        inputSaldo.value = valorSugerido.toFixed(2);
+        
+        // Aplica o valor automaticamente no cálculo
+        saldoUtilizadoTotal = gr(valorSugerido);
+        atualizarResumoTela();
+    }
 });
 
 // ======================================================
@@ -168,12 +194,14 @@ async function processarVendaFinal() {
     const dataHora = new Date().toLocaleString('pt-BR');
     const cupomTexto = (inputCupom.value.trim() !== "") ? inputCupom.value.toUpperCase() : "NENHUM";
 
-    // 1. Mapeamento inicial dos itens
+    // 1. Mapeamento inicial dos itens com proteção de valores numéricos
     const jsonVendaFinal = carrinho.map(item => {
-        const qtd = item.quantidade || 1;
+        const qtd = parseInt(item.quantidade) || 1;
         const valorUnitario = gr(parseFloat(item.preco));
         const valorLinhaOriginal = gr(valorUnitario * qtd);
-        const proporcao = valorLinhaOriginal / totalOriginal;
+        
+        // Evita divisão por zero se o totalOriginal estiver corrompido
+        const proporcao = totalOriginal > 0 ? (valorLinhaOriginal / totalOriginal) : (1 / carrinho.length);
 
         const descDesteItem = gr(descontoAplicado * proporcao);
         const valorComDescontoCupom = gr(valorLinhaOriginal - descDesteItem);
@@ -206,7 +234,7 @@ async function processarVendaFinal() {
     });
 
     const modoManual = localStorage.getItem('modo_pagamento_manual') === 'true';
-    const isRetirada = localStorage.getItem('travar_cupom') === 'true'; // Identifica se veio do botão Retirada
+    const isRetirada = localStorage.getItem('travar_cupom') === 'true'; 
     const valorTotalPago = gr(jsonVendaFinal.reduce((acc, i) => acc + i["ValorPAgo"], 0));
     const valorTotalCentavos = Math.round(valorTotalPago * 100);
 
@@ -215,26 +243,19 @@ async function processarVendaFinal() {
 
         // --- ROTA A: LANÇAMENTO MANUAL OU SALDO TOTAL (Bypassa a Maquininha) ---
         if (modoManual || valorTotalCentavos === 0) {
-            
-            // Lógica de nomes para o banco de dados
             let labelTipo;
-            if (isRetirada) {
-                labelTipo = "RETIRADA_ESTOQUE";
-            } else if (modoManual) {
-                labelTipo = "MANUAL_DIN_PIX";
-            } else {
-                labelTipo = "SALDO_OU_CUPOM";
-            }
+            if (isRetirada) labelTipo = "RETIRADA_ESTOQUE";
+            else if (modoManual) labelTipo = "MANUAL_DIN_PIX";
+            else labelTipo = "SALDO_OU_CUPOM";
 
-            jsonVendaFinal.forEach(item => {
-                item["Tipo Pagamento"] = labelTipo;
-            });
-            
+            jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = labelTipo; });
+
             podeGravar = true;
+            // Limpamos apenas após confirmar a rota
             localStorage.removeItem('modo_pagamento_manual');
-            localStorage.removeItem('travar_cupom'); 
-        } 
-        
+            localStorage.removeItem('travar_cupom');
+        }
+
         // --- ROTA B: AMBIENTE DE PRODUÇÃO (Usa Maquininha Real) ---
         else if (AMBIENTE === 'PROD') {
             const payload = {
@@ -251,48 +272,54 @@ async function processarVendaFinal() {
 
             if (resIntent.status === "success" && resIntent.intent_id) {
                 exibirStatusPagamento("Enviado para a Maquininha... <br><br> <b style='color:green'>Se a tela não acender, aperte o botão 'VERDE' na máquina!</b>");
-                
+
                 let pago = false;
                 let tentativas = 0;
-                const maxTentativas = 40;
+                const maxTentativas = 60; // Aumentado para 3 minutos de tolerância
 
                 while (!pago && tentativas < maxTentativas) {
                     tentativas++;
+                    console.log(`Verificando pagamento... Tentativa ${tentativas}`);
                     await new Promise(r => setTimeout(r, 3000));
 
-                    const check = await fetch(`${URL_SCRIPT}?verificarPagamento=${resIntent.intent_id}&token=${configMP.token}`);
-                    const statusMP = await check.json();
+                    try {
+                        const check = await fetch(`${URL_SCRIPT}?verificarPagamento=${resIntent.intent_id}&token=${configMP.token}`);
+                        const statusMP = await check.json();
 
-                    if (statusMP.status === "approved") {
-                        pago = true;
-                        podeGravar = true;
-                        const tipoReal = statusMP.raw_status || "CARTAO_MAQUININHA";
-                        jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = tipoReal; });
-                        console.log("Pagamento aprovado!");
-                    } else if (statusMP.status === "canceled") {
-                        alert("Pagamento cancelado ou erro na maquininha.");
-                        location.reload();
-                        return;
+                        if (statusMP.status === "approved") {
+                            pago = true;
+                            podeGravar = true;
+                            const tipoReal = statusMP.raw_status || "CARTAO_PAGO";
+                            jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = tipoReal; });
+                            break; 
+                        } 
+                        else if (statusMP.status === "canceled") {
+                            alert("❌ O pagamento foi cancelado ou recusado.");
+                            location.reload();
+                            return;
+                        }
+                    } catch (err) {
+                        console.warn("Falha momentânea de rede, tentando novamente...");
                     }
                 }
+                if (!pago) throw new Error("Tempo limite de pagamento excedido.");
+
             } else {
-                throw new Error("Erro ao criar intenção de pagamento.");
+                throw new Error("Não foi possível iniciar a maquininha. Verifique a conexão.");
             }
-        } 
-        
-        // --- ROTA C: AMBIENTE DE DESENVOLVIMENTO (Simulação) ---
+        }
+
+        // --- ROTA C: AMBIENTE DE DESENVOLVIMENTO ---
         else {
             console.log("Simulando aprovação (Modo DESENV)...");
-            await new Promise(r => setTimeout(r, 2000));
-            jsonVendaFinal.forEach(item => {
-                item["Tipo Pagamento"] = "MODO_TESTE";
-            });
+            await new Promise(r => setTimeout(r, 1500));
+            jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = "MODO_TESTE"; });
             podeGravar = true;
         }
 
         // --- FINALIZAÇÃO: GRAVAÇÃO NA PLANILHA ---
         if (podeGravar) {
-            exibirStatusPagamento("Registrando venda na planilha...");
+            exibirStatusPagamento("Finalizando... <br> Gravando na planilha.");
 
             const resFinal = await fetch(URL_SCRIPT, {
                 method: 'POST',
@@ -305,16 +332,17 @@ async function processarVendaFinal() {
             const finalData = await resFinal.json();
 
             if (finalData.status === "success") {
-                alert("Sucesso! Venda registrada.");
+                alert("✅ Venda concluída com sucesso!");
                 localStorage.removeItem('carrinho');
+                localStorage.removeItem('total_venda');
                 window.location.href = "index.html";
             } else {
-                throw new Error(finalData.message || "Erro ao registrar na planilha.");
+                throw new Error(finalData.message || "A maquininha pagou, mas a planilha falhou. Contate o suporte.");
             }
         }
 
     } catch (e) {
-        alert("Erro no processo: " + e.message);
+        alert("⚠️ Ocorreu um erro: " + e.message);
         location.reload();
     }
 }
@@ -327,5 +355,29 @@ function exibirStatusPagamento(mensagem) {
         <p>Não feche esta tela.</p>
     `;
 }
+
+// MÁSCARA PARA O INPUT DE SALDO
+if (inputSaldo) {
+    inputSaldo.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, "");
+        value = (value / 100).toFixed(2);
+
+        // REGRA DE OURO: Não pode ser maior que o saldo E nem maior que o total da compra
+        let limiteMaximo = Math.min(saldoDisponivel, totalOriginal);
+
+        if (parseFloat(value) > limiteMaximo) {
+            value = limiteMaximo.toFixed(2);
+        }
+
+        e.target.value = value;
+        
+        // Atualização em tempo real (opcional, mas melhora a experiência)
+        saldoUtilizadoTotal = gr(parseFloat(value));
+        atualizarResumoTela();
+    });
+}
+
+
+
 
 atualizarResumoTela();

@@ -17,8 +17,9 @@ const CPF_HUGO = "41471613836";
 const SENHA_ADMIN = "4321"; // Defina sua senha aqui
 
 
-// cpfInput.value="414.716.138-36"; // teste admin
-// cpfInput.value="458.488.840-05"; //teste cliente
+// cpfInput.value="414.716.138-36"; // teste admin (HUGO)
+// cpfInput.value="458.488.840-05"; //teste cliente (FARLEY)
+cpfInput.value="996.508.460-26"; //teste parceiro (RATO)
 
 
 
@@ -169,7 +170,7 @@ async function ValidarNoGoogleSheets() {
         if (resultado.tipo === "Parceiro") {
             localStorage.setItem('usuario_saldo', resultado.saldo);
             localStorage.setItem('usuario_cupom', resultado.cupom);
-            window.location.href = "caixa.html";
+            window.location.href = "parceiro-painel.html"; // Direciona para a nova página
         } else {
             window.location.href = "caixa.html";
         }

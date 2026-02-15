@@ -70,70 +70,71 @@
         }
 
         /* Ajuste na Grid para ocupar tudo */
-.container-pedido {
-    display: block; /* Removemos a grid de 2 colunas */
-    max-width: 800px;
-    margin: 0 auto;
-}
+        .container-pedido {
+            display: block;
+            /* Removemos a grid de 2 colunas */
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-/* Estilo do Modal (Pop-up) */
-.modal-resumo {
-    display: none; /* Escondido por padrão */
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
+        /* Estilo do Modal (Pop-up) */
+        .modal-resumo {
+            display: none;
+            /* Escondido por padrão */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
 
-.modal-content {
-    background: white;
-    width: 90%;
-    max-width: 500px;
-    padding: 20px;
-    border-radius: 15px;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-}
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 15px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
 
-/* Botão Flutuante para ver o carrinho */
-.btn-ver-resumo {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    cursor: pointer;
-    z-index: 900;
-}
+        /* Botão Flutuante para ver o carrinho */
+        .btn-ver-resumo {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 900;
+        }
 
-.item-esgotado {
-    opacity: 0.5;
-    background-color: #f8d7da !important;
-    cursor: not-allowed;
-}
+        .item-esgotado {
+            opacity: 0.5;
+            background-color: #f8d7da !important;
+            cursor: not-allowed;
+        }
 
-#nomePedido {
-    transition: all 0.3s ease;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+        #nomePedido {
+            transition: all 0.3s ease;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-#nomePedido[readonly] {
-    color: #666;
-    cursor: not-allowed;
-}
-        
-
-        
+        #nomePedido[readonly] {
+            color: #666;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -141,17 +142,17 @@
     <div class="container-pedido">
         <div class="bloco">
             <div class="header-admin">
-                <button onclick="location.href='admin.html'">← Voltar</button>
+                <button onclick="btnVoltar()">← Voltar</button>
                 <h1>Criar Novo Pedido</h1>
             </div>
 
             <h3>1. Escolha o Tipo de Saída</h3>
-<div class="tipo-cliente">
-    <button class="btn-tipo active" id="btnCli" onclick="setTipo('Cliente')">Cliente Comum</button>
-    <button class="btn-tipo" id="btnPar" onclick="setTipo('Parceiro')">Parceiro</button>
-    <button class="btn-tipo" id="btnRet" onclick="setTipo('Retirada')">Retirada</button>
-</div>
-            
+            <div class="tipo-cliente">
+                <button class="btn-tipo active" id="btnCli" onclick="setTipo('Cliente')">Cliente Comum</button>
+                <button class="btn-tipo" id="btnPar" onclick="setTipo('Parceiro')">Parceiro</button>
+                <button class="btn-tipo" id="btnRet" onclick="setTipo('Retirada')">Retirada</button>
+            </div>
+
 
             <h3>2. Selecione os Produtos</h3>
             <span id="textLoading">Carregando produtos...</span>
@@ -165,37 +166,43 @@
 
     <div id="modalResumo" class="modal-resumo">
         <div class="modal-content">
-            <button onclick="fecharModalResumo()" style="float: right; border: none; background: #666; color: white; font-size: 24px; cursor: pointer; width: 40px; height: 40px;  border-radius:5px; padding:2px 8px; line-height: 1; text-align: center;">&times;</button>
+            <button onclick="fecharModalResumo()"
+                style="float: right; border: none; background: #666; color: white; font-size: 24px; cursor: pointer; width: 40px; height: 40px;  border-radius:5px; padding:2px 8px; line-height: 1; text-align: center;">&times;</button>
             <h3>Resumo do Pedido</h3>
 
-            <input type="text" id="nomePedido" placeholder="Nome do Cliente (Obrigatório)" style="width:100%; padding:10px; margin-bottom:15px;">
-            <button id="btnBuscarParceiro" style="display:none; margin-bottom:10px; padding:5px; background:#ff9045; color:white; border:none; border-radius:5px; cursor:pointer;">
-    🔍 Verificar Saldo do Parceiro
-</button>
+            <input type="text" id="nomePedido" placeholder="Nome do Cliente (Obrigatório)"
+                style="width:100%; padding:10px; margin-bottom:15px;">
+            <button id="btnBuscarParceiro"
+                style="display:none; margin-bottom:10px; padding:5px; background:#ff9045; color:white; border:none; border-radius:5px; cursor:pointer;">
+                🔍 Verificar Saldo do Parceiro
+            </button>
             <hr>
             <div id="resumoPedido" style="margin-top:15px;"></div>
             <hr>
             <h2 id="totalPedido">Total: R$ 0.00</h2>
-            
-            <button onclick="limparPedidoCompleto()" style="background:#666; color:white; border:none; padding:10px; border-radius:5px; margin-bottom:10px; width:100%;">
+
+            <button onclick="limparPedidoCompleto()"
+                style="background:#666; color:white; border:none; padding:10px; border-radius:5px; margin-bottom:10px; width:100%;">
                 Limpar Todo o Pedido
             </button>
-            <button onclick="gerarPDFPedido()" style="width:100%; padding:15px; background: #28a745; color:white; border:none; border-radius:5px; font-weight:bold;">
-                EXPORTAR PDF / FINALIZAR
+            <button onclick="gerarPDFPedido()"
+                style="width:100%; padding:15px; background: #28a745; color:white; border:none; border-radius:5px; font-weight:bold;">
+                Gerar PDF do pedido
             </button>
 
-            <button onclick="realizarVendaManual()" style="width:100%; padding:15px; background: #007bff; color:white; border:none; border-radius:5px; font-weight:bold; margin-top: 10px; cursor: pointer;">
-    REALIZAR VENDA (PAGAMENTO MANUAL)
-</button>
+            <button onclick="realizarVendaManual()"
+                style="width:100%; padding:15px; background: #007bff; color:white; border:none; border-radius:5px; font-weight:bold; margin-top: 10px; cursor: pointer;">
+                REALIZAR VENDA (PAGAMENTO MANUAL)
+            </button>
         </div>
     </div>
-    
-    </body>
+
+</body>
 
 </html>
 
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="js/admin-pedidos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="js/admin-pedidos.js"></script>
