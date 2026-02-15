@@ -3,16 +3,12 @@ let produtosEstoque = [];
 let carrinhoManual = [];
 let tipoPreco = 'Cliente';
 
+console.log(localStorage.getItem("origem_acesso"));
+
 // Inicia ao carregar
 document.addEventListener('DOMContentLoaded', iniciar);
 
-function gr(valor) {
-    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
-}
 
-function btnVoltar() {
-    window.location.href = "parceiro-painel.html";
-}
 
 async function iniciar() {
     try {

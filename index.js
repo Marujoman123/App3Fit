@@ -2,6 +2,8 @@
 // 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
 localStorage.clear();
 
+localStorage.setItem('origem_acesso', 'externo');
+
 const btnEntrar = document.getElementById('btnEntrar');
 const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');
@@ -170,7 +172,7 @@ async function ValidarNoGoogleSheets() {
         if (resultado.tipo === "Parceiro") {
             localStorage.setItem('usuario_saldo', resultado.saldo);
             localStorage.setItem('usuario_cupom', resultado.cupom);
-            window.location.href = "www/parceiro-painel.html"; // Direciona para a nova página
+            window.location.href = "parceiro-painel.html"; // Direciona para a nova página
         } else {
             window.location.href = "www/caixa.html";
         }

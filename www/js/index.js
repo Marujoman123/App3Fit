@@ -2,6 +2,7 @@
 // 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
 localStorage.clear();
 
+localStorage.setItem('origem_acesso', 'interno');
 const btnEntrar = document.getElementById('btnEntrar');
 const cpfInput = document.getElementById('cpf');
 const mensagemErro = document.getElementById('mensagem-erro');

@@ -67,15 +67,16 @@ function resetarTemporizador() {
 }
 
 function voltarAoInicio() {
-    // 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
-    localStorage.clear();
-
-    // 2. Opcional: Avisar o usuário antes (mas em totens autônomos geralmente é direto)
-    // alert("Sessão encerrada por inatividade.");
-
-    // 3. Volta para a página de Login
-    window.location.href = "index.html";
+    const origem = localStorage.getItem('origem_acesso');
+    if (origem === 'externo') {
+        // Altere para o caminho real do seu index fora da estrutura
+        window.location.href = "../parceiro-painel.html";
+    } else {
+        // Altere para o caminho real do seu index fora da estrutura
+        window.location.href = "parceiro-painel.html";
+    }
 }
+
 
 // Inicia assim que a página carregar
 document.addEventListener('DOMContentLoaded', iniciarMonitoramento);

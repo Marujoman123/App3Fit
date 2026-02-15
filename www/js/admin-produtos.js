@@ -1,5 +1,5 @@
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
-
+console.log(localStorage.getItem("origem_acesso"));
 // admin-relatorio.js
 async function carregarRelatorio() {
     const corpo = document.getElementById('corpoTabela');

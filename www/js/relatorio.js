@@ -3,6 +3,7 @@ const btnFiltrar = document.getElementById("btnFiltrar");
 const btnVoltar = document.getElementById("btnVoltar");
 let cacheVendasGeral = [];
 
+
 /**
  * 1. INICIALIZAÇÃO
  */
@@ -21,10 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 btnFiltrar.addEventListener('click', () => {
     sincronizarDadosVendas();
-});
-
-btnVoltar.addEventListener('click', () => {
-    window.location.href = "parceiro-painel.html";
 });
 
 /**

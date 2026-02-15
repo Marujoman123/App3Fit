@@ -4,27 +4,9 @@ let carrinhoManual = [];
 let tipoPreco = 'Cliente';
 let dadosParceiroLocal = null;
 
+console.log(localStorage.getItem("origem_acesso"));
 
 iniciar();
-
-
-// Função para evitar erros de ponto flutuante
-function gr(valor) {
-    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
-}
-
-
-function btnVoltar() {
-    // Buscamos o tipo de usuário que salvamos no login
-    const tipoUsuario = localStorage.getItem('usuario_tipo');
-
-    if (tipoUsuario === "Parceiro") {
-        window.location.href = "parceiro-painel.html";
-    } else {
-        // Se for Admin ou qualquer outro, volta para o admin
-        window.location.href = "admin.html";
-    }
-}
 
 
 

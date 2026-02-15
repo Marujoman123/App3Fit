@@ -14,13 +14,12 @@
         .btn-voltar { padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
 
 </head>
 <body>
     <div class="container-relatorio">
-        <button class="btn-voltar"  onclick="btnVoltar()">← Voltar</button>
+        <button class="btn-voltar"  onclick="voltarParaPainel()">← Voltar</button>
         <h1 style="color: white;">Estoque Atual</h1>
         
         <div id="loadingEstoque" style="color: white;">Carregando produtos...</div>
@@ -42,6 +41,13 @@
         </table>
     </div>
 
-    <script src="js/admin-produtos.js"></script>
+   
 </body>
 </html>
+
+
+ <script src="js/admin-produtos.js"></script>
+<script src="js/global.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>

@@ -12,12 +12,6 @@ const configMP = {
     paymentType: "debit_card"
 };
 
-// Função de Arredondamento Financeiro (Crucial)
-function gr(valor) {
-    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
-}
-
-
 
 const tipoUsuario = localStorage.getItem('usuario_tipo');
 const nomeUsuario = localStorage.getItem('usuario_nome');
