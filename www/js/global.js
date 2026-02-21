@@ -29,8 +29,6 @@ function voltarParaPainel() {
 }
 
 
-
-
 // Função para evitar erros de ponto flutuante
 function gr(valor) {
     return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
