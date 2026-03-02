@@ -44,6 +44,29 @@ function doGet(e) {
       return respostaJSON({ status: "success", produtos: listaFinal });
     }
 
+
+    // --- ROTA 1.B: Listar TODOS os produtos (MESMO ZERADOS) para Encomenda ---
+    if (e.parameter.todosProdutosSemFiltro) {
+      var abaProd = ss.getSheetByName("produtos");
+      var dadosProd = abaProd.getDataRange().getValues();
+      var listaCompleta = [];
+
+      // Começa em 1 para pular o cabeçalho
+      for (var j = 1; j < dadosProd.length; j++) {
+        listaCompleta.push({
+          codigo: dadosProd[j][0].toString(),
+          nome: dadosProd[j][1],
+          kg: dadosProd[j][2],
+          linha: dadosProd[j][6],
+          precoCusto: dadosProd[j][3],
+          precoCliente: dadosProd[j][4],
+          precoParceiro: dadosProd[j][5],
+          quantidade: 0 // Força 0 pois na encomenda começa zerado
+        });
+      }
+      return respostaJSON({ status: "success", produtos: listaCompleta });
+    }
+
     // --- ROTA 2: Validar Cupom ---
     if (e.parameter.validarCupom) {
       return validarCupom(e.parameter.validarCupom, ss);
