@@ -284,13 +284,39 @@ async function processarVendaFinal() {
             const finalData = await resFinal.json();
 
             if (finalData.status === "success") {
-                alert("✅ Venda concluída!");
-                localStorage.removeItem('carrinho');
-                localStorage.removeItem('total_venda');
-                localStorage.removeItem('modo_pagamento_manual');
-                localStorage.removeItem('travar_cupom');
-                window.location.href = "index.html";
-                sessionStorage.removeItem('idVendaAtual');
+                // Gera o PDF por trás dos panos e pega o link seguro
+                const urlRecibo = gerarReciboPDF(jsonVendaFinal);
+
+                // Transforma o modal atual numa tela de Sucesso
+                const container = document.querySelector('#modalPagamento .modal-content');
+                container.innerHTML = `
+                    <h2 style="color: #28a745; margin-bottom: 10px;">✅ Venda Realizada!</h2>
+                    <p style="margin-bottom: 20px;">Venda registrada com sucesso na planilha.</p>
+                    
+                    <button id="btnVerRecibo" style="background: #007bff; color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-size: 16px; margin-bottom: 10px; cursor: pointer; font-weight: bold;">
+                        📄 Imprimir / Ver Recibo
+                    </button>
+                    
+                    <button id="btnNovaVenda" style="background: #28a745; color: white; padding: 15px; width: 100%; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold;">
+                        🛒 Finalizar e Voltar
+                    </button>
+                `;
+
+                // Como é o usuário clicando aqui, a nova aba NUNCA será bloqueada!
+                document.getElementById('btnVerRecibo').onclick = () => {
+                    window.open(urlRecibo, '_blank');
+                };
+
+                // Limpa o sistema para o próximo cliente
+                document.getElementById('btnNovaVenda').onclick = () => {
+                    localStorage.removeItem('carrinho');
+                    localStorage.removeItem('total_venda');
+                    localStorage.removeItem('modo_pagamento_manual');
+                    localStorage.removeItem('travar_cupom');
+                    sessionStorage.removeItem('idVendaAtual');
+                    window.location.href = "index.html";
+                };
+
             } else {
                 throw new Error("Erro ao gravar planilha: " + finalData.message);
             }
@@ -322,4 +348,121 @@ function exibirStatusPagamento(mensagem) {
             <p>Não feche esta tela.</p>
         `;
     }
+}
+
+
+
+// ======================================================
+// GERAÇÃO DE RECIBO EM PDF
+// ======================================================
+function gerarReciboPDF(dadosVenda) {
+    // Verifica se a biblioteca jsPDF carregou corretamente
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        console.warn("Biblioteca jsPDF não encontrada. Não foi possível gerar o recibo.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Dados gerais do cabeçalho extraídos da primeira linha da venda
+    const info = dadosVenda[0];
+    const idVenda = info["ID Venda"];
+    const dataHora = info["Data/Hora"];
+    const cliente = info["Nome"] || "Consumidor Final";
+    const cpf = info["CPF"] ? info["CPF"].replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : "N/A";
+    const tipoPagamento = info["Tipo Pagamento"];
+
+    let y = 20;
+
+    // Cabeçalho da Loja
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("RECIBO DE VENDA - 3FIT", 105, y, { align: "center" });
+    y += 12;
+
+    // Informações da Venda
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Pedido: ${idVenda}`, 10, y);
+    doc.text(`Data: ${dataHora}`, 120, y);
+    y += 8;
+
+    doc.text(`Cliente: ${cliente}`, 10, y);
+    doc.text(`CPF: ${cpf}`, 120, y);
+    y += 10;
+
+    // Linha Divisória
+    doc.setLineWidth(0.5);
+    doc.line(10, y, 200, y);
+    y += 10;
+
+    // Cabeçalho da Tabela de Itens
+    doc.setFont("helvetica", "bold");
+    doc.text("Qtd", 10, y);
+    doc.text("Produto", 25, y);
+    doc.text("V. Unit", 145, y);
+    doc.text("Total", 175, y);
+    y += 8;
+    
+    doc.setFont("helvetica", "normal");
+
+    // Loop para desenhar cada produto do carrinho
+    let subtotalProdutos = 0;
+    dadosVenda.forEach(item => {
+        const qtd = item["Quantidade"];
+        const prod = item["Produto"];
+        const vUnit = parseFloat(item["Valor Unit"]);
+        const vTotalLinha = parseFloat(item["Valor Total Item"]);
+        
+        subtotalProdutos += vTotalLinha;
+
+        doc.text(`${qtd}x`, 10, y);
+        
+        // Quebra nomes de produtos muito grandes para não invadir a coluna de preço
+        const nomeFormatado = doc.splitTextToSize(prod, 110);
+        doc.text(nomeFormatado, 25, y);
+        
+        doc.text(`R$ ${vUnit.toFixed(2)}`, 145, y);
+        doc.text(`R$ ${vTotalLinha.toFixed(2)}`, 175, y);
+        
+        // Aumenta o espaço (Y) dependendo de quantas linhas o nome do produto ocupou
+        y += (nomeFormatado.length * 7); 
+    });
+
+    y += 5;
+    doc.line(10, y, 200, y);
+    y += 10;
+
+    // Cálculo dos Totais Finais
+    const valorPagoFinal = dadosVenda.reduce((acc, curr) => acc + curr["ValorPAgo"], 0);
+
+    doc.setFont("helvetica", "bold");
+    doc.text(`Subtotal: R$ ${subtotalProdutos.toFixed(2)}`, 140, y);
+    y += 7;
+
+    if (descontoAplicado > 0) {
+        doc.text(`Desconto: R$ -${descontoAplicado.toFixed(2)}`, 140, y);
+        y += 7;
+    }
+    
+    if (saldoUtilizadoTotal > 0) {
+        doc.text(`Saldo Usado: R$ -${saldoUtilizadoTotal.toFixed(2)}`, 140, y);
+        y += 7;
+    }
+
+    doc.text(`Total Pago: R$ ${valorPagoFinal.toFixed(2)}`, 140, y);
+    y += 15;
+
+    // Rodapé
+    doc.setFont("helvetica", "normal");
+    doc.text(`Forma de Pagamento: ${tipoPagamento}`, 10, y);
+    y += 10;
+    doc.setFontSize(10);
+    doc.text("Obrigado pela preferência!", 105, y, { align: "center" });
+
+    // Cria o arquivo na memória
+    const pdfBlob = doc.output('blob');
+    // Devolve o link temporário para o botão usar
+    return URL.createObjectURL(pdfBlob);
 }
