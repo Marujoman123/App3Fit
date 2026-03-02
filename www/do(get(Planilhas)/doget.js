@@ -190,56 +190,75 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
 
-    // Rota 1: Gravar a venda final na planilha (Ação disparada após aprovação)
+    // --- ROTA 1: Gravar a venda final na planilha ---
     if (data.acao === "registrarVendaFinal") {
       return registrarVendaNaPlanilha(data.dados);
     }
 
-    // Rota 2: Cadastro de Novo Cliente
+    // --- ROTA 2: Cadastro de Novo Cliente ---
     if (data.telefone) {
       var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Clientes");
       sheet.appendRow([
         data.cpf,
         data.nome,
-        "'" + data.telefone, 
+        "'" + data.telefone,
         data.tipo,
         data.saldo
       ]);
       return respostaJSON({ status: "success", message: "Cliente cadastrado com sucesso" });
     }
 
-    // Rota 3: Iniciar Intenção de Pagamento na Point
+    // --- ROTA 3: Iniciar Intenção de Pagamento na Point ---
     if (data.config && data.config.token) {
       var token = data.config.token;
       var deviceId = data.config.deviceId;
       var valorParaMaquininha = Number.parseInt(data.config.amount);
-      
+
       // Pegamos o ID da venda do primeiro item do carrinho
       var idVenda = data.itens && data.itens.length > 0 ? data.itens[0]["ID Venda"].toString() : "V" + Date.now();
 
       if (valorParaMaquininha > 0) {
-        // AJUSTE: Passamos data.config.payment, que pode ser null/undefined na nova lógica
+
+        // 🚨 COMANDO DE CHOQUE: Limpa a maquininha antes de enviar a nova!
+        cancelarIntencoesPendentes(deviceId, token);
+        Utilities.sleep(1500); // Pausa 1.5s para o Mercado Pago processar a limpeza
+
+        // Chamada para a função auxiliar externa
         var resMP = acionarMaquinaPoint(
           valorParaMaquininha,
           idVenda,
           token,
           deviceId,
-          data.config.payment || null // Se não existir, envia null
+          data.config.payment || null
         );
-        
-        var resObj = JSON.parse(resMP.getContentText());
 
+        var responseText = resMP.getContentText();
+        var resObj = JSON.parse(responseText);
+        var responseCode = resMP.getResponseCode(); // Captura o código HTTP (ex: 201, 409, 400)
+
+        // Caso A: Sucesso (Intenção criada)
         if (resObj.id) {
           return respostaJSON({ status: "success", intent_id: resObj.id });
-        } else {
-          // Log de erro no console do Google Scripts para facilitar seu debug
-          console.error("Erro retornado pelo Mercado Pago: " + resMP.getContentText());
-          return respostaJSON({ status: "error", message: "Erro MP: " + resMP.getContentText() });
         }
+
+        // Caso B: Erro 409 - Maquininha com pagamento pendente (Ocupada)
+        if (responseCode === 409 || resObj.error === "2205") {
+          return respostaJSON({
+            status: "error",
+            message: "A maquininha está ocupada com outro pedido. Cancele a operação atual no botão VERMELHO da maquininha e tente novamente."
+          });
+        }
+
+        // Caso C: Outros erros (Token inválido, DeviceID errado, etc)
+        console.error("Erro retornado pelo Mercado Pago: " + responseText);
+        return respostaJSON({
+          status: "error",
+          message: "Erro na Point: " + (resObj.message || "Verifique a conexão da máquina.")
+        });
       }
     }
 
-    return respostaJSON({ status: "error", message: "Dados inválidos ou formato desconhecido" });
+    return respostaJSON({ status: "error", message: "Dados inválidos ou rota desconhecida." });
 
   } catch (err) {
     console.error("Erro crítico no doPost: " + err.toString());
@@ -323,8 +342,6 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
     }
   };
 
-  // Se o JavaScript enviou configurações (como parcelas no crédito), adiciona aqui.
-  // Se for null (nosso novo padrão), a máquina pergunta o tipo ao cliente.
   if (paymentConfig) {
     payload.payment = paymentConfig;
   }
@@ -334,7 +351,7 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
     "headers": {
       "Authorization": "Bearer " + token,
       "Content-Type": "application/json",
-      "X-Idempotency-Key": "ID-" + idVenda
+      "X-Idempotency-Key": "ID-" + idVenda // Chave para evitar duplicidade
     },
     "payload": JSON.stringify(payload),
     "muteHttpExceptions": true
@@ -344,37 +361,66 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
 }
 
 function consultarStatusPagamento(intentId, token) {
-  const url = "https://api.mercadopago.com/point/integration-api/payment-intents/" + intentId;
-  const options = {
+  var url = "https://api.mercadopago.com/point/integration-api/payment-intents/" + intentId + "?t=" + new Date().getTime();
+  var options = {
     "method": "get",
     "headers": {
       "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache"
     },
     "muteHttpExceptions": true
   };
 
   try {
-    const response = UrlFetchApp.fetch(url, options);
-    const data = JSON.parse(response.getContentText());
+    var response = UrlFetchApp.fetch(url, options);
+    var data = JSON.parse(response.getContentText());
+
+    // 1. Pega o status geral da maquininha
+    var mpStatus = (data.state || data.status || "").toUpperCase();
     
-    // O status real de sucesso na Point v2 é 'FINISHED'
-    var mpStatus = (data.status || "").toUpperCase();
+    // 2. CRIA A VARIÁVEL paymentStatus com segurança (isso resolve o seu ReferenceError)
+    var paymentStatus = "";
+    if (data.payment && data.payment.state) {
+      paymentStatus = data.payment.state.toUpperCase();
+    }
+
     var statusFinal = "pending";
 
-    if (mpStatus === "FINISHED") {
+    // 3. Verifica se foi Aprovado/Finalizado
+    if (mpStatus === "FINISHED" || mpStatus === "CLOSED" || mpStatus === "PROCESSED" || paymentStatus === "APPROVED") {
       statusFinal = "approved";
-    } else if (mpStatus === "CANCELED" || mpStatus === "ABANDONED") {
+    }
+    // 4. Verifica se foi Cancelado/Rejeitado
+    else if (mpStatus === "CANCELED" || mpStatus === "ABANDONED" || mpStatus === "EXPIRED" || mpStatus === "FAILED" || paymentStatus === "REJECTED") {
       statusFinal = "canceled";
     }
 
-    return respostaJSON({ 
-      status: statusFinal, 
-      raw_status: mpStatus,
-      payment_id: data.payment ? data.payment.id : null 
+    // 5. Retorna para o seu App
+    return respostaJSON({
+      status: statusFinal,
+      raw_status: paymentStatus !== "" ? paymentStatus : mpStatus,
+      json_completo: data
     });
 
   } catch (err) {
     return respostaJSON({ status: "error", message: err.toString() });
+  }
+}
+
+// Função para limpar a tela da máquina antes de uma nova venda
+function cancelarIntencoesPendentes(deviceId, token) {
+  try {
+    var url = "https://api.mercadopago.com/point/integration-api/devices/" + deviceId + "/payment-intents";
+    var options = {
+      "method": "delete",
+      "headers": {
+        "Authorization": "Bearer " + token
+      },
+      "muteHttpExceptions": true
+    };
+    UrlFetchApp.fetch(url, options);
+  } catch (e) {
+    // Apenas ignora se não houver nada para limpar
   }
 }

@@ -70,10 +70,10 @@ function voltarAoInicio() {
     const origem = localStorage.getItem('origem_acesso');
     if (origem === 'externo') {
         // Altere para o caminho real do seu index fora da estrutura
-        window.location.href = "../parceiro-painel.html";
+        window.location.href = "../index.html";
     } else {
         // Altere para o caminho real do seu index fora da estrutura
-        window.location.href = "parceiro-painel.html";
+        window.location.href = "index.html";
     }
 }
 

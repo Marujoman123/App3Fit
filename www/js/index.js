@@ -19,7 +19,7 @@ const SENHA_ADMIN = "4321"; // Defina sua senha aqui
 
 
 // cpfInput.value="414.716.138-36"; // teste admin (HUGO)
-// cpfInput.value="458.488.840-05"; //teste cliente (FARLEY)
+cpfInput.value="458.488.840-05"; //teste cliente (TESTE)
 // cpfInput.value="996.508.460-26"; //teste parceiro (RATO)
 
 

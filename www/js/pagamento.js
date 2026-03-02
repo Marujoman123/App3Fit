@@ -1,24 +1,29 @@
+// ======================================================
+// CONFIGURAÇÕES GERAIS E AMBIENTE
+// ======================================================
 const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
-
-// ======================================================
-// CONFIGURAÇÃO DE AMBIENTE
-// ======================================================
-const AMBIENTE = 'PROD'; // Troque para 'PROD' quando for usar a maquininha real e 'DESENV' para o desenvolvimento
+const AMBIENTE = 'PROD'; // 'PROD' para maquininha real | 'DESENV' para testes
 
 const configMP = {
     token: "APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591",
-    deviceId: "PAX_Q92__Q92-1733541950",
-    installments: 1,
-    paymentType: "debit_card"
+    deviceId: "PAX_Q92__Q92-1733541950"
 };
 
+// Variáveis de Controle Global (Idempotência e Trava de Clique)
+// Gerar o ID uma única vez evita cobranças duplicadas se a rede oscilar
+// Tenta pegar um ID que já existe nesta aba do navegador, se não existir, cria um novo
+let idVendaGlobal = sessionStorage.getItem('idVendaAtual');
+if (!idVendaGlobal) {
+    idVendaGlobal = "V" + Date.now();
+    sessionStorage.setItem('idVendaAtual', idVendaGlobal);
+}
 
+let pagamentoEmAndamento = false;
+
+// Dados do Usuário e Carrinho
 const tipoUsuario = localStorage.getItem('usuario_tipo');
 const nomeUsuario = localStorage.getItem('usuario_nome');
 const cpfUsuario = localStorage.getItem('usuario_cpf');
-
-
-// RECUPERAÇÃO DE DADOS COM TRAVA DE CENTAVOS
 const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 const totalOriginal = gr(parseFloat(localStorage.getItem('total_venda')) || 0);
 const saldoDisponivel = gr(parseFloat(localStorage.getItem('usuario_saldo')) || 0);
@@ -26,48 +31,56 @@ const saldoDisponivel = gr(parseFloat(localStorage.getItem('usuario_saldo')) || 
 let saldoUtilizadoTotal = 0;
 let descontoAplicado = 0;
 
+// Elementos da Interface
 const btnValidar = document.getElementById('btnValidarCupom');
 const inputCupom = document.getElementById('inputCupom');
 const inputSaldo = document.getElementById('inputUsarSaldo');
 const btnConfirmar = document.getElementById('btnConfirmarPagamento');
 
 // ======================================================
-// LÓGICA DE INTERFACE E RENDERIZAÇÃO
+// INICIALIZAÇÃO E RENDERIZAÇÃO
 // ======================================================
 
-if (tipoUsuario === "Parceiro") {
-    document.getElementById('containerSaldo').style.display = 'block';
-    document.getElementById('txtSaldoDisponivel').innerText = saldoDisponivel.toFixed(2);
-    document.getElementById('containerCupom').style.display = 'none';
-}
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarItens();
+    configurarInterfaceUsuario();
+    atualizarResumoTela();
+});
 
-const containerLista = document.getElementById('listaItensPagamento');
-if (carrinho.length === 0) {
-    containerLista.innerHTML = "<p>Carrinho vazio</p>";
-} else {
-    carrinho.forEach(item => {
-        const p = document.createElement('p');
-        const qtd = item.quantidade || 1;
-        // CORREÇÃO: Arredondando subtotal do item
-        const subtotal = gr(gr(item.preco) * qtd);
+function configurarInterfaceUsuario() {
+    if (tipoUsuario === "Parceiro") {
+        document.getElementById('containerSaldo').style.display = 'block';
+        document.getElementById('txtSaldoDisponivel').innerText = saldoDisponivel.toFixed(2);
+        document.getElementById('containerCupom').style.display = 'none';
 
-        p.style.fontSize = "0.9rem"; p.style.margin = "5px 0";
-        p.innerHTML = `• ${qtd}x ${item.nome} <span style="float:right;">R$ ${subtotal.toFixed(2)}</span>`;
-        containerLista.appendChild(p);
-    });
-}
+        // Sugere o uso de saldo automaticamente
+        let valorSugerido = Math.min(totalOriginal, saldoDisponivel);
+        if (inputSaldo) {
+            inputSaldo.value = valorSugerido.toFixed(2);
+            saldoUtilizadoTotal = gr(valorSugerido);
+        }
+    }
 
-
-// Se for retirada, esconde a seção de cupom na interface
-if (localStorage.getItem('travar_cupom') === 'true') {
-    const containerCupom = document.getElementById('containerCupom');
-    if (containerCupom) {
-        containerCupom.style.display = 'none';
-        // console.log("Interface de cupom desabilitada para Retirada.");
+    if (localStorage.getItem('travar_cupom') === 'true') {
+        const container = document.getElementById('containerCupom');
+        if (container) container.style.display = 'none';
     }
 }
 
-
+function renderizarItens() {
+    const container = document.getElementById('listaItensPagamento');
+    if (carrinho.length === 0) {
+        container.innerHTML = "<p>Carrinho vazio</p>";
+        return;
+    }
+    carrinho.forEach(item => {
+        const p = document.createElement('p');
+        const subtotal = gr(gr(item.preco) * (item.quantidade || 1));
+        p.style.fontSize = "0.9rem";
+        p.innerHTML = `• ${item.quantidade}x ${item.nome} <span style="float:right;">R$ ${subtotal.toFixed(2)}</span>`;
+        container.appendChild(p);
+    });
+}
 
 function atualizarResumoTela() {
     const totalComDesconto = gr(totalOriginal - descontoAplicado);
@@ -76,136 +89,101 @@ function atualizarResumoTela() {
     document.getElementById('totalOriginal').innerText = totalOriginal.toFixed(2);
     document.getElementById('totalFinal').innerText = totalFinal.toFixed(2);
 
-    const elDesconto = document.getElementById('valorDesconto');
-    if (elDesconto) {
-        elDesconto.innerHTML = "Desconto: <b>R$" + descontoAplicado.toFixed(2) + "</b>";
-    }
+    const elDesc = document.getElementById('valorDesconto');
+    if (elDesc) elDesc.innerHTML = `Desconto: <b>R$ ${descontoAplicado.toFixed(2)}</b>`;
 
-    const elSaldoUsado = document.getElementById('txtSaldoUsado');
-    if (elSaldoUsado) {
-        elSaldoUsado.style.display = saldoUtilizadoTotal > 0 ? 'block' : 'none';
-        elSaldoUsado.innerHTML = 'Saldo de R$ ' + saldoUtilizadoTotal.toFixed(2) + ' aplicado!';
+    const elSaldo = document.getElementById('txtSaldoUsado');
+    if (elSaldo) {
+        elSaldo.style.display = saldoUtilizadoTotal > 0 ? 'block' : 'none';
+        elSaldo.innerHTML = `Saldo de R$ ${saldoUtilizadoTotal.toFixed(2)} aplicado!`;
     }
 }
 
-btnValidar.addEventListener('click', async () => {
+// ======================================================
+// LOGICA DE CUPOM E SALDO
+// ======================================================
+
+btnValidar.onclick = async () => {
     const cupom = inputCupom.value.trim().toUpperCase();
-    const textoCupom = document.getElementById("txtCumpom");
-    const valorDesconto = document.getElementById("valorDesconto");
-    if (!cupom) {
-        descontoAplicado = 0;
-        atualizarResumoTela();
-        return;
-    }
+    if (!cupom) { descontoAplicado = 0; atualizarResumoTela(); return; }
+
     btnValidar.innerText = "...";
     try {
-        const response = await fetch(`${URL_SCRIPT}?validarCupom=${cupom}`);
-        const data = await response.json();
+        const res = await fetch(`${URL_SCRIPT}?validarCupom=${cupom}`);
+        const data = await res.json();
         if (data.status === "success") {
-            const nomeParceiro = data.parceiro ? data.parceiro.split(" ")[0] : "Parceiro";
-            // CORREÇÃO: Arredondando o desconto de 10%
             descontoAplicado = gr(totalOriginal * 0.10);
-            valorDesconto.style.display = 'block';
-            textoCupom.style.display = 'block';
-            textoCupom.style.color = 'Green';
-            textoCupom.innerHTML = "Cupom de " + nomeParceiro + " aplicado: 10% de desconto!";
-            atualizarResumoTela();
+            document.getElementById("txtCumpom").innerHTML = "Cupom aplicado!";
+            document.getElementById("txtCumpom").style.color = "green";
         } else {
             descontoAplicado = 0;
-            valorDesconto.style.display = 'none';
-            textoCupom.style.display = 'block';
-            textoCupom.style.color = 'red';
-            textoCupom.innerHTML = "Cupom inválido ou expirado.";
-            atualizarResumoTela();
+            alert("Cupom inválido.");
         }
-    } catch (e) {
-        alert("Erro ao conectar com o servidor.");
-    } finally {
-        btnValidar.innerText = "Validar";
-    }
-});
-
-// document.getElementById('btnAplicarSaldo').addEventListener('click', () => {
-//     // Lê o valor formatado do input
-//     let valorDigitado = parseFloat(inputSaldo.value) || 0;
-
-//     // Proteção: não pode usar mais do que o saldo disponível
-//     if (valorDigitado > saldoDisponivel) {
-//         valorDigitado = saldoDisponivel;
-//         inputSaldo.value = saldoDisponivel.toFixed(2);
-//     }
-
-//     // Atualiza a variável global do cálculo
-//     saldoUtilizadoTotal = gr(valorDigitado);
-    
-//     // Atualiza a tela (totais, descontos, etc)
-//     atualizarResumoTela();
-// });
-
-// LÓGICA DE PREENCHIMENTO AUTOMÁTICO DO SALDO
-document.addEventListener('DOMContentLoaded', () => {
-    if (tipoUsuario === "Parceiro" && inputSaldo) {
-        // Cálculo: Usar o total da compra, mas limitado ao saldo disponível
-        // Se a compra é R$ 50 e o saldo é R$ 100 -> Preenche 50.00
-        // Se a compra é R$ 100 e o saldo é R$ 50 -> Preenche 50.00
-        let valorSugerido = Math.min(totalOriginal, saldoDisponivel);
-        
-        inputSaldo.value = valorSugerido.toFixed(2);
-        
-        // Aplica o valor automaticamente no cálculo
-        saldoUtilizadoTotal = gr(valorSugerido);
         atualizarResumoTela();
-    }
-});
+    } catch (e) { alert("Erro ao validar cupom."); }
+    btnValidar.innerText = "Validar";
+};
 
-// ======================================================
-// FLUXO DE PAGAMENTO E MODAL
-// ======================================================
-
-function abrirModalPagamento() {
-    if (carrinho.length === 0) return alert("Carrinho vazio!");
-    document.getElementById('modalPagamento').style.display = 'flex';
+if (inputSaldo) {
+    inputSaldo.oninput = (e) => {
+        let val = parseFloat(e.target.value.replace(/\D/g, "") / 100) || 0;
+        let limite = Math.min(saldoDisponivel, totalOriginal);
+        if (val > limite) val = limite;
+        e.target.value = val.toFixed(2);
+        saldoUtilizadoTotal = gr(val);
+        atualizarResumoTela();
+    };
 }
 
-function fecharModal() {
-    document.getElementById('modalPagamento').style.display = 'none';
-}
+// ======================================================
+// FLUXO DE PAGAMENTO (O CORAÇÃO DO SISTEMA)
+// ======================================================
+
+// Disparo principal
+btnConfirmar.onclick = () => {
+    dispararPagamentoNaMaquina();
+};
 
 async function dispararPagamentoNaMaquina() {
+    if (pagamentoEmAndamento) return;
     if (carrinho.length === 0) return alert("Carrinho vazio!");
 
-    // Mostra o status imediatamente
-    exibirStatusPagamento("Aguardando ação na Maquininha...");
+    pagamentoEmAndamento = true;
+    btnConfirmar.disabled = true;
+    btnConfirmar.innerText = "Processando...";
 
-    // Chamamos o processamento final
+    // Mostra o modal de status
+    const modal = document.getElementById('modalPagamento');
+    if (modal) modal.style.display = 'flex';
+
+    exibirStatusPagamento("Aguardando ação na Maquininha... <br><br> <b style='color:green'>Faça o Pagamento na Maquininha, Caso o valor não apareceça aperte o botão verde</b>");
+
     await processarVendaFinal();
+
+    // Libera o botão caso não tenha redirecionado (erro)
+    pagamentoEmAndamento = false;
+    btnConfirmar.disabled = false;
+    btnConfirmar.innerText = "Confirmar e Finalizar";
 }
 
-btnConfirmar.addEventListener('click', abrirModalPagamento);
-
 async function processarVendaFinal() {
-    const idVendaUnico = "V" + Date.now();
+    const idVendaUnico = idVendaGlobal; // Usa o ID fixo da sessão
     const dataHora = new Date().toLocaleString('pt-BR');
-    const cupomTexto = (inputCupom.value.trim() !== "") ? inputCupom.value.toUpperCase() : "NENHUM";
+    const cupomTexto = inputCupom.value.trim().toUpperCase() || "NENHUM";
 
-    // 1. Mapeamento inicial dos itens com proteção de valores numéricos
+    // 1. Mapeamento para Planilha
     const jsonVendaFinal = carrinho.map(item => {
-        const qtd = parseInt(item.quantidade) || 1;
-        const valorUnitario = gr(parseFloat(item.preco));
-        const valorLinhaOriginal = gr(valorUnitario * qtd);
-        
-        // Evita divisão por zero se o totalOriginal estiver corrompido
-        const proporcao = totalOriginal > 0 ? (valorLinhaOriginal / totalOriginal) : (1 / carrinho.length);
+        const qtd = item.quantidade || 1;
+        const vUnit = gr(parseFloat(item.preco));
+        const vTotalLinha = gr(vUnit * qtd);
+        const prop = totalOriginal > 0 ? (vTotalLinha / totalOriginal) : (1 / carrinho.length);
 
-        const descDesteItem = gr(descontoAplicado * proporcao);
-        const valorComDescontoCupom = gr(valorLinhaOriginal - descDesteItem);
-        const saldoDesteItem = gr(saldoUtilizadoTotal * proporcao);
-        const valorPagoDesteItem = gr(Math.max(0, gr(valorComDescontoCupom - saldoDesteItem)));
+        const descItem = gr(descontoAplicado * prop);
+        const saldoItem = gr(saldoUtilizadoTotal * prop);
+        const pagoItem = gr(Math.max(0, gr(gr(vTotalLinha - descItem) - saldoItem)));
 
-        let comissao = (descontoAplicado > 0) ? gr(valorLinhaOriginal * 0.10) : 0;
-        if (tipoUsuario === "Parceiro" && saldoDesteItem > 0) {
-            comissao = gr(-saldoDesteItem);
-        }
+        let comissao = (descontoAplicado > 0) ? gr(vTotalLinha * 0.10) : 0;
+        if (tipoUsuario === "Parceiro" && saldoItem > 0) comissao = gr(-saldoItem);
 
         return {
             "ID Venda": idVendaUnico,
@@ -216,48 +194,36 @@ async function processarVendaFinal() {
             "Cod": item.codigo,
             "Produto": item.nome,
             "Quantidade": qtd,
-            "Valor Unit": valorUnitario,
-            "Valor Total Item": valorLinhaOriginal,
+            "Valor Unit": vUnit,
+            "Valor Total Item": vTotalLinha,
             "cupom": cupomTexto,
-            "ValoremSaldo": saldoDesteItem,
-            "ValorPAgo": valorPagoDesteItem,
+            "ValoremSaldo": saldoItem,
+            "ValorPAgo": pagoItem,
             "Valor parceiro": comissao,
-            "Valor liquido": gr(Math.max(0, gr(valorPagoDesteItem - (comissao > 0 ? comissao : 0)))),
+            "Valor liquido": gr(Math.max(0, gr(pagoItem - (comissao > 0 ? comissao : 0)))),
             "Tipo Pagamento": "PROCESSANDO"
         };
     });
 
-    const modoManual = localStorage.getItem('modo_pagamento_manual') === 'true';
-    const isRetirada = localStorage.getItem('travar_cupom') === 'true'; 
     const valorTotalPago = gr(jsonVendaFinal.reduce((acc, i) => acc + i["ValorPAgo"], 0));
     const valorTotalCentavos = Math.round(valorTotalPago * 100);
 
     try {
         let podeGravar = false;
 
-        // --- ROTA A: LANÇAMENTO MANUAL OU SALDO TOTAL (Bypassa a Maquininha) ---
-        if (modoManual || valorTotalCentavos === 0) {
-            let labelTipo;
-            if (isRetirada) labelTipo = "RETIRADA_ESTOQUE";
-            else if (modoManual) labelTipo = "MANUAL_DIN_PIX";
-            else labelTipo = "SALDO_OU_CUPOM";
+        // --- ROTA: MANUAL OU SALDO TOTAL ---
+        if (localStorage.getItem('modo_pagamento_manual') === 'true' || valorTotalCentavos === 0) {
+            let label = "SALDO_OU_CUPOM";
+            if (localStorage.getItem('travar_cupom') === 'true') label = "RETIRADA_ESTOQUE";
+            else if (localStorage.getItem('modo_pagamento_manual') === 'true') label = "MANUAL_DIN_PIX";
 
-            jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = labelTipo; });
-
+            jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = label; });
             podeGravar = true;
-            // Limpamos apenas após confirmar a rota
-            localStorage.removeItem('modo_pagamento_manual');
-            localStorage.removeItem('travar_cupom');
         }
-
-        // --- ROTA B: AMBIENTE DE PRODUÇÃO (Usa Maquininha Real) ---
+        // --- ROTA: MAQUININHA REAL ---
         else if (AMBIENTE === 'PROD') {
             const payload = {
-                config: {
-                    token: configMP.token,
-                    deviceId: configMP.deviceId,
-                    amount: valorTotalCentavos
-                },
+                config: { token: configMP.token, deviceId: configMP.deviceId, amount: valorTotalCentavos },
                 itens: jsonVendaFinal
             };
 
@@ -265,113 +231,95 @@ async function processarVendaFinal() {
             const resIntent = await response.json();
 
             if (resIntent.status === "success" && resIntent.intent_id) {
-                exibirStatusPagamento("Enviado para a Maquininha... <br><br> <b style='color:green'>Se a tela não acender, aperte o botão 'VERDE' na máquina!</b>");
-
                 let pago = false;
                 let tentativas = 0;
-                const maxTentativas = 60; // Aumentado para 3 minutos de tolerância
 
-                while (!pago && tentativas < maxTentativas) {
+                while (!pago && tentativas < 60) { // Polling de 3 minutos
                     tentativas++;
-                    console.log(`Verificando pagamento... Tentativa ${tentativas}`);
                     await new Promise(r => setTimeout(r, 3000));
 
                     try {
                         const check = await fetch(`${URL_SCRIPT}?verificarPagamento=${resIntent.intent_id}&token=${configMP.token}`);
                         const statusMP = await check.json();
 
+                        console.log("🔍 Retorno da Maquininha:", statusMP);
+
                         if (statusMP.status === "approved") {
                             pago = true;
                             podeGravar = true;
-                            const tipoReal = statusMP.raw_status || "CARTAO_PAGO";
-                            jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = tipoReal; });
-                            break; 
-                        } 
-                        else if (statusMP.status === "canceled") {
-                            alert("❌ O pagamento foi cancelado ou recusado.");
-                            location.reload();
-                            return;
+                            jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = statusMP.raw_status; });
+                            break;
+                        } else if (statusMP.status === "canceled") {
+                            // Usamos um código secreto para identificar o cancelamento
+                            throw new Error("CANCELADO");
                         }
                     } catch (err) {
-                        console.warn("Falha momentânea de rede, tentando novamente...");
+                        // SE O ERRO FOR "CANCELADO", JOGAMOS ELE PARA FORA DO LOOP!
+                        if (err.message === "CANCELADO") {
+                            throw new Error("Pagamento cancelado na máquina.");
+                        }
+                        // Se for erro de internet normal, ele apenas loga e tenta de novo
+                        console.warn("Erro de conexão, tentando novamente...");
                     }
                 }
-                if (!pago) throw new Error("Tempo limite de pagamento excedido.");
-
+                if (!pago) throw new Error("Tempo esgotado na máquina.");voltarAoInicio();
             } else {
-                throw new Error("Não foi possível iniciar a maquininha. Verifique a conexão.");
+                throw new Error("Erro ao iniciar máquina: " + (resIntent.message || "Verifique conexão"));
             }
         }
-
-        // --- ROTA C: AMBIENTE DE DESENVOLVIMENTO ---
+        // --- ROTA: MODO TESTE ---
         else {
-            console.log("Simulando aprovação (Modo DESENV)...");
             await new Promise(r => setTimeout(r, 1500));
             jsonVendaFinal.forEach(item => { item["Tipo Pagamento"] = "MODO_TESTE"; });
             podeGravar = true;
         }
 
-        // --- FINALIZAÇÃO: GRAVAÇÃO NA PLANILHA ---
+        // --- GRAVAÇÃO NA PLANILHA ---
         if (podeGravar) {
-            exibirStatusPagamento("Finalizando... <br> Gravando na planilha.");
-
+            exibirStatusPagamento("Pagamento aprovado! Gravando dados...");
             const resFinal = await fetch(URL_SCRIPT, {
                 method: 'POST',
-                body: JSON.stringify({
-                    acao: "registrarVendaFinal",
-                    dados: jsonVendaFinal
-                })
+                body: JSON.stringify({ acao: "registrarVendaFinal", dados: jsonVendaFinal })
             });
-
             const finalData = await resFinal.json();
 
             if (finalData.status === "success") {
-                alert("✅ Venda concluída com sucesso!");
+                alert("✅ Venda concluída!");
                 localStorage.removeItem('carrinho');
                 localStorage.removeItem('total_venda');
+                localStorage.removeItem('modo_pagamento_manual');
+                localStorage.removeItem('travar_cupom');
                 window.location.href = "index.html";
+                sessionStorage.removeItem('idVendaAtual');
             } else {
-                throw new Error(finalData.message || "A maquininha pagou, mas a planilha falhou. Contate o suporte.");
+                throw new Error("Erro ao gravar planilha: " + finalData.message);
             }
         }
 
     } catch (e) {
-        alert("⚠️ Ocorreu um erro: " + e.message);
-        location.reload();
+        alert("⚠️ " + e.message);
+        document.getElementById('modalPagamento').style.display = 'none';
+        pagamentoEmAndamento = false;
+
+        // Se foi só um erro de internet ou timeout, ele MANTÉM o ID.
+        // Assim, se você clicar em "Confirmar" de novo, ele não cria uma cobrança nova, 
+        // ele apenas se reconecta àquela que já está na tela da maquininha!
+        if (e.message.includes("cancelado")) {
+            sessionStorage.removeItem('idVendaAtual');
+            idVendaGlobal = "V" + Date.now();
+            sessionStorage.setItem('idVendaAtual', idVendaGlobal);
+        }
     }
 }
 
 function exibirStatusPagamento(mensagem) {
-    const modalContent = document.querySelector('.modal-content');
-    modalContent.innerHTML = `
-        <div class="spinner"></div>
-        <h3>${mensagem}</h3>
-        <p>Não feche esta tela.</p>
-    `;
+    // Busca o elemento interno do modal que você já tem
+    const container = document.querySelector('#modalPagamento .modal-content');
+    if (container) {
+        container.innerHTML = `
+            <div class="spinner"></div>
+            <h3>${mensagem}</h3>
+            <p>Não feche esta tela.</p>
+        `;
+    }
 }
-
-// MÁSCARA PARA O INPUT DE SALDO
-if (inputSaldo) {
-    inputSaldo.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, "");
-        value = (value / 100).toFixed(2);
-
-        // REGRA DE OURO: Não pode ser maior que o saldo E nem maior que o total da compra
-        let limiteMaximo = Math.min(saldoDisponivel, totalOriginal);
-
-        if (parseFloat(value) > limiteMaximo) {
-            value = limiteMaximo.toFixed(2);
-        }
-
-        e.target.value = value;
-        
-        // Atualização em tempo real (opcional, mas melhora a experiência)
-        saldoUtilizadoTotal = gr(parseFloat(value));
-        atualizarResumoTela();
-    });
-}
-
-
-
-
-atualizarResumoTela();
