@@ -68,10 +68,19 @@ function adicionarManual(codigo) {
     const p = produtosEstoque.find(x => x.codigo === codigo);
     if (!p) return; // Não trava mais se quantidade for 0
 
-    // 🔥 MUDANÇA: Adiciona 1 no contador da tela
+    // Adiciona 1 no contador da tela
     p.quantidade++;
     
-    const preco = (tipoPreco === 'Parceiro') ? gr(p.precoParceiro) : gr(p.precoCliente);
+    // 🔥 MUDANÇA: Verifica se é Admin (pela origem_acesso ou tipo de usuário)
+    const isAdministrador = localStorage.getItem("origem_acesso") === "admin" || localStorage.getItem("usuario_tipo") === "Proprietário";
+    
+    let preco;
+    if (tipoPreco === 'Parceiro') {
+        // Se for Admin logado, puxa o Custo. Se for Parceiro real, puxa precoParceiro
+        preco = isAdministrador ? gr(p.precoCusto) : gr(p.precoParceiro);
+    } else {
+        preco = gr(p.precoCliente);
+    }
 
     const existente = carrinhoManual.find(x => x.codigo === codigo);
     if (existente) {
@@ -221,10 +230,17 @@ async function gerarPDFPedido() {
 }
 
 function atualizarPrecosCarrinho() {
+    // 🔥 MUDANÇA: A mesma verificação de Admin para quando trocar a chavinha lá em cima
+    const isAdministrador = localStorage.getItem("origem_acesso") === "admin" || localStorage.getItem("usuario_tipo") === "Proprietário";
+
     carrinhoManual = carrinhoManual.map(item => {
         const original = produtosEstoque.find(p => p.codigo === item.codigo);
         if (original) {
-            item.precoEfetivo = (tipoPreco === 'Parceiro') ? gr(original.precoParceiro) : gr(original.precoCliente);
+            if (tipoPreco === 'Parceiro') {
+                item.precoEfetivo = isAdministrador ? gr(original.precoCusto) : gr(original.precoParceiro);
+            } else {
+                item.precoEfetivo = gr(original.precoCliente);
+            }
         }
         return item;
     });
