@@ -10,32 +10,58 @@ function doGet(e) {
       var abaProd = ss.getSheetByName("produtos");
       var abaEstoque = ss.getSheetByName("Estoque");
 
-      var dadosProd = abaProd.getDataRange().getValues();
-      var dadosEstoque = abaEstoque.getDataRange().getValues();
+      // getDisplayValues obriga a ler como texto, impedindo erros de notação científica
+      var dadosProd = abaProd.getDataRange().getDisplayValues();
+      var dadosEstoque = abaEstoque.getDataRange().getDisplayValues();
 
-      // Mapa de estoque: { "Código": Quantidade }
+      // 1. Cria dicionário dos produtos para saber quais códigos realmente existem
+      var produtosValidos = {};
+      for (var j = 1; j < dadosProd.length; j++) {
+        var codValido = dadosProd[j][0].toString().trim().replace(/^0+/, '');
+        if (codValido !== "") produtosValidos[codValido] = true;
+      }
+
+      // 2. Mapeia estoque com a Busca Inteligente
       var mapaEstoque = {};
       for (var i = 1; i < dadosEstoque.length; i++) {
-        mapaEstoque[dadosEstoque[i][0].toString()] = dadosEstoque[i][1];
+        var codigoBruto = dadosEstoque[i][0].toString().trim();
+        var codigoSemZeros = codigoBruto.replace(/^0+/, '');
+        var codigoReal = "";
+
+        // A) Tenta achar o código exato primeiro (códigos antigos funcionam aqui)
+        if (produtosValidos[codigoSemZeros]) {
+          codigoReal = codigoSemZeros;
+        } 
+        // B) Se não achou exato e tem mais de 7 dígitos, corta o lote (códigos novos)
+        else if (codigoBruto.length > 7) {
+          var codigoCortado = codigoBruto.substring(7).replace(/^0+/, '');
+          if (produtosValidos[codigoCortado]) {
+            codigoReal = codigoCortado;
+          }
+        }
+
+        // Se encontrou correspondência, soma a quantidade (agrupa múltiplos lotes)
+        if (codigoReal !== "") {
+          var qtd = Number(dadosEstoque[i][1]) || 0;
+          mapaEstoque[codigoReal] = (mapaEstoque[codigoReal] || 0) + qtd;
+        }
       }
 
       var listaFinal = [];
 
-      // Percorre os produtos (começa em 1 para pular cabeçalho)
       for (var j = 1; j < dadosProd.length; j++) {
-        var cod = dadosProd[j][0].toString();
-        var estoqueAtual = mapaEstoque[cod] || 0;
+        var codPlanilha = dadosProd[j][0].toString().trim().replace(/^0+/, '');
+        var estoqueAtual = mapaEstoque[codPlanilha] || 0;
 
-        // FILTRO: Só adiciona à lista se houver estoque
         if (estoqueAtual > 0) {
           listaFinal.push({
-            codigo: cod,
-            nome: dadosProd[j][1],         // Ajuste se o nome estiver em outra coluna
-            kg: dadosProd[j][2],           // Coluna C
-            linha: dadosProd[j][6],       // Coluna D (Ajuste conforme sua planilha)
+            codigo: dadosProd[j][0].toString().trim(), // Mantém original pro front
+            nome: dadosProd[j][1],
+            kg: dadosProd[j][2],
+            linha: dadosProd[j][6],
             precoCusto: dadosProd[j][3],
-            precoCliente: dadosProd[j][4],  // Coluna E
-            precoParceiro: dadosProd[j][5], // Coluna F
+            precoCliente: dadosProd[j][4],
+            precoParceiro: dadosProd[j][5],
             quantidade: estoqueAtual
           });
         }
@@ -44,14 +70,12 @@ function doGet(e) {
       return respostaJSON({ status: "success", produtos: listaFinal });
     }
 
-
     // --- ROTA 1.B: Listar TODOS os produtos (MESMO ZERADOS) para Encomenda ---
     if (e.parameter.todosProdutosSemFiltro) {
       var abaProd = ss.getSheetByName("produtos");
       var dadosProd = abaProd.getDataRange().getValues();
       var listaCompleta = [];
 
-      // Começa em 1 para pular o cabeçalho
       for (var j = 1; j < dadosProd.length; j++) {
         listaCompleta.push({
           codigo: dadosProd[j][0].toString(),
@@ -120,10 +144,9 @@ function validarCupom(cupomRecebido, ss) {
   var dados = abaParceiros.getDataRange().getValues();
 
   for (var i = 1; i < dados.length; i++) {
-    // Índice 0 = CPF, Índice 1 = Nome, Índice 3 = Cupom, Índice 4 = Saldo
     if (dados[i][3].toString().toUpperCase().trim() === cupomBuscado) {
       return respostaJSON({
-        status: "success", // Mantemos "success" para o seu fetch reconhecer
+        status: "success",
         nome: dados[i][1],
         cpf: dados[i][0],
         saldo: dados[i][4],
@@ -135,11 +158,17 @@ function validarCupom(cupomRecebido, ss) {
 }
 
 function buscarProduto(barcode, ss) {
+  var barcodeStr = barcode.toString().trim();
   var abaProd = ss.getSheetByName("produtos");
-  var dados = abaProd.getDataRange().getValues();
+  var dados = abaProd.getDataRange().getDisplayValues(); 
 
   for (var i = 1; i < dados.length; i++) {
-    if (dados[i][0].toString().trim() === barcode.toString().trim()) {
+    var codPlanilha = dados[i][0].toString().trim().replace(/^0+/, '');
+    var codBuscaSemZeros = barcodeStr.replace(/^0+/, '');
+    var codBuscaCortado = barcodeStr.length > 7 ? barcodeStr.substring(7).replace(/^0+/, '') : "";
+
+    // Bate o código exato ou o código já cortado
+    if (codPlanilha === codBuscaSemZeros || codPlanilha === codBuscaCortado) {
       return respostaJSON({
         status: "success",
         nome: dados[i][1],
@@ -182,26 +211,45 @@ function atualizarEstoque(codProduto, quantidadeVendida, ss) {
   var sheetProdutos = ss.getSheetByName("Estoque");
   if (!sheetProdutos) return;
 
-  var dados = sheetProdutos.getDataRange().getValues();
+  var dados = sheetProdutos.getDataRange().getDisplayValues(); 
+  var qtdRestante = quantidadeVendida;
+  var codVendidoLimpo = codProduto.toString().trim().replace(/^0+/, '');
 
+  // PASSO 1: Percorre as linhas e deduz dos lotes que têm estoque disponível
   for (var i = 1; i < dados.length; i++) {
-    // Usamos == para comparar, ou toString() como você fez, para evitar erro de tipo (número vs texto)
-    if (dados[i][0].toString() === codProduto.toString()) {
+    var codigoBruto = dados[i][0].toString().trim();
+    var codigoSemZeros = codigoBruto.replace(/^0+/, '');
+    var codigoCortado = codigoBruto.length > 7 ? codigoBruto.substring(7).replace(/^0+/, '') : "";
 
+    // Compara se o código bate e se ainda tem quantidade pra baixar
+    if ((codigoSemZeros === codVendidoLimpo || codigoCortado === codVendidoLimpo) && qtdRestante > 0) {
       var estoqueAtual = Number(dados[i][1]) || 0;
-      var novoEstoque = estoqueAtual - quantidadeVendida;
 
-      // Ajuste de segurança: Evitar que o estoque fique negativo se você não quiser
-      if (novoEstoque < 0) novoEstoque = 0;
+      if (estoqueAtual > 0) {
+        var deduzir = Math.min(estoqueAtual, qtdRestante);
+        var novoEstoque = estoqueAtual - deduzir;
+        sheetProdutos.getRange(i + 1, 2).setValue(novoEstoque);
+        qtdRestante -= deduzir;
+      }
+    }
+  }
 
-      // i + 1 porque o array começa em 0 e a planilha em 1
-      // Coluna 2 é a Coluna B (Quantidade)
-      sheetProdutos.getRange(i + 1, 2).setValue(novoEstoque);
+  // PASSO 2: Ajuste de segurança caso o estoque total termine e falte baixar algo
+  if (qtdRestante > 0) {
+    for (var i = 1; i < dados.length; i++) {
+      var codigoBruto = dados[i][0].toString().trim();
+      var codigoSemZeros = codigoBruto.replace(/^0+/, '');
+      var codigoCortado = codigoBruto.length > 7 ? codigoBruto.substring(7).replace(/^0+/, '') : "";
 
-      // Opcional: Registrar no console para debug do Apps Script
-      console.log("Produto: " + codProduto + " | Estoque anterior: " + estoqueAtual + " | Novo: " + novoEstoque);
-
-      return; // Encerra a função após encontrar e atualizar
+      if (codigoSemZeros === codVendidoLimpo || codigoCortado === codVendidoLimpo) {
+        var estoqueAtual = Number(dados[i][1]) || 0;
+        var novoEstoque = estoqueAtual - qtdRestante;
+        
+        if (novoEstoque < 0) novoEstoque = 0; // Trava para não ficar negativo
+        
+        sheetProdutos.getRange(i + 1, 2).setValue(novoEstoque);
+        break; 
+      }
     }
   }
 }
@@ -237,16 +285,12 @@ function doPost(e) {
       var deviceId = data.config.deviceId;
       var valorParaMaquininha = Number.parseInt(data.config.amount);
 
-      // Pegamos o ID da venda do primeiro item do carrinho
       var idVenda = data.itens && data.itens.length > 0 ? data.itens[0]["ID Venda"].toString() : "V" + Date.now();
 
       if (valorParaMaquininha > 0) {
-
-        // 🚨 COMANDO DE CHOQUE: Limpa a maquininha antes de enviar a nova!
         cancelarIntencoesPendentes(deviceId, token);
-        Utilities.sleep(1500); // Pausa 1.5s para o Mercado Pago processar a limpeza
+        Utilities.sleep(1500); 
 
-        // Chamada para a função auxiliar externa
         var resMP = acionarMaquinaPoint(
           valorParaMaquininha,
           idVenda,
@@ -257,14 +301,12 @@ function doPost(e) {
 
         var responseText = resMP.getContentText();
         var resObj = JSON.parse(responseText);
-        var responseCode = resMP.getResponseCode(); // Captura o código HTTP (ex: 201, 409, 400)
+        var responseCode = resMP.getResponseCode(); 
 
-        // Caso A: Sucesso (Intenção criada)
         if (resObj.id) {
           return respostaJSON({ status: "success", intent_id: resObj.id });
         }
 
-        // Caso B: Erro 409 - Maquininha com pagamento pendente (Ocupada)
         if (responseCode === 409 || resObj.error === "2205") {
           return respostaJSON({
             status: "error",
@@ -272,7 +314,6 @@ function doPost(e) {
           });
         }
 
-        // Caso C: Outros erros (Token inválido, DeviceID errado, etc)
         console.error("Erro retornado pelo Mercado Pago: " + responseText);
         return respostaJSON({
           status: "error",
@@ -289,7 +330,6 @@ function doPost(e) {
   }
 }
 
-// Função auxiliar para responder JSON corretamente
 function respostaJSON(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
@@ -349,10 +389,6 @@ function registrarVendaNaPlanilha(data) {
 // 4. INTEGRAÇÃO MERCADO PAGO E AUXILIARES
 // ======================================================
 
-// ======================================================
-// INTEGRAÇÃO MERCADO PAGO ATUALIZADA (V2)
-// ======================================================
-
 function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentConfig) {
   const url = "https://api.mercadopago.com/point/integration-api/devices/" + deviceId + "/payment-intents";
 
@@ -374,7 +410,7 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
     "headers": {
       "Authorization": "Bearer " + token,
       "Content-Type": "application/json",
-      "X-Idempotency-Key": "ID-" + idVenda // Chave para evitar duplicidade
+      "X-Idempotency-Key": "ID-" + idVenda 
     },
     "payload": JSON.stringify(payload),
     "muteHttpExceptions": true
@@ -399,10 +435,7 @@ function consultarStatusPagamento(intentId, token) {
     var response = UrlFetchApp.fetch(url, options);
     var data = JSON.parse(response.getContentText());
 
-    // 1. Pega o status geral da maquininha
     var mpStatus = (data.state || data.status || "").toUpperCase();
-    
-    // 2. CRIA A VARIÁVEL paymentStatus com segurança (isso resolve o seu ReferenceError)
     var paymentStatus = "";
     if (data.payment && data.payment.state) {
       paymentStatus = data.payment.state.toUpperCase();
@@ -410,16 +443,13 @@ function consultarStatusPagamento(intentId, token) {
 
     var statusFinal = "pending";
 
-    // 3. Verifica se foi Aprovado/Finalizado
     if (mpStatus === "FINISHED" || mpStatus === "CLOSED" || mpStatus === "PROCESSED" || paymentStatus === "APPROVED") {
       statusFinal = "approved";
     }
-    // 4. Verifica se foi Cancelado/Rejeitado
     else if (mpStatus === "CANCELED" || mpStatus === "ABANDONED" || mpStatus === "EXPIRED" || mpStatus === "FAILED" || paymentStatus === "REJECTED") {
       statusFinal = "canceled";
     }
 
-    // 5. Retorna para o seu App
     return respostaJSON({
       status: statusFinal,
       raw_status: paymentStatus !== "" ? paymentStatus : mpStatus,
@@ -431,7 +461,6 @@ function consultarStatusPagamento(intentId, token) {
   }
 }
 
-// Função para limpar a tela da máquina antes de uma nova venda
 function cancelarIntencoesPendentes(deviceId, token) {
   try {
     var url = "https://api.mercadopago.com/point/integration-api/devices/" + deviceId + "/payment-intents";
@@ -443,7 +472,5 @@ function cancelarIntencoesPendentes(deviceId, token) {
       "muteHttpExceptions": true
     };
     UrlFetchApp.fetch(url, options);
-  } catch (e) {
-    // Apenas ignora se não houver nada para limpar
-  }
+  } catch (e) {}
 }

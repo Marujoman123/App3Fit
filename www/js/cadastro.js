@@ -1,5 +1,5 @@
 // URL do seu Google Apps Script (aquela que você gerou na implantação)
-const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
+const URL_PLANILHA = "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec";
 const cadCpf = document.getElementById('cadCpf');
 const btnSalvar = document.getElementById('btnSalvar');
 

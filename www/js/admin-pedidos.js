@@ -1,4 +1,4 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec";
 let produtosEstoque = [];
 let carrinhoManual = [];
 let tipoPreco = 'Cliente';
@@ -77,8 +77,8 @@ function renderizarSelecao() {
             return `
         <div class="item-selecao ${esgotado}" onclick="adicionarManual('${p.codigo}')">
             <div>
-                <small style="color: #666; display: block;">${p.linha}</small>
-                <strong>${p.nome}</strong> - <small>${p.kg}</small>
+                <small style="color: #666; display: block;">${p.linha} - ${p.codigo}</small>
+                <strong>${p.nome}</strong> - <small>${p.kg} = ${p.validade} </small>
             </div>
             <span class="badge-estoque" style="${p.quantidade <= 0 ? 'color:red' : ''}">
                 ${p.quantidade}
@@ -91,6 +91,10 @@ function renderizarSelecao() {
 
 
 function adicionarManual(codigo) {
+
+    let codigolimpo = codigo.substring(7);
+    console.log(codigo);
+    console.log(codigolimpo);
     // Busca o produto na lista global de estoque
     const p = produtosEstoque.find(x => x.codigo === codigo);
     if (!p) return;

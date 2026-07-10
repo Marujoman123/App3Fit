@@ -1,7 +1,7 @@
 // ======================================================
 // CONFIGURAÇÕES GERAIS E AMBIENTE
 // ======================================================
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec";
 const AMBIENTE = 'PROD'; // 'PROD' para maquininha real | 'DESENV' para testes
 
 const configMP = {
