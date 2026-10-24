@@ -8,7 +8,11 @@ function voltarParaPainel() {
         if (tipoUsuario === "Parceiro") {
             // Altere para o caminho real do seu index fora da estrutura
             window.location.href = "../parceiro-painel.html";
-        } else {
+        } 
+        else if  (tipoUsuario === "Cliente") {
+            window.location.href = "../cliente-painel.html";
+        }
+        else {
             // Se for Admin ou qualquer outro, volta para o admin
             window.location.href = "admin.html";
         }
@@ -19,7 +23,11 @@ function voltarParaPainel() {
         if (tipoUsuario === "Parceiro") {
             // Altere para o caminho real do seu index fora da estrutura
             window.location.href = "parceiro-painel.html";
-        } else {
+        } 
+        else if  (tipoUsuario === "Cliente") {
+            window.location.href = "cliente-painel.html";
+        }
+        else {
             // Se for Admin ou qualquer outro, volta para o admin
             window.location.href = "admin.html";
         }
