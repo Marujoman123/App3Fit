@@ -134,7 +134,7 @@ function TestaCPF() {
 
 // Função de Consulta à Planilha
 async function ValidarNoGoogleSheets() {
-    const urlScript = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec";
     const cpfLimpo = cpfInput.value.replace(/\D/g, "");
 
     // Mostra o loading e esconde o botão (conforme combinamos)
@@ -144,7 +144,7 @@ async function ValidarNoGoogleSheets() {
     let resultado;
 
     try {
-        const response = await fetch(`${urlScript}?cpf=${cpfLimpo}`);
+        const response = await fetch(`${URL_SCRIPT}?cpf=${cpfLimpo}`);
 
         if (!response.ok) throw new Error("Erro na rede");
 
@@ -174,7 +174,7 @@ async function ValidarNoGoogleSheets() {
             localStorage.setItem('usuario_cupom', resultado.cupom);
             window.location.href = "parceiro-painel.html"; // Direciona para a nova página
         } else {
-            window.location.href = "www/caixa.html";
+            window.location.href = "cliente-painel.html";
         }
     } else {
         // Se o usuário não existe, também é bom salvar o CPF para o cadastro
