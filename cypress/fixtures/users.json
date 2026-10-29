@@ -1,0 +1,25 @@
+{
+  "admin": {
+    "cpf": "414.716.138-36",
+    "cpfClean": "41471613836",
+    "name": "HUGO ROSA",
+    "password": "4321",
+    "type": "Proprietário"
+  },
+  "cliente": {
+    "cpf": "458.488.840-05",
+    "cpfClean": "45848884005",
+    "name": "CLIENTE TESTE",
+    "phone": "(11) 99999-9999",
+    "type": "Cliente"
+  },
+  "parceiro": {
+    "cpf": "996.508.460-26",
+    "cpfClean": "99650846026",
+    "name": "PARCEIRO RATO",
+    "phone": "(21) 98888-8888",
+    "coupon": "RATO2024",
+    "balance": "500.00",
+    "type": "Parceiro"
+  }
+}

@@ -7,7 +7,7 @@
 import CONFIG from './config.js';
 import Storage from './storage.js';
 
-export const Router = {
+const Router = {
   // Navegar para página
   navigate(page, params = {}) {
     let url = page;

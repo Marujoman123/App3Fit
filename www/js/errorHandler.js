@@ -3,7 +3,7 @@
 // ============================================
 // Centraliza tratamento de erros com padrão consistente
 
-export const ErrorHandler = {
+const ErrorHandler = {
   // Tipos de erro
   TYPES: {
     INFO: 'info',

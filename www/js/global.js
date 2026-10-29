@@ -1,45 +1,19 @@
+// Script comum (não-módulo): carregado antes dos scripts das páginas ainda não migradas.
 function voltarParaPainel() {
     const origem = localStorage.getItem('origem_acesso');
     const tipoUsuario = localStorage.getItem('usuario_tipo');
+    const prefixo = origem === 'externo' ? '../' : '';
 
-    if (origem === 'externo') {
-
-
-        if (tipoUsuario === "Parceiro") {
-            // Altere para o caminho real do seu index fora da estrutura
-            window.location.href = "../parceiro-painel.html";
-        } 
-        else if  (tipoUsuario === "Cliente") {
-            window.location.href = "../cliente-painel.html";
-        }
-        else {
-            // Se for Admin ou qualquer outro, volta para o admin
-            window.location.href = "admin.html";
-        }
-
+    if (tipoUsuario === "Parceiro") {
+        window.location.href = prefixo + "parceiro-painel.html";
+    } else if (tipoUsuario === "Cliente") {
+        window.location.href = prefixo + "cliente-painel.html";
     } else {
-
-
-        if (tipoUsuario === "Parceiro") {
-            // Altere para o caminho real do seu index fora da estrutura
-            window.location.href = "parceiro-painel.html";
-        } 
-        else if  (tipoUsuario === "Cliente") {
-            window.location.href = "cliente-painel.html";
-        }
-        else {
-            // Se for Admin ou qualquer outro, volta para o admin
-            window.location.href = "admin.html";
-        }
-
+        window.location.href = "admin.html";
     }
-
 }
 
-
-// Função para evitar erros de ponto flutuante
+// Evita erros de ponto flutuante
 function gr(valor) {
     return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
 }
-
-

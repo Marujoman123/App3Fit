@@ -5,9 +5,9 @@
 // Sem URLs hardcoded em outros arquivos
 
 import CONFIG from './config.js';
-import { ErrorHandler } from './errorHandler.js';
+import ErrorHandler from './errorHandler.js';
 
-export const API = {
+const API = {
   // Helper: Fazer requisição genérica ao Google Apps Script
   async request(params = {}) {
     try {

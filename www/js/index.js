@@ -1,201 +1,175 @@
+import CONFIG from './config.js';
+import Storage from './storage.js';
+import API from './api.js';
+import Router from './router.js';
+import ErrorHandler from './errorHandler.js';
+import { formatCPF, isValidCPF } from './utils.js';
 
-// 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
-localStorage.clear();
+// ============================================
+// DOM ELEMENTS
+// ============================================
 
-localStorage.setItem('origem_acesso', 'interno');
-const btnEntrar = document.getElementById('btnEntrar');
-const cpfInput = document.getElementById('cpf');
-const mensagemErro = document.getElementById('mensagem-erro');
-const inputs = document.querySelectorAll('input');
-const loginContainer = document.getElementById('loginContainer');
-const modal = document.getElementById('modalSenha');
-const inputSenha = document.getElementById('inputSenhaAdmin');
-const btnConfirmar = document.getElementById('btnConfirmarSenha');
-const btnCancelar = document.getElementById('btnCancelarSenha');
+let btnEntrar, cpfInput, mensagemErro, modal, inputSenha, btnConfirmar, btnCancelar, loginContainer, loadingLogin;
 
-const CPF_JE = "31806722852";
-const CPF_HUGO = "41471613836";
-const SENHA_ADMIN = "4321"; // Defina sua senha aqui
+// ============================================
+// INITIALIZATION
+// ============================================
 
+document.addEventListener('DOMContentLoaded', () => {
+  Storage.clearAll();
+  Storage.setOrigin('interno');
 
-// cpfInput.value="414.716.138-36"; // teste admin (HUGO)
-// cpfInput.value="458.488.840-05"; //teste cliente (TESTE)
-// cpfInput.value="996.508.460-26"; //teste parceiro (RATO)
+  initializeElements();
+  setupKeyboardEnhancements();
+  initializeEventListeners();
+  cpfInput.focus();
+});
 
+function initializeElements() {
+  btnEntrar = document.getElementById('btnEntrar');
+  cpfInput = document.getElementById('cpf');
+  mensagemErro = document.getElementById('mensagem-erro');
+  loginContainer = document.getElementById('loginContainer');
+  loadingLogin = document.getElementById('loadingLogin');
+  modal = document.getElementById('modalSenha');
+  inputSenha = document.getElementById('inputSenhaAdmin');
+  btnConfirmar = document.getElementById('btnConfirmarSenha');
+  btnCancelar = document.getElementById('btnCancelarSenha');
+}
 
-
-inputs.forEach(input => {
+function setupKeyboardEnhancements() {
+  document.querySelectorAll('input').forEach(input => {
     input.addEventListener('focus', () => {
-        // Aguarda 300ms para o teclado terminar de subir e centraliza o campo na tela
-        setTimeout(() => {
-            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+      setTimeout(() => {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
     });
-});
+  });
 
-
-// Evento de Clique
-btnEntrar.addEventListener('click', async () => {
-    // 1. Primeiro valida a matemática do CPF localmente
-    const cpfValidoMatematicamente = TestaCPF();
-
-    if (!cpfValidoMatematicamente) {
-        alert("O CPF " + cpfInput.value + " não é válido.");
-       // cpfInput.value = '';
-        mensagemErro.innerText = "Digite um CPF válido.";
-        cpfInput.focus();
-        return; // Para a execução aqui
+  const inputs = document.querySelectorAll('input:not(#barcodeInput)');
+  inputs.forEach(input => {
+    if (!input.getAttribute('inputmode')) {
+      input.setAttribute('inputmode', 'numeric');
     }
+  });
+}
 
-    // 2. Verificação de Administrador com Senha
-    const cpfLimpo = cpfInput.value.replace(/\D/g, "");
-    if (cpfLimpo === CPF_JE || cpfLimpo === CPF_HUGO) {
-        const nome = (cpfLimpo === CPF_JE) ? 'JEFERSON MACHADO' : 'HUGO ROSA';
+function initializeEventListeners() {
+  btnEntrar.addEventListener('click', handleLogin);
+  btnConfirmar.addEventListener('click', handleAdminPasswordConfirm);
+  btnCancelar.addEventListener('click', handleModalCancel);
 
-        modal.style.display = 'flex';
-        inputSenha.value = '';
-        inputSenha.focus();
+  cpfInput.addEventListener('input', (e) => {
+    e.target.value = formatCPF(e.target.value);
+  });
 
-        btnConfirmar.onclick = () => {
-            if (inputSenha.value === SENHA_ADMIN) {
-                localStorage.setItem('usuario_tipo', 'Proprietário');
-                localStorage.setItem('usuario_nome', nome);
-                localStorage.setItem('usuario_cpf', cpfLimpo);
-                window.location.href = "admin.html";
-            } else {
-                alert("Senha incorreta!");
-                inputSenha.value = '';
-                inputSenha.focus();
-            }
-        };
-        return; // Para o fluxo aqui e espera o clique no modal
-    }
-
-    // 3. Fluxo normal para usuários comuns
-    await ValidarNoGoogleSheets();
-});
-
-// Máscara e Tecla Enter (Seu código original está perfeito aqui)
-cpfInput.addEventListener('input', (e) => {
-    let valor = e.target.value.replace(/\D/g, "");
-    if (valor.length > 11) valor = valor.slice(0, 11);
-    valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
-    valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
-    valor = valor.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-    e.target.value = valor;
-});
-
-cpfInput.addEventListener('keydown', (event) => {
+  cpfInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
-        event.preventDefault();
-        btnEntrar.click();
+      event.preventDefault();
+      btnEntrar.click();
     }
-});
+  });
 
-inputSenha.addEventListener('keydown', (event) => {
+  inputSenha.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
-        event.preventDefault();
-        btnConfirmar.click();
+      event.preventDefault();
+      btnConfirmar.click();
     }
-});
+  });
+}
 
-btnCancelar.addEventListener('click', async () => {
-     modal.style.display = 'none';
-    inputSenha.value = ''; // Limpa a senha por segurança
+// ============================================
+// HANDLERS
+// ============================================
 
-    // Devolve o foco para o CPF para o Admin poder tentar de novo ou limpar
+async function handleLogin() {
+  if (!isValidCPF(cpfInput.value)) {
+    ErrorHandler.show('CPF inválido. Tente novamente.');
+    mensagemErro.innerText = 'Digite um CPF válido.';
     cpfInput.focus();
+    return;
+  }
 
-    });
+  const cpfLimpo = cpfInput.value.replace(/\D/g, '');
+  Storage.setUserCPF(cpfLimpo);
 
+  if (isAdminCPF(cpfLimpo)) {
+    showAdminPasswordModal();
+    return;
+  }
 
-// Função Matemática (Validada)
-function TestaCPF() {
-    const strCPF = cpfInput.value.replace(/\D/g, "");
-    if (strCPF.length !== 11 || strCPF.split('').every(char => char === strCPF[0])) return false;
-
-    let Soma = 0;
-    let Resto;
-
-    for (let i = 1; i <= 9; i++) Soma = Soma + parseInt(strCPF.substring(i - 1, i)) * (11 - i);
-    Resto = (Soma * 10) % 11;
-    if ((Resto == 10) || (Resto == 11)) Resto = 0;
-    if (Resto != parseInt(strCPF.substring(9, 10))) return false;
-
-    Soma = 0;
-    for (let i = 1; i <= 10; i++) Soma = Soma + parseInt(strCPF.substring(i - 1, i)) * (12 - i);
-    Resto = (Soma * 10) % 11;
-    if ((Resto == 10) || (Resto == 11)) Resto = 0;
-    if (Resto != parseInt(strCPF.substring(10, 11))) return false;
-
-    return true;
+  await validateUserInGoogleSheets(cpfLimpo);
 }
 
-// Função de Consulta à Planilha
-async function ValidarNoGoogleSheets() {
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec";
-    const cpfLimpo = cpfInput.value.replace(/\D/g, "");
+function isAdminCPF(cpf) {
+  return cpf === CONFIG.ADMIN.CPF_JE || cpf === CONFIG.ADMIN.CPF_HUGO;
+}
 
-    // Mostra o loading e esconde o botão (conforme combinamos)
-    loginContainer.style.display = 'none';
-    loadingLogin.style.display = 'block';
+function getAdminName(cpf) {
+  return cpf === CONFIG.ADMIN.CPF_JE ? 'JEFERSON MACHADO' : 'HUGO ROSA';
+}
 
-    let resultado;
+function showAdminPasswordModal() {
+  modal.style.display = 'flex';
+  inputSenha.value = '';
+  inputSenha.focus();
+}
 
-    try {
-        const response = await fetch(`${URL_SCRIPT}?cpf=${cpfLimpo}`);
+function handleAdminPasswordConfirm() {
+  if (inputSenha.value === CONFIG.ADMIN.SENHA_ADMIN) {
+    const cpfLimpo = Storage.getUserCPF();
+    const nome = getAdminName(cpfLimpo);
 
-        if (!response.ok) throw new Error("Erro na rede");
+    Storage.setUserType(CONFIG.USER_TYPES.PROPRIETARIO);
+    Storage.setUserName(nome);
 
-        resultado = await response.json();
-    } catch (error) {
-        // O erro só aparece se a requisição REALMENTE falhar antes do redirecionamento
-        console.error("Erro na consulta:", error);
-        alert("Erro ao consultar servidor.");
+    Router.goToAdmin();
+  } else {
+    ErrorHandler.show('Senha incorreta!');
+    inputSenha.value = '';
+    inputSenha.focus();
+  }
+}
 
-        // Se deu erro, volta o botão
-        loginContainer.style.display = 'block';
-        loadingLogin.style.display = 'none';
-        return; // Sai da função
-    }
+function handleModalCancel() {
+  modal.style.display = 'none';
+  inputSenha.value = '';
+  cpfInput.focus();
+}
 
-    // Se o código chegou aqui, a consulta foi um sucesso. 
-    // Agora tratamos os dados fora do try/catch para evitar o falso erro de rede.
-    if (resultado.status === "exists") {
-        // ADICIONE ESTA LINHA ABAIXO:
-        localStorage.setItem('usuario_cpf', cpfLimpo);
+// ============================================
+// API VALIDATION
+// ============================================
 
-        localStorage.setItem('usuario_nome', resultado.nome);
-        localStorage.setItem('usuario_tipo', resultado.tipo);
+async function validateUserInGoogleSheets(cpf) {
+  try {
+    showLoading(true);
 
-        if (resultado.tipo === "Parceiro") {
-            localStorage.setItem('usuario_saldo', resultado.saldo);
-            localStorage.setItem('usuario_cupom', resultado.cupom);
-            window.location.href = "parceiro-painel.html"; // Direciona para a nova página
-        } else {
-            window.location.href = "cliente-painel.html";
-        }
+    const result = await API.validateCPF(cpf);
+
+    if (result.status === 'exists') {
+      Storage.setUserName(result.nome);
+      Storage.setUserType(result.tipo);
+
+      if (result.tipo === CONFIG.USER_TYPES.PARCEIRO) {
+        Storage.setUserBalance(result.saldo);
+        Storage.setUserCoupon(result.cupom);
+        Router.goToPartnerPanel();
+      } else {
+        Router.goToClientPanel();
+      }
     } else {
-        // Se o usuário não existe, também é bom salvar o CPF para o cadastro
-        localStorage.setItem('usuario_cpf', cpfLimpo);
-        localStorage.setItem('cpfParaCadastro', cpfLimpo);
-        window.location.href = "cadastro.html?cpf=" + cpfLimpo;
+      Storage.setCPFForRegistration(cpf);
+      Router.goToRegistration(cpf);
     }
+  } catch (error) {
+    ErrorHandler.log('Validation Error:', error);
+    ErrorHandler.show('Erro ao consultar servidor. Tente novamente.');
+    showLoading(false);
+  }
 }
 
-// -----------------FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
-function forcarTeclado() {
-    const inputs = document.querySelectorAll('input:not(#barcodeInput)');
-    inputs.forEach(input => {
-        // O atributo decimal ou numeric costuma forçar a chamada do teclado no Android
-        if (!input.getAttribute('inputmode')) {
-            input.setAttribute('inputmode', 'numeric');
-        }
-    });
+function showLoading(show) {
+  loginContainer.style.display = show ? 'none' : 'block';
+  loadingLogin.style.display = show ? 'block' : 'none';
 }
-
-document.addEventListener('DOMContentLoaded', forcarTeclado);
-
-// -----------------/FORCÇAR QUE O TECLADO APAREÇA MESMO COM LEITOR-------------------------------
-
-cpfInput.focus();

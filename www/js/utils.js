@@ -109,6 +109,12 @@ export function groupBy(array, key) {
 
 // -------- STRINGS --------
 
+export function escapeHtml(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 export function capitalize(str) {
   return (str || '').charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }

@@ -5,7 +5,10 @@
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cypress run",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:watch": "cypress open"
   },
   "keywords": [
     "ecosystem:cordova"
@@ -17,7 +20,8 @@
     "cordova-ios": "^8.0.0",
     "cordova-plugin-customurlscheme": "^5.0.2",
     "cordova-plugin-keyboard": "^1.3.0",
-    "cordova-plugin-whitelist": "1"
+    "cordova-plugin-whitelist": "1",
+    "cypress": "^13.6.0"
   },
   "cordova": {
     "platforms": [

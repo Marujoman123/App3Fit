@@ -4,7 +4,7 @@
 // Centraliza TODOS os acessos ao localStorage
 // Sem "strings mágicas" espalhadas no código
 
-export const Storage = {
+const Storage = {
   // -------- USUÁRIO --------
   setUserType(tipo) {
     localStorage.setItem('usuario_tipo', tipo);

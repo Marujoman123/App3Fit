@@ -4,7 +4,7 @@
 // Este arquivo centraliza TODAS as constantes da aplicação
 // Qualquer mudança de URL, timeout ou chave deve ser feita AQUI
 
-export const CONFIG = {
+const CONFIG = {
   // API - Google Apps Script
   API: {
     URL: "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec",
