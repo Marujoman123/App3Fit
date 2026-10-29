@@ -4,11 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - 3Fit</title>
+    <title>Painel Parceiro - 3Fit</title>
     <link rel="stylesheet" href="www/css/style.css">
     <link rel="stylesheet" href="www/css/admin.css">
-
-
 </head>
 
 <body class="admin-body backgroud-white">
@@ -17,33 +15,39 @@
         <h1>Painel Parceiro</h1>
         <p>Bem-vindo, Parceiro</p>
 
-
-
         <div class="admin-grid">
-             <div class="admin-grid">
-                <button class="btn-panel azul" onclick="location.href='www/parceiro-pedidos.html'">
+            <button class="btn-panel laranja" data-destino="www/caixa.html">
+                🛒 Fazer Compra
+            </button>
+
+            <div class="admin-grid">
+                <button class="btn-panel azul" data-destino="www/parceiro-pedidos.html">
                     ✏️ Criar Pedido
                 </button>
 
-                <button class="btn-panel verde" onclick="location.href='www/admin-produtos.html'">
+                <button class="btn-panel verde" data-destino="www/admin-produtos.html">
                     📦 Produtos Disponíveis
                 </button>
 
-                <button class="btn-panel terracota" onclick="location.href='www/parceiro-encomendas.html'">
+                <button class="btn-panel terracota" data-destino="www/parceiro-encomendas.html">
                     🚚 Encomendas
                 </button>
 
-                <button class="btn-panel roxo" onclick="location.href='www/relatorio.html'">
+                <button class="btn-panel roxo" data-destino="www/relatorio.html">
                     📝 Relatório
                 </button>
 
-                <button class="btn-panel sair" onclick="window.location.href = 'index.html'">
+                <button id="btnSair" class="btn-panel sair">
                     Sair do Painel
                 </button>
             </div>
         </div>
+    </div>
+
+    <script type="module">
+        import iniciarPainel from './www/js/painel.js';
+        iniciarPainel({ donos: ['Parceiro'] });
+    </script>
 </body>
 
 </html>
-
-<script src="www/js/global.js"></script>

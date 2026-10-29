@@ -9,7 +9,7 @@ describe('Registration Page - cadastro.html', () => {
     cy.fixture('users').then((users) => {
       const cliente = users.cliente;
 
-      cy.visit('/');
+      cy.visitRaiz('/index.html');
       cy.get('#cpf').type(cliente.cpf);
       cy.get('#btnEntrar').click();
 

@@ -4,7 +4,7 @@
 
 describe('Login Page - index.html', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visitRaiz('/index.html');
   });
 
   // ========== TESTES GERAIS ==========

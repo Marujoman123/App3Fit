@@ -103,12 +103,12 @@ describe('Authentication & Header', () => {
     });
 
     it('Should redirect to login if accessing cliente-painel without auth', () => {
-      cy.visit('/cliente-painel.html');
+      cy.visitRaiz('/cliente-painel.html');
       cy.url().should('include', 'index.html');
     });
 
     it('Should redirect to login if accessing parceiro-painel without auth', () => {
-      cy.visit('/parceiro-painel.html');
+      cy.visitRaiz('/parceiro-painel.html');
       cy.url().should('include', 'index.html');
     });
   });

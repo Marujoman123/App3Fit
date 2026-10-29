@@ -2,12 +2,17 @@
 // CUSTOM COMMANDS
 // ============================================
 
+// Visita uma página da raiz do site (login web e painéis ficam fora de www)
+Cypress.Commands.add('visitRaiz', (caminho) => {
+  cy.visit(`${Cypress.env('RAIZ')}${caminho}`);
+});
+
 // Login como admin
 Cypress.Commands.add('loginAsAdmin', () => {
   cy.fixture('users').then((users) => {
     const admin = users.admin;
 
-    cy.visit('/');
+    cy.visitRaiz('/index.html');
     cy.get('#cpf').type(admin.cpf);
     cy.get('#btnEntrar').click();
 
@@ -26,7 +31,7 @@ Cypress.Commands.add('loginAsCliente', () => {
   cy.fixture('users').then((users) => {
     const cliente = users.cliente;
 
-    cy.visit('/');
+    cy.visitRaiz('/index.html');
     cy.get('#cpf').type(cliente.cpf);
     cy.get('#btnEntrar').click();
 
@@ -40,7 +45,7 @@ Cypress.Commands.add('loginAsParceiro', () => {
   cy.fixture('users').then((users) => {
     const parceiro = users.parceiro;
 
-    cy.visit('/');
+    cy.visitRaiz('/index.html');
     cy.get('#cpf').type(parceiro.cpf);
     cy.get('#btnEntrar').click();
 

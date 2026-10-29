@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<script src="www/js/global.js"></script>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - 3Fit</title>
+    <title>Painel Cliente - 3Fit</title>
     <link rel="stylesheet" href="www/css/style.css">
     <link rel="stylesheet" href="www/css/admin.css">
-
-
 </head>
 
 <body class="admin-body backgroud-white">
@@ -18,25 +15,31 @@
         <h1>Painel Cliente</h1>
         <p>Bem-vindo</p>
 
-
-
         <div class="admin-grid">
+            <button class="btn-panel laranja" data-destino="www/caixa.html">
+                🛒 Fazer Compra
+            </button>
 
-                <div class="admin-grid">
-                <button class="btn-panel azul" onclick="location.href='www/clientes-pedidos.html'">
+            <div class="admin-grid">
+                <button class="btn-panel azul" data-destino="www/clientes-pedidos.html">
                     ✏️ Criar Pedido
                 </button>
 
-   
-                <button class="btn-panel terracota" onclick="location.href='www/parceiro-encomendas.html'">
+                <button class="btn-panel terracota" data-destino="www/parceiro-encomendas.html">
                     🚚 Encomendas
                 </button>
 
-                <button class="btn-panel sair" onclick="window.location.href = 'index.html'">
+                <button id="btnSair" class="btn-panel sair">
                     Sair do Painel
                 </button>
             </div>
         </div>
+    </div>
+
+    <script type="module">
+        import iniciarPainel from './www/js/painel.js';
+        iniciarPainel({ donos: ['Cliente'] });
+    </script>
 </body>
 
 </html>

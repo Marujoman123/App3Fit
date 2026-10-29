@@ -10,8 +10,12 @@ const $ = (id) => document.getElementById(id);
 let produtosEstoque = [];
 let carrinho = [];
 let tipoPreco = null;
+let opcoes = null;
 
-export default function iniciarPedidoManual({ donos }) {
+// fonte 'estoque': limita pelo estoque e devolve ao remover (pedido de compra).
+// fonte 'encomenda': sem estoque, a quantidade é só uma contagem (planilha inteira, quantidade 0).
+export default function iniciarPedidoManual({ donos = null, fonte = 'estoque', titulo = 'PEDIDO DE COMPRA', prefixo = 'Pedido' }) {
+  opcoes = { fonte, titulo, prefixo };
   if (!verificarAcesso(donos)) return;
 
   configurarEventos();
@@ -25,7 +29,7 @@ function verificarAcesso(donos) {
     Router.backToLogin();
     return false;
   }
-  if (!donos.includes(tipo)) {
+  if (donos && !donos.includes(tipo)) {
     Router.backToPanel();
     return false;
   }
@@ -54,7 +58,9 @@ function configurarEventos() {
 
 async function carregarProdutos() {
   try {
-    const json = await API.getAllProducts();
+    const json = opcoes.fonte === 'encomenda'
+      ? await API.getAllProductsNoFilter()
+      : await API.getAllProducts();
     if (json.status !== 'success') throw new Error(json.message || 'Resposta inválida');
     produtosEstoque = json.produtos;
     $('textLoading').classList.add('oculto');
@@ -66,7 +72,9 @@ async function carregarProdutos() {
 }
 
 function precoPorTipo(produto, tipo) {
-  return roundValue(tipo === CONFIG.USER_TYPES.PARCEIRO ? produto.precoParceiro : produto.precoCliente);
+  if (tipo !== CONFIG.USER_TYPES.PARCEIRO) return roundValue(produto.precoCliente);
+  const ehAdmin = Storage.getUserType() === CONFIG.USER_TYPES.PROPRIETARIO;
+  return roundValue(ehAdmin ? produto.precoCusto : produto.precoParceiro);
 }
 
 // Botões trazem data-tipo (preço usado) e data-nome: "usuario" trava o nome com o logado, "livre" deixa digitar
@@ -90,26 +98,33 @@ function selecionarModo(btn) {
 }
 
 function renderizarSelecao() {
+  const estoque = opcoes.fonte === 'estoque';
   $('listaSelecaoManual').innerHTML = produtosEstoque
     .filter(p => String(p.linha).toUpperCase() !== 'TESTE')
     .map(p => {
-      const esgotado = p.quantidade <= 0;
+      const esgotado = estoque && p.quantidade <= 0;
+      const badge = estoque ? '' : (p.quantidade > 0 ? 'badge-ativo' : '');
       return `
         <div class="item-selecao ${esgotado ? 'item-esgotado' : ''}" data-codigo="${escapeHtml(p.codigo)}">
           <div>
             <small class="linha-produto">${escapeHtml(p.linha)}</small>
             <strong>${escapeHtml(p.nome)}</strong> - <small>${escapeHtml(p.kg)}</small>
           </div>
-          <span class="badge-estoque">${escapeHtml(p.quantidade)}</span>
+          <span class="badge-estoque ${badge}">${escapeHtml(p.quantidade)}</span>
         </div>`;
     }).join('');
 }
 
 function adicionarItem(codigo) {
   const p = produtosEstoque.find(x => String(x.codigo) === codigo);
-  if (!p || p.quantidade <= 0) return;
+  if (!p) return;
+  if (opcoes.fonte === 'estoque') {
+    if (p.quantidade <= 0) return;
+    p.quantidade--;
+  } else {
+    p.quantidade++;
+  }
 
-  p.quantidade--;
   const preco = precoPorTipo(p, tipoPreco);
   const existente = carrinho.find(x => x.codigo === p.codigo);
 
@@ -148,7 +163,10 @@ function removerItem(index) {
   if (!item) return;
 
   const original = produtosEstoque.find(p => p.codigo === item.codigo);
-  if (original) original.quantidade++;
+  if (original) {
+    if (opcoes.fonte === 'estoque') original.quantidade++;
+    else if (original.quantidade > 0) original.quantidade--;
+  }
 
   if (item.quantidade > 1) item.quantidade--;
   else carrinho.splice(index, 1);
@@ -160,10 +178,14 @@ function removerItem(index) {
 function limparPedido() {
   if (!confirm('Limpar carrinho?')) return;
 
-  carrinho.forEach(item => {
-    const original = produtosEstoque.find(p => p.codigo === item.codigo);
-    if (original) original.quantidade += item.quantidade;
-  });
+  if (opcoes.fonte === 'estoque') {
+    carrinho.forEach(item => {
+      const original = produtosEstoque.find(p => p.codigo === item.codigo);
+      if (original) original.quantidade += item.quantidade;
+    });
+  } else {
+    produtosEstoque.forEach(p => p.quantidade = 0);
+  }
   carrinho = [];
   renderizarSelecao();
   renderizarCarrinho();
@@ -194,7 +216,7 @@ function gerarPDF() {
   const dataHoje = new Date().toLocaleString('pt-BR');
 
   doc.setFontSize(18);
-  doc.text('PEDIDO DE COMPRA - 3FIT', 14, 20);
+  doc.text(`${opcoes.titulo} - 3FIT`, 14, 20);
 
   doc.setFontSize(11);
   doc.text(`Nome: ${nomeCliente}`, 14, 30);
@@ -226,11 +248,11 @@ function gerarPDF() {
   const finalY = doc.lastAutoTable.finalY + 15;
   doc.setFontSize(9);
   doc.setTextColor(100);
-  doc.text(`Pedido gerado por: ${responsavel}`, 14, finalY);
+  doc.text(`${opcoes.prefixo} gerado por: ${responsavel}`, 14, finalY);
   doc.text(`Data de emissão: ${dataHoje}`, 14, finalY + 7);
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const nomeArquivo = `Pedido_${nomeCliente.replace(/\s+/g, '_')}.pdf`;
+  const nomeArquivo = `${opcoes.prefixo}_${nomeCliente.replace(/\s+/g, '_')}.pdf`;
 
   try {
     if (isMobile || !window.open(doc.output('bloburl'), '_blank')) {
