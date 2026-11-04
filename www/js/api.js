@@ -73,39 +73,28 @@ const API = {
   },
 
   // -------- PAGAMENTO --------
-  async verifyPayment(intentId, token) {
-    return this.request({
-      verificarPagamento: intentId,
-      token: token
-    });
+  // Token e maquininha ficam no Apps Script (Propriedades do script), nunca no navegador
+  async verifyPayment(intentId) {
+    return this.request({ verificarPagamento: intentId });
   },
 
-  async recordPayment(paymentData) {
-    return this.post({
-      tipo: 'recordarPagamento',
-      ...paymentData
-    });
+  async startPayment(amount, itens) {
+    return this.post({ config: { amount }, itens });
   },
 
-  // -------- REGISTROS --------
-  async savePendingPayment(paymentData) {
-    return this.post({
-      tipo: 'salvarPagamentoPendente',
-      ...paymentData
-    });
+  // -------- ADMIN --------
+  // POST para a senha não ir na URL
+  async loginAdmin(cpf, senha) {
+    return this.post({ acao: 'loginAdmin', cpf, senha });
   },
 
-  // -------- PARCEIROS --------
-  async searchPartnerByCoupon(cupom) {
-    return this.request({ buscarParceiroId: cupom });
+  // -------- VENDAS --------
+  async registerSale(dados) {
+    return this.post({ acao: 'registrarVendaFinal', dados });
   },
 
-  // -------- PEDIDOS --------
-  async savePDF(pdfData) {
-    return this.post({
-      tipo: 'salvarPDF',
-      ...pdfData
-    });
+  async getAllSales() {
+    return this.request({ buscarTodasVendas: true });
   },
 };
 

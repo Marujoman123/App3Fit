@@ -234,6 +234,10 @@ button:hover {
     padding: 12px;
     margin: 2px
 }
+.oculto {
+    display: none !important;
+}
+
 .backgroud-white{
  background: #FFFFFF;
     border-radius: 6px;

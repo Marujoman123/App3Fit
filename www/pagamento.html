@@ -1,29 +1,35 @@
 <!DOCTYPE html>
-<script src="js/global.js"></script>
 <html>
 
 <head>
     <meta charset="utf-8">
-    <!--
-        Customize this policy to fit your own app's needs. For more guidance, please refer to the docs:
-            https://cordova.apache.org/docs/en/latest/
-        Some notes:
-            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-                * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://api.mercadopago.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: content: https:;">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .item-pagamento { font-size: 0.9rem; }
+        .item-pagamento span { float: right; }
+        .cupom-ok { color: green; }
+        .texto-verde { color: green; }
+        .aviso-maquininha { color: green; }
+        .container-saldo { margin-top: 15px; border: 1px dashed #ccc; padding: 10px; }
+        .titulo-sucesso { color: #28a745; margin-bottom: 10px; }
+        .texto-sucesso { margin-bottom: 20px; }
+        .btn-recibo, .btn-nova-venda {
+            color: white; padding: 15px; width: 100%; border: none; border-radius: 5px;
+            font-size: 16px; cursor: pointer; font-weight: bold;
+        }
+        .btn-recibo { background: #007bff; margin-bottom: 10px; }
+        .btn-nova-venda { background: #28a745; }
+        #btnConfirmarPagamento { background-color: #28a745; margin-top: 20px; }
+    </style>
 
     <title>3Fit - Pagamento</title>
 </head>
-
 
 <body>
 
@@ -33,12 +39,9 @@
             <h2 id="tituloCaixa" style="margin-right: auto;">Resumo da Compra</h2>
 
             <div class="user-info-container">
-
-                <button id="btnRelatorio" style="flex: 1; text-align: left; display: none;">Relatório</button>
                 <div class="user-details">
-
                     <span id="header-nome">Carregando...</span>
-                    <span id="header-saldo" class="saldo-badge" style="display: none;">Saldo: R$ 0.00</span>
+                    <span id="header-saldo" class="saldo-badge oculto">Saldo: R$ 0.00</span>
                 </div>
                 <div class="user-icon">
                     <img src="img/user-icon.png" alt="Usuário">
@@ -48,32 +51,25 @@
                         <img src="img/arrow-right-from-bracket-solid-full.svg" alt="Sair"></button>
                 </div>
             </div>
-
         </div>
-
-
 
         <div class="login-container">
             <div class="login-container-internal">
 
                 <div class="input-group" id="containerCupom">
                     <label style="color: #000;">Possui Cupom de Parceiro?</label>
-
                     <div style="display: flex; gap: 5px;">
                         <input type="text" id="inputCupom" placeholder="Digite o cupom">
                         <button id="btnValidarCupom" style="width: auto; height: 100%;">Validar</button>
                     </div>
-
                     <label id="msgCupom" style="font-size: 0.8rem; margin-top: 5px; display: block;"></label>
                 </div>
 
-                <div id="containerSaldo"
-                    style="display: none; margin-top: 15px; border: 1px dashed #ccc; padding: 10px;">
+                <div id="containerSaldo" class="container-saldo oculto">
                     <label style="color: #000;">Gostaria de pagar com saldo?</label>
                     <label>Saldo Disponível: <b>R$ <span id="txtSaldoDisponivel">0.00</span></b></label>
                     <div style="display: flex; gap: 5px; margin-top: 5px;">
                         <input type="number" id="inputUsarSaldo" step="0.01" inputmode="decimal" placeholder="0.00">
-                        <!-- <button id="btnAplicarSaldo" style="width: auto;">Aplicar</button> -->
                     </div>
                     <label id="msgSaldo" style="font-size: 0.8rem; display: block;"></label>
                 </div>
@@ -82,61 +78,32 @@
                     style="margin-bottom: 10px; text-align: left; border-bottom: 1px solid #ddd;">
                     <h3 style="font-size: 1rem; color: #000;">Itens selecionados:</h3>
                 </div>
-
-
-
-
-
-
-
-
             </div>
-
-
-
 
             <div class="login-container-internal">
                 <div class="resumo-simples">
                     <p id="dtot">Total dos Itens: <b>R$ <span id="totalOriginal">0.00</span></b></p>
-                        <p id="txtCumpom"> </p>
-                        <p id="valorDesconto" style="color: green; display: none;"> </p>
-                        <p id="txtSaldoUsado" style="color: green; display: none;"> </p>
-                 
+                    <p id="txtCumpom"></p>
+                    <p id="valorDesconto" class="texto-verde oculto"></p>
+                    <p id="txtSaldoUsado" class="texto-verde oculto"></p>
                     <hr id="linhatot">
                     <p>Total a Pagar: R$ <span id="totalFinal">0.00</span></p>
                 </div>
 
-
-
-
-
                 <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
-                <button id="btnConfirmarPagamento" style="background-color: #28a745; margin-top: 20px;">Confirmar e
-                    Finalizar</button>
+                <button id="btnConfirmarPagamento">Confirmar e Finalizar</button>
             </div>
-
-
         </div>
-
     </div>
 
-    <div id="modalPagamento" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-        <h2>Selecione a Forma de Pagamento</h2>
-        <div class="grid-pagamentos">
-        </div>
-        <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+    <div id="modalPagamento" class="modal-overlay oculto">
+        <div class="modal-content"></div>
     </div>
-</div>
 
-
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/pagamento.js"></script>
 </body>
 
 </html>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script type="module" src="js/auth.js"></script>
-<script src="js/pagamento.js"></script>
-

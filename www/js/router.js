@@ -26,20 +26,21 @@ const Router = {
     window.location.href = url;
   },
 
-  // Voltar para painel do usuário (baseado no tipo)
+  // Voltar para o "início" do usuário.
+  // Cordova (interno): o app é um caixa autônomo, então o início é sempre o caixa.
+  // Web (externo): painéis de cliente/parceiro ficam na raiz do site; admin fica em www.
   backToPanel() {
-    const userType = Storage.getUserType();
-    const origin = Storage.getOrigin();
-    const isExternal = origin === 'externo';
+    if (Storage.getOrigin() !== 'externo') {
+      this.navigate('caixa.html');
+      return;
+    }
 
+    const userType = Storage.getUserType();
     if (userType === CONFIG.USER_TYPES.PARCEIRO) {
-      const page = isExternal ? '../parceiro-painel.html' : 'parceiro-painel.html';
-      this.navigate(page);
+      this.navigate('../parceiro-painel.html');
     } else if (userType === CONFIG.USER_TYPES.CLIENTE) {
-      const page = isExternal ? '../cliente-painel.html' : 'cliente-painel.html';
-      this.navigate(page);
+      this.navigate('../cliente-painel.html');
     } else {
-      // Admin ou outros
       this.navigate('admin.html');
     }
   },
@@ -65,27 +66,6 @@ const Router = {
   // Voltar para página anterior
   back() {
     window.history.back();
-  },
-
-  // Navegar para cadastro
-  goToRegistration(cpf = '') {
-    const params = cpf ? { cpf } : {};
-    this.navigate(CONFIG.PAGES.CADASTRO, params);
-  },
-
-  // Navegar para admin
-  goToAdmin() {
-    this.navigate(CONFIG.PAGES.ADMIN);
-  },
-
-  // Navegar para painel de cliente
-  goToClientPanel() {
-    this.navigate(CONFIG.PAGES.CLIENTE_PAINEL);
-  },
-
-  // Navegar para painel de parceiro
-  goToPartnerPanel() {
-    this.navigate(CONFIG.PAGES.PARCEIRO_PAINEL);
   },
 
   // Obter parâmetro da query string

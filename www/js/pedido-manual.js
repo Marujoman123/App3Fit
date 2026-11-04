@@ -4,6 +4,7 @@ import API from './api.js';
 import Router from './router.js';
 import ErrorHandler from './errorHandler.js';
 import { roundValue, escapeHtml } from './utils.js';
+import { exigirAcesso } from './acesso.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -16,24 +17,11 @@ let opcoes = null;
 // fonte 'encomenda': sem estoque, a quantidade é só uma contagem (planilha inteira, quantidade 0).
 export default function iniciarPedidoManual({ donos = null, fonte = 'estoque', titulo = 'PEDIDO DE COMPRA', prefixo = 'Pedido' }) {
   opcoes = { fonte, titulo, prefixo };
-  if (!verificarAcesso(donos)) return;
+  if (!exigirAcesso(donos)) return;
 
   configurarEventos();
   selecionarModo(document.querySelector('.btn-tipo.active'));
   carregarProdutos();
-}
-
-function verificarAcesso(donos) {
-  const tipo = Storage.getUserType();
-  if (!tipo) {
-    Router.backToLogin();
-    return false;
-  }
-  if (donos && !donos.includes(tipo)) {
-    Router.backToPanel();
-    return false;
-  }
-  return true;
 }
 
 function configurarEventos() {

@@ -1,273 +1,151 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec";
+import CONFIG from './config.js';
+import Storage from './storage.js';
+import API from './api.js';
+import Router from './router.js';
+import ErrorHandler from './errorHandler.js';
+import { roundValue, escapeHtml } from './utils.js';
+import { exigirAcesso } from './acesso.js';
+
+const $ = (id) => document.getElementById(id);
+
+let produtos = [];
+let carrinho = [];
 let totalGeral = 0;
-let listaLocalProdutos = [];
-let carrinho = []; // ADICIONADO: Array para armazenar os objetos dos produtos
-const tipoUsuario = localStorage.getItem('usuario_tipo');
-const nome = localStorage.getItem('usuario_nome');
-const primeiroNome = nome.split(" ")[0];
 
-// Elementos da tela
-const loading = document.getElementById('loading');
-const conteudoCaixa = document.getElementById('conteudoCaixa');
-const formBarcode = document.getElementById('formBarcode');
-const barcodeInput = document.getElementById('barcodeInput');
-const listaProdutosDiv = document.getElementById('listaProdutos');
-const valorTotalTxt = document.getElementById('valorTotal');
-
-
-// Remova o carregarDados() solto e use este listener:
-document.addEventListener('DOMContentLoaded', () => {
-    carregarDados(); // Carrega os dados da API
-    
-});
-
-async function carregarDados() {
-    try {
-        const res = await fetch(URL_SCRIPT + "?todosProdutos=true");
-        const json = await res.json();
-
-        // console.table(json);
-
-        if (json.status === "success") {
-            listaLocalProdutos = json.produtos;
-
-            if (tipoUsuario === "Parceiro") {
-                document.getElementById('header-nome').innerText = primeiroNome + " (Parceiro)";
-
-
-                // Evento de Clique
-                btnRelatorio.addEventListener('click', async () => {
-                    window.location.href = "relatorio.html";
-                });
-
-                btnRelatorio.style.display = 'flex';
-
-
-            } else {
-                document.getElementById('header-nome').innerText = primeiroNome;
-            }
-
-            loading.style.display = 'none';
-            conteudoCaixa.style.display = 'flex';
-           
-            // Ativa os listeners de foco
-            garantirFocoNoLeitor();
-        }
-    } catch (err) {
-        alert("Erro ao sincronizar produtos. Verifique sua internet.");
-        console.error(err);
-    }
+if (exigirAcesso()) {
+  configurarLeitor();
+  configurarEventos();
+  carregarProdutos();
 }
 
-document.addEventListener('click', (e) => {
-    if (e.target.tagName !== 'BUTTON') {
-        barcodeInput.focus();
-    }
-});
+async function carregarProdutos() {
+  try {
+    const json = await API.getAllProducts();
+    if (json.status !== 'success') throw new Error(json.message || 'Resposta inválida');
+    produtos = json.produtos;
 
-formBarcode.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const codigo = barcodeInput.value.trim();
+    montarCabecalho();
+    $('loading').classList.add('oculto');
+    $('conteudoCaixa').classList.remove('oculto');
+    $('barcodeInput').focus();
+  } catch (error) {
+    ErrorHandler.log('Erro ao sincronizar produtos:', error);
+    ErrorHandler.show('Erro ao sincronizar produtos. Verifique sua internet.');
+  }
+}
 
-    // console.log("Código lido:", codigo); // Para debug
+function montarCabecalho() {
+  if (Storage.getUserType() !== CONFIG.USER_TYPES.PARCEIRO) return;
 
-    if (codigo) {
-        // CORREÇÃO CRÍTICA: Convertendo ambos para String para garantir que o "find" funcione
-        // mesmo se o código na planilha for interpretado como número.
-        const produtoInfo = listaLocalProdutos.find(p => p.codigo.toString() === codigo.toString());
+  const primeiroNome = (Storage.getUserName() || '').split(' ')[0];
+  $('header-nome').innerText = `${primeiroNome} (Parceiro)`;
+  $('btnRelatorio').classList.remove('oculto');
+}
 
-        if (produtoInfo) {
-            // Acesse pelas propriedades
-            const nome = produtoInfo.nome;
-            const qtdEstoque = produtoInfo.quantidade;
-            // ... restante da lógica
-        }
+function configurarEventos() {
+  $('btnRelatorio').addEventListener('click', () => Router.navigate('relatorio.html'));
+  $('btnContinuar').addEventListener('click', continuarParaPagamento);
+  $('formBarcode').addEventListener('submit', lerCodigo);
 
-        if (produtoInfo) {
-            // 1. Pegar o preço correto (usando propriedades, não índices)
-            // No novo formato, certifique-se que o doGet envia 'precoCliente' e 'precoParceiro'
-            // ou ajuste conforme o objeto que você montou na Rota 1 do doGet
-            const precoBruto = (tipoUsuario === "Parceiro") ? (produtoInfo.precoParceiro || 0) : (produtoInfo.precoCliente || 0);
-            const precoVenda = gr(precoBruto); // Garante o arredondamento aqui
+  $('listaProdutos').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-index]');
+    if (btn) removerItem(Number(btn.dataset.index));
+  });
+}
 
-            // 2. Verifica se o produto já existe no carrinho (usando .codigo)
-            // Também convertendo para String aqui para evitar erros de comparação
-            const itemExistente = carrinho.find(item => item.codigo.toString() === produtoInfo.codigo.toString());
+// O leitor de código de barras funciona como um teclado: o campo precisa estar sempre focado,
+// sem abrir o teclado virtual do celular.
+function configurarLeitor() {
+  const input = $('barcodeInput');
+  input.setAttribute('inputmode', 'none');
 
-            if (itemExistente) {
-                itemExistente.quantidade += 1;
-            } else {
-                carrinho.push({
-                    codigo: produtoInfo.codigo,
-                    nome: produtoInfo.nome,
-                    kg: produtoInfo.kg || "", // Se o seu objeto não tiver kg, evita erro
-                    preco: precoVenda,
-                    quantidade: 1
-                });
-            }
+  // readOnly por um instante impede o teclado virtual, mas mantém a entrada do leitor
+  input.addEventListener('focus', () => {
+    input.readOnly = true;
+    setTimeout(() => { input.readOnly = false; }, 50);
+  });
+  input.addEventListener('mousedown', () => setTimeout(() => input.focus(), 10));
 
-            renderizarCarrinho();
-        } else {
-            alert("Produto não cadastrado!");
-        }
+  document.addEventListener('click', () => setTimeout(() => input.focus(), 100));
+  document.addEventListener('touchstart', () => input.focus());
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Enter') input.focus();
+  });
 
-        // LIMPEZA E REDIRECIONAMENTO DE FOCO
-        barcodeInput.value = '';
-        
-        // Garante que o input receba o foco novamente para a próxima leitura imediata
-        setTimeout(() => {
-            barcodeInput.focus();
-        }, 10);
-    }
-});
+  // Re-foca periodicamente para o leitor não "dormir"
+  setInterval(() => {
+    if (document.activeElement !== input) input.focus();
+  }, 30000);
+}
 
-// FUNÇÃO PARA DESENHAR O CARRINHO NA TELA
-function renderizarCarrinho() {
-    listaProdutosDiv.innerHTML = '';
-    totalGeral = 0;
+function lerCodigo(e) {
+  e.preventDefault();
+  const input = $('barcodeInput');
+  const codigo = input.value.trim();
+  if (!codigo) return;
 
-    carrinho.forEach((item, index) => {
-        // Aplica o gr() no subtotal do item
-        const subtotalItem = gr(item.preco * item.quantidade);
-        totalGeral = gr(totalGeral + subtotalItem); // Soma garantindo os centavos
+  // A planilha pode devolver o código como número; compara como texto
+  const produto = produtos.find(p => String(p.codigo) === codigo);
+  if (produto) adicionarItem(produto);
+  else ErrorHandler.show('Produto não cadastrado!');
 
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'linha-carrinho';
-        itemDiv.innerHTML = `
-            <span class="col-nome">${item.nome} - <b>${item.kg}</b></span>
-            <span class="col-qtd">${item.quantidade}x</span>
-            <span class="col-preco">R$ ${subtotalItem.toFixed(2)}</span>
-            <div class="col-acao">
-                <button class="btn-remover" onclick="removerItem(${index})">×</button>
-            </div>
-        `;
-        listaProdutosDiv.appendChild(itemDiv);
+  input.value = '';
+  setTimeout(() => input.focus(), 10);
+}
+
+function adicionarItem(produto) {
+  const ehParceiro = Storage.getUserType() === CONFIG.USER_TYPES.PARCEIRO;
+  const preco = roundValue(ehParceiro ? (produto.precoParceiro || 0) : (produto.precoCliente || 0));
+  const existente = carrinho.find(item => String(item.codigo) === String(produto.codigo));
+
+  if (existente) {
+    existente.quantidade += 1;
+  } else {
+    carrinho.push({
+      codigo: produto.codigo,
+      nome: produto.nome,
+      kg: produto.kg || '',
+      preco,
+      quantidade: 1,
     });
-
-    valorTotalTxt.innerText = totalGeral.toFixed(2);
-    // GARANTIA FINAL: Sempre que mexer no carrinho, o leitor volta a "ouvir"
-    barcodeInput.focus();
+  }
+  renderizarCarrinho();
 }
 
-
-
-// FUNÇÃO PARA REMOVER OU DIMINUIR QUANTIDADE
 function removerItem(index) {
-    if (carrinho[index].quantidade > 1) {
-        carrinho[index].quantidade -= 1;
-
-    } else {
-        carrinho.splice(index, 1);
-    }
-    renderizarCarrinho();
+  const item = carrinho[index];
+  if (!item) return;
+  if (item.quantidade > 1) item.quantidade -= 1;
+  else carrinho.splice(index, 1);
+  renderizarCarrinho();
 }
 
+function renderizarCarrinho() {
+  totalGeral = 0;
+  $('listaProdutos').innerHTML = carrinho.map((item, index) => {
+    const subtotal = roundValue(item.preco * item.quantidade);
+    totalGeral = roundValue(totalGeral + subtotal);
+    return `
+      <div class="linha-carrinho">
+        <span class="col-nome">${escapeHtml(item.nome)} - <b>${escapeHtml(item.kg)}</b></span>
+        <span class="col-qtd">${item.quantidade}x</span>
+        <span class="col-preco">R$ ${subtotal.toFixed(2)}</span>
+        <div class="col-acao">
+          <button class="btn-remover" data-index="${index}">×</button>
+        </div>
+      </div>`;
+  }).join('');
 
-
-
-
-
-// 4. Botão Continuar
-document.getElementById('btnContinuar').addEventListener('click', () => {
-    if (totalGeral <= 0) {
-        alert("O carrinho está vazio!");
-        return;
-    }
-
-    // ADICIONADO: Salva o array de itens para a próxima página
-    localStorage.setItem('carrinho', JSON.stringify(carrinho));
-    localStorage.setItem('total_venda', totalGeral.toFixed(2));
-
-    window.location.href = "pagamento.html";
-});
-
-
-
-
-
-
-// No caixa.js, desative o teclado virtual explicitamente para o campo de scan
-const inputScan = document.getElementById('barcodeInput');
-
-if (inputScan) {
-    // 1. Define como none
-    inputScan.setAttribute('inputmode', 'none');
-
-    // 2. Truque do readOnly: impede o teclado mas aceita entrada do leitor
-    inputScan.addEventListener('focus', function () {
-        this.readOnly = true;
-        setTimeout(() => { this.readOnly = false; }, 50);
-    });
-
-    // 3. Forçar o fechamento se o teclado teimar em abrir
-   inputScan.addEventListener('mousedown', (e) => {
-    // Impede o comportamento padrão que abre o teclado em dispositivos móveis
-    // mas mantém o foco lógico no campo.
-    setTimeout(() => inputScan.focus(), 10);
-});
+  $('valorTotal').innerText = totalGeral.toFixed(2);
+  $('barcodeInput').focus();
 }
 
-// Função para evitar erros de ponto flutuante (centavos perdidos)
-function gr(valor) {
-    return Math.round((parseFloat(valor) + Number.EPSILON) * 100) / 100;
+function continuarParaPagamento() {
+  if (totalGeral <= 0) {
+    ErrorHandler.show('O carrinho está vazio!', ErrorHandler.TYPES.WARNING);
+    return;
+  }
+  Storage.setCart(carrinho);
+  Storage.setTotalSale(totalGeral.toFixed(2));
+  Router.navigate('pagamento.html');
 }
-
-
-function manterLeitorAtivo() {
-    const inputScan = document.getElementById('barcodeInput');
-
-    // Tenta "re-focar" a cada 30 segundos para sinalizar atividade ao sistema
-    setInterval(() => {
-        if (document.activeElement !== inputScan) {
-            inputScan.focus();
-            // console.log("Sinal de vida enviado ao input do leitor...");
-        }
-    }, 30000); 
-
-    // Truque: Ao detectar qualquer movimento do mouse ou toque, garante o foco
-    document.addEventListener('touchstart', () => inputScan.focus());
-}
-manterLeitorAtivo();
-
-
-let leitorConectando = false;
-
-// document.getElementById('barcodeInput').addEventListener('keydown', (e) => {
-//     // Se recebermos dados muito rápido após um período de silêncio, 
-//     // pode ser o leitor acordando
-//     if (e.target.value.length === 0) {
-//         console.log("Leitor detectado enviando dados...");
-//     }
-// });
-
-
-
-function garantirFocoNoLeitor() {
-    
-    if (!barcodeInput) return;
-
-    // 1. Devolve o foco sempre que clicar em qualquer lugar da tela
-    document.addEventListener('click', () => {
-        // Pequeno delay para não interferir com a ação do clique em outros botões
-        setTimeout(() => barcodeInput.focus(), 100);
-    });
-
-    // 2. Devolve o foco após o uso do teclado (ex: apertar Enter ou Esc)
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' || e.key === 'Enter') {
-            barcodeInput.focus();
-        }
-    });
-
-    // 3. Força o foco inicial
-    barcodeInput.focus();
-}
-
-
-
-
-
-
-
-
-

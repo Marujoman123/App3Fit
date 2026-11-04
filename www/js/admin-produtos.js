@@ -1,90 +1,68 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxoJK7T0b4-EmwtY7Nu00pLkNvBsZmeypryqsf_vCACvBtiK5LO54nFO8iUbfCNYVFg/exec";
-console.log(localStorage.getItem("origem_acesso"));
-// admin-relatorio.js
-async function carregarRelatorio() {
-    const corpo = document.getElementById('corpoTabela');
-    const loading = document.getElementById('loadingEstoque');
-    const tabela = document.getElementById('tabelaEstoque');
+import CONFIG from './config.js';
+import API from './api.js';
+import Router from './router.js';
+import ErrorHandler from './errorHandler.js';
+import { escapeHtml } from './utils.js';
+import { exigirAcesso } from './acesso.js';
 
-    try {
-        const res = await fetch(URL_SCRIPT + "?todosProdutos=true");
-        const json = await res.json();
+const $ = (id) => document.getElementById(id);
 
-        if (json.status === "success") {
-            corpo.innerHTML = "";
-            
-            // Agora 'prod' é um objeto {codigo, nome, quantidade}
-            json.produtos.forEach(prod => {
-                const tr = document.createElement('tr');
-                const classeQtd = prod.quantidade <= 2 ? 'style="color:red; font-weight:bold;"' : prod.quantidade <= 4 ? 'style="color:#CA9802; font-weight:bold;"' : '';
-                if (prod.linha.toUpperCase() !== 'TESTE'){ //REtirando os produtos usados para teste
-                tr.innerHTML = `
-                    <td>${prod.linha}</td>
-                    <td>${prod.nome}</td>
-                    <td ${classeQtd}>${prod.quantidade}</td>
-                `;
-                }
-                corpo.appendChild(tr);
-            });
-
-            loading.style.display = 'none';
-            tabela.style.display = 'table';
-            document.getElementById('btnPDF').style.display = 'block';
-        }
-    } catch (err) {
-        loading.innerText = "Erro na conexão.";
-        console.error(err);
-    }
+if (exigirAcesso([CONFIG.USER_TYPES.PARCEIRO, CONFIG.USER_TYPES.PROPRIETARIO])) {
+  $('btnVoltar').addEventListener('click', () => Router.backToPanel());
+  $('btnPDF').addEventListener('click', gerarPDF);
+  carregarEstoque();
 }
 
-document.addEventListener('DOMContentLoaded', carregarRelatorio);
-
-
-function btnVoltar() {
-    // Buscamos o tipo de usuário que salvamos no login
-    const tipoUsuario = localStorage.getItem('usuario_tipo');
-
-    if (tipoUsuario === "Parceiro") {
-        window.location.href = "parceiro-painel.html";
-    } else {
-        // Se for Admin ou qualquer outro, volta para o admin
-        window.location.href = "admin.html";
-    }
+function classeQuantidade(qtd) {
+  if (qtd <= 2) return 'qtd-critica';
+  if (qtd <= 4) return 'qtd-baixa';
+  return '';
 }
 
+async function carregarEstoque() {
+  try {
+    const json = await API.getAllProducts();
+    if (json.status !== 'success') throw new Error(json.message || 'Resposta inválida');
 
+    $('corpoTabela').innerHTML = json.produtos
+      .filter(p => String(p.linha).toUpperCase() !== 'TESTE')
+      .map(p => `
+        <tr>
+          <td>${escapeHtml(p.linha)}</td>
+          <td>${escapeHtml(p.nome)}</td>
+          <td class="${classeQuantidade(p.quantidade)}">${escapeHtml(p.quantidade)}</td>
+        </tr>`)
+      .join('');
 
-document.getElementById('btnPDF').addEventListener('click', () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    $('loadingEstoque').classList.add('oculto');
+    $('tabelaEstoque').classList.remove('oculto');
+    $('btnPDF').classList.remove('oculto');
+  } catch (error) {
+    ErrorHandler.log('Erro ao carregar estoque:', error);
+    $('loadingEstoque').innerText = 'Erro na conexão.';
+  }
+}
 
-    // Configuração do Título
-    doc.setFontSize(18);
-    doc.text("Relatório de Estoque - 3Fit", 14, 20);
-    
-    doc.setFontSize(10);
-    doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 28);
+function gerarPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-    // Gerar a tabela
-    doc.autoTable({
-        html: '#tabelaEstoque',
-        startY: 35,
-        theme: 'grid',
-        headStyles: { fillColor: [255, 144, 69] }
-    });
+  doc.setFontSize(18);
+  doc.text('Relatório de Estoque - 3Fit', 14, 20);
+  doc.setFontSize(10);
+  doc.text(`Gerado em: ${new Date().toLocaleString()}`, 14, 28);
 
-    // --- LÓGICA HÍBRIDA: PC vs MOBILE ---
-    
-    // Detecta se é um dispositivo móvel
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  doc.autoTable({
+    html: '#tabelaEstoque',
+    startY: 35,
+    theme: 'grid',
+    headStyles: { fillColor: [255, 144, 69] },
+  });
 
-    if (isMobile) {
-        // No Mobile, força o download direto. 
-        // O Android baixa e o iOS abre uma tela de visualização própria.
-        doc.save(`estoque_3fit_${Date.now()}.pdf`);
-    } else {
-        // No PC, mantém a abertura na nova aba
-        const blob = doc.output('bloburl');
-        window.open(blob, '_blank');
-    }
-});
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const nomeArquivo = `estoque_3fit_${Date.now()}.pdf`;
+
+  if (isMobile || !window.open(doc.output('bloburl'), '_blank')) {
+    doc.save(nomeArquivo);
+  }
+}

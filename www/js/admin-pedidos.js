@@ -4,6 +4,7 @@ import API from './api.js';
 import Router from './router.js';
 import ErrorHandler from './errorHandler.js';
 import { roundValue, escapeHtml } from './utils.js';
+import { exigirAcesso } from './acesso.js';
 
 const TIPO = { CLIENTE: 'Cliente', PARCEIRO: 'Parceiro', RETIRADA: 'Retirada' };
 const CPF_VENDA_MANUAL = '000.000.000-00';
@@ -16,24 +17,11 @@ let dadosParceiroLocal = null;
 
 const $ = (id) => document.getElementById(id);
 
-if (verificarAcesso()) {
+if (exigirAcesso([CONFIG.USER_TYPES.PROPRIETARIO])) {
   document.addEventListener('DOMContentLoaded', () => {
     configurarEventos();
     carregarProdutos();
   });
-}
-
-function verificarAcesso() {
-  const tipo = Storage.getUserType();
-  if (!tipo) {
-    Router.backToLogin();
-    return false;
-  }
-  if (tipo !== CONFIG.USER_TYPES.PROPRIETARIO) {
-    Router.backToPanel();
-    return false;
-  }
-  return true;
 }
 
 function configurarEventos() {

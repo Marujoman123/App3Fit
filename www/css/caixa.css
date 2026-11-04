@@ -4,6 +4,16 @@ h2 {
     margin-top: 0;
 }
 
+#conteudoCaixa {
+    display: flex;
+}
+
+#btnRelatorio {
+    display: flex;
+    flex: 1;
+    text-align: left;
+}
+
 label {
     display: block;
     margin-bottom: 5px;

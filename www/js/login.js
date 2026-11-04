@@ -64,20 +64,7 @@ async function handleLogin() {
   const cpfLimpo = cpfInput.value.replace(/\D/g, '');
   Storage.setUserCPF(cpfLimpo);
 
-  if (isAdminCPF(cpfLimpo)) {
-    mostrarModalSenha();
-    return;
-  }
-
   await validarNaPlanilha(cpfLimpo);
-}
-
-function isAdminCPF(cpf) {
-  return cpf === CONFIG.ADMIN.CPF_JE || cpf === CONFIG.ADMIN.CPF_HUGO;
-}
-
-function nomeAdmin(cpf) {
-  return cpf === CONFIG.ADMIN.CPF_JE ? 'JEFERSON MACHADO' : 'HUGO ROSA';
 }
 
 function mostrarModalSenha() {
@@ -86,17 +73,29 @@ function mostrarModalSenha() {
   $('inputSenhaAdmin').focus();
 }
 
-function handleAdminPasswordConfirm() {
+// A senha é conferida no Apps Script; o site não conhece a senha nem a lista de admins
+async function handleAdminPasswordConfirm() {
   const senha = $('inputSenhaAdmin');
-  if (senha.value === CONFIG.ADMIN.SENHA_ADMIN) {
-    Storage.setUserType(CONFIG.USER_TYPES.PROPRIETARIO);
-    Storage.setUserName(nomeAdmin(Storage.getUserCPF()));
-    Router.navigate(rotas.admin);
-  } else {
-    ErrorHandler.show('Senha incorreta!');
-    senha.value = '';
-    senha.focus();
+  const btn = $('btnConfirmarSenha');
+  btn.disabled = true;
+
+  try {
+    const result = await API.loginAdmin(Storage.getUserCPF(), senha.value);
+    if (result.status === 'exists') {
+      Storage.setUserType(result.tipo);
+      Storage.setUserName(result.nome);
+      Router.navigate(rotas.admin);
+      return;
+    }
+    ErrorHandler.show(result.message || 'Senha incorreta!');
+  } catch (error) {
+    ErrorHandler.log('Admin Login Error:', error);
+    ErrorHandler.show('Erro ao consultar servidor. Tente novamente.');
   }
+
+  btn.disabled = false;
+  senha.value = '';
+  senha.focus();
 }
 
 function handleModalCancel() {
@@ -109,6 +108,12 @@ async function validarNaPlanilha(cpf) {
   try {
     mostrarCarregando(true);
     const result = await API.validateCPF(cpf);
+
+    if (result.status === 'admin') {
+      mostrarCarregando(false);
+      mostrarModalSenha();
+      return;
+    }
 
     if (result.status === 'exists') {
       Storage.setUserName(result.nome);

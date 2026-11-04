@@ -1,18 +1,8 @@
 <!DOCTYPE html>
-
-    <script src="js/global.js"></script>
 <html lang="pt-BR">
 
 <head>
     <meta charset="utf-8">
-    <!--
-        Customize this policy to fit your own app's needs. For more guidance, please refer to the docs:
-            https://cordova.apache.org/docs/en/latest/
-        Some notes:
-            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-                * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: content:;">
     <meta name="format-detection" content="telephone=no">
@@ -21,70 +11,76 @@
     <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="css/relatorio.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .msg-tabela { text-align: center; padding: 20px; }
+        .msg-carregando { font-weight: bold; color: #666; }
+        .msg-erro { color: red; }
+        .col-centro { text-align: center; }
+        .col-pagamento { font-size: 11px; color: #666; }
+        .etiqueta { font-size: 10px; padding: 2px 5px; border-radius: 4px; }
+        .etiqueta-retirada { background: #6c757d; color: white; }
+        .etiqueta-propria { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .comissao-negativa, .comissao-positiva, .comissao-zero { font-weight: bold; }
+        .comissao-negativa { color: red; }
+        .comissao-positiva { color: green; }
+        .comissao-zero { color: #666; }
+    </style>
 
     <title>3Fit - Relatório</title>
 </head>
 
 <body>
 
+    <div class="relatorio-container">
+        <h2>Relatório de Vendas</h2>
 
-<div class="relatorio-container">
-    <h2>Relatório de Vendas</h2>
+        <div class="filtros">
+            <div class="campo">
+                <label>Início:</label>
+                <input type="date" id="dataInicio">
+            </div>
+            <div class="campo">
+                <label>Fim:</label>
+                <input type="date" id="dataFim">
+            </div>
+            <button id="btnFiltrar">Filtrar</button>
+            <button id="btnVoltar" class="btn-secundario">Voltar</button>
+        </div>
 
-    <div class="filtros">
-        <div class="campo">
-            <label>Início:</label>
-            <input type="date" id="dataInicio">
+        <div class="resumo-cards">
+            <div class="card card-azul">
+                <span>Saldo a Receber <b>(Atual)</b></span>
+                <strong id="saldoValor">R$ 0,00</strong>
+            </div>
+            <div class="card card-periodo">
+                <span>Comissão no Período</span>
+                <strong id="comissaoPeriodo">R$ 0,00</strong>
+            </div>
+            <div class="card">
+                <span>Vendas no Período</span>
+                <strong id="totalVendas">0</strong>
+            </div>
         </div>
-        <div class="campo">
-            <label>Fim:</label>
-            <input type="date" id="dataFim">
+
+        <div class="table-container">
+            <table class="tabela-relatorio">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Produto</th>
+                        <th>Qtd</th>
+                        <th>Valor</th>
+                        <th>Pagamento</th>
+                        <th>Comissão</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoRelatorio"></tbody>
+            </table>
         </div>
-        <button id="btnFiltrar">Filtrar</button>
-        <button id="btnVoltar" class="btn-secundario" onclick="voltarParaPainel()">Voltar</button>
-       
     </div>
 
-    <div class="resumo-cards">
-        <div class="card card-azul">
-            <span>Saldo a Receber <b>(Atual)</b></span>
-            <strong id="saldoValor">R$ 0,00</strong>
-        </div>
-        <div class="card card-periodo">
-        <span>Comissão no Período</span>
-        <strong id="comissaoPeriodo">R$ 0,00</strong>
-    </div>
-        <div class="card">
-            <span>Vendas no Período</span>
-            <strong id="totalVendas">0</strong>
-        </div>
-    </div>
-
-    <div class="table-container">
-    <table class="tabela-relatorio">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Cliente</th>
-                <th>Produto</th>
-                <th>Qtd</th>
-                <th>Valor</th>
-                <th>Pagamento</th>
-                <th>Comissão</th>
-            </tr>
-        </thead>
-        <tbody id="corpoRelatorio">
-            </tbody>
-        
-    </table>
-    </div>
-
-</div>
-
+    <script type="module" src="js/relatorio.js"></script>
 </body>
 
 </html>
-
-<script src="js/relatorio.js"></script>
-
-

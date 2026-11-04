@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<script src="js/global.js"></script>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -7,32 +6,32 @@
     <title>Painel Admin - 3Fit</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
-    
-    
 </head>
 <body class="admin-body backgroud-white">
 
     <div class=" backgroud-white">
-    <h1>Painel Administrativo</h1>
-    <p>Bem-vindo, Administrador</p>
+        <h1>Painel Administrativo</h1>
+        <p>Bem-vindo, Administrador</p>
 
-    <div class="admin-grid">
-        <button class="btn-panel azul" onclick="location.href='admin-pedidos.html'">
-            🛒 Criar Pedido
-        </button>
+        <div class="admin-grid">
+            <button class="btn-panel azul" data-destino="admin-pedidos.html">
+                🛒 Criar Pedido
+            </button>
 
-        <button class="btn-panel verde" onclick="location.href='admin-produtos.html'">
-            📦 Produtos Disponíveis
-        </button>
+            <button class="btn-panel verde" data-destino="admin-produtos.html">
+                📦 Produtos Disponíveis
+            </button>
 
-        <button class="btn-panel terracota" onclick="location.href='parceiro-encomendas.html'">
-                    🚚 Encomendas
-                </button>
+            <button class="btn-panel terracota" data-destino="parceiro-encomendas.html">
+                🚚 Encomendas
+            </button>
 
-        <button class="btn-panel sair" onclick="location.href='index.html'">
-            Sair do Painel
-        </button>
+            <button id="btnSair" class="btn-panel sair">
+                Sair do Painel
+            </button>
+        </div>
     </div>
-</div>
+
+    <script type="module" src="js/admin.js"></script>
 </body>
 </html>

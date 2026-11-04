@@ -3,9 +3,6 @@ import Storage from './storage.js';
 import Router from './router.js';
 import ErrorHandler from './errorHandler.js';
 
-// Usado por pagamento.js (script comum)
-window.voltarAoInicio = () => Router.backToLogin();
-
 // ============================================
 // HEADER PROFILE
 // ============================================
@@ -36,7 +33,7 @@ function setupHeaderProfile() {
 
   if (tipo === CONFIG.USER_TYPES.PARCEIRO && elSaldo) {
     elSaldo.innerText = `Saldo: R$ ${saldo.toFixed(2)}`;
-    elSaldo.classList.add('visible');
+    elSaldo.classList.remove('oculto');
   }
 }
 

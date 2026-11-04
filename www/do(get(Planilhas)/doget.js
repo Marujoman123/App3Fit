@@ -91,10 +91,9 @@ function doGet(e) {
     }
 
     // --- ROTA 6: Verificar Status do Pagamento na Maquininha ---
+    // O token vem das Propriedades do script; qualquer token enviado pelo navegador é ignorado
     if (e.parameter.verificarPagamento) {
-      var intentId = e.parameter.verificarPagamento;
-      var tokenMP = e.parameter.token;
-      return consultarStatusPagamento(intentId, tokenMP);
+      return consultarStatusPagamento(e.parameter.verificarPagamento);
     }
 
     // --- ROTA 7: Registrar Venda Final (Chamada após aprovação da Point) ---
@@ -154,6 +153,12 @@ function buscarProduto(barcode, ss) {
 
 function realizarLogin(cpfOriginal, ss) {
   var cpf = cpfOriginal.replace(/\D/g, "");
+
+  // Admin não entra direto: o site pede a senha e valida em loginAdmin (doPost)
+  if (adminsCadastrados()[cpf]) {
+    return respostaJSON({ status: "admin" });
+  }
+
   var abaCli = ss.getSheetByName("Clientes");
   var dadosCli = abaCli.getDataRange().getValues();
   for (var i = 1; i < dadosCli.length; i++) {
@@ -218,6 +223,11 @@ function doPost(e) {
       return registrarVendaNaPlanilha(data.dados);
     }
 
+    // --- ROTA 1.B: Login de administrador (senha validada aqui, nunca no navegador) ---
+    if (data.acao === "loginAdmin") {
+      return loginAdmin(data.cpf, data.senha);
+    }
+
     // --- ROTA 2: Cadastro de Novo Cliente ---
     if (data.telefone) {
       var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Clientes");
@@ -232,9 +242,11 @@ function doPost(e) {
     }
 
     // --- ROTA 3: Iniciar Intenção de Pagamento na Point ---
-    if (data.config && data.config.token) {
-      var token = data.config.token;
-      var deviceId = data.config.deviceId;
+    // Token e maquininha vêm das Propriedades do script; o que o navegador enviar é ignorado
+    if (data.config) {
+      var mp = credenciaisMP();
+      var token = mp.token;
+      var deviceId = mp.deviceId;
       var valorParaMaquininha = Number.parseInt(data.config.amount);
 
       // Pegamos o ID da venda do primeiro item do carrinho
@@ -287,6 +299,48 @@ function doPost(e) {
     console.error("Erro crítico no doPost: " + err.toString());
     return respostaJSON({ status: "error", message: "Erro no Servidor: " + err.toString() });
   }
+}
+
+// ======================================================
+// SEGREDOS (Configurações do projeto > Propriedades do script)
+// MP_TOKEN, MP_DEVICE_ID, ADMIN_SENHA e ADMINS ({"cpf": "NOME", ...})
+// ======================================================
+function credenciaisMP() {
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty("MP_TOKEN");
+  var deviceId = props.getProperty("MP_DEVICE_ID");
+  if (!token || !deviceId) {
+    throw new Error("Configure MP_TOKEN e MP_DEVICE_ID nas Propriedades do script.");
+  }
+  return { token: token, deviceId: deviceId };
+}
+
+function adminsCadastrados() {
+  var json = PropertiesService.getScriptProperties().getProperty("ADMINS");
+  return json ? JSON.parse(json) : {};
+}
+
+// Bloqueia o CPF por 15 minutos após 5 senhas erradas (a senha é curta)
+function loginAdmin(cpfOriginal, senha) {
+  var cpf = String(cpfOriginal || "").replace(/\D/g, "");
+  var cache = CacheService.getScriptCache();
+  var chave = "tentativas_admin_" + cpf;
+  var tentativas = Number(cache.get(chave)) || 0;
+
+  if (tentativas >= 5) {
+    return respostaJSON({ status: "error", message: "Muitas tentativas. Aguarde 15 minutos." });
+  }
+
+  var admins = adminsCadastrados();
+  var senhaCorreta = PropertiesService.getScriptProperties().getProperty("ADMIN_SENHA");
+
+  if (!admins[cpf] || !senhaCorreta || String(senha) !== senhaCorreta) {
+    cache.put(chave, String(tentativas + 1), 900);
+    return respostaJSON({ status: "error", message: "Senha incorreta!" });
+  }
+
+  cache.remove(chave);
+  return respostaJSON({ status: "exists", tipo: "Proprietário", nome: admins[cpf] });
 }
 
 // Função auxiliar para responder JSON corretamente
@@ -383,7 +437,8 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
   return UrlFetchApp.fetch(url, options);
 }
 
-function consultarStatusPagamento(intentId, token) {
+function consultarStatusPagamento(intentId) {
+  var token = credenciaisMP().token;
   var url = "https://api.mercadopago.com/point/integration-api/payment-intents/" + intentId + "?t=" + new Date().getTime();
   var options = {
     "method": "get",

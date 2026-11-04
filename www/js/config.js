@@ -37,17 +37,9 @@ const CONFIG = {
   PAGES: {
     LOGIN: 'index.html',
     ADMIN: 'admin.html',
-    CLIENTE_PAINEL: 'cliente-painel.html',
-    PARCEIRO_PAINEL: 'parceiro-painel.html',
     CADASTRO: 'cadastro.html',
   },
 
-  // Credenciais (APENAS PARA DEV - remover antes de prod)
-  ADMIN: {
-    CPF_JE: "31806722852",
-    CPF_HUGO: "41471613836",
-    SENHA_ADMIN: "4321",
-  },
 };
 
 export default CONFIG;

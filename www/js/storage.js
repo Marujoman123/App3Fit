@@ -119,6 +119,15 @@ const Storage = {
     return sessionStorage.getItem('idVendaAtual');
   },
 
+  // Limpa só os dados da venda em andamento (mantém o usuário logado)
+  clearSale() {
+    localStorage.removeItem('carrinho');
+    localStorage.removeItem('total_venda');
+    localStorage.removeItem('modo_pagamento_manual');
+    localStorage.removeItem('travar_cupom');
+    sessionStorage.removeItem('idVendaAtual');
+  },
+
   // -------- LIMPEZA --------
   clearUserData() {
     // Limpa dados sensíveis do usuário (mantém alguns)

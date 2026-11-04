@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<script src="js/global.js"></script>
 <html>
 
 <head>
@@ -17,20 +16,16 @@
         <p>Sincronizando produtos...</p>
     </div>
 
-    <div class="login-container-internal" id="conteudoCaixa" style="display: none;">
+    <div class="login-container-internal oculto" id="conteudoCaixa">
 
         <div id="user-header" class="user-header">
             <h2 id="tituloCaixa" style="margin-right: auto;">Caixa</h2>
 
-           
-
             <div class="user-info-container">
-
-                <button id="btnRelatorio" style="flex: 1; text-align: left; display: none;">Relatório</button>
+                <button id="btnRelatorio" class="oculto">Relatório</button>
                 <div class="user-details">
-
                     <span id="header-nome">Carregando...</span>
-                    <span id="header-saldo" class="saldo-badge" style="display: none;">Saldo: R$ 0.00</span>
+                    <span id="header-saldo" class="saldo-badge oculto">Saldo: R$ 0.00</span>
                 </div>
                 <div class="user-icon">
                     <img src="img/user-icon.png" alt="Usuário">
@@ -40,11 +35,9 @@
                         <img src="img/arrow-right-from-bracket-solid-full.svg" alt="Sair"></button>
                 </div>
             </div>
-
         </div>
 
         <div class="login-container-sem-margem">
-
             <div class="login-container-internal">
                 <div class="linha-carrinho lista-header">
                     <span class="header-produto">Produto</span>
@@ -53,7 +46,7 @@
                     <span class="header-vazio"></span>
                 </div>
 
-                <div id="listaProdutos" class="lista-itens"> </div>
+                <div id="listaProdutos" class="lista-itens"></div>
 
                 <div class="total-fundo">
                     <h3 style="margin: 0%; padding: 0%;"> Total: R$ <span id="valorTotal">0.00</span></h3>
@@ -61,39 +54,31 @@
             </div>
         </div>
 
-
         <div id="modalFooter" class="modal-bottom-sheet">
-            
             <div class="login-container-internal">
                 <div class="input-group">
-
                     <form id="formBarcode" style="margin: 0%; padding: 0%; ">
                         <div id="scanner-container"
                             style="text-align: center;  border: 2px dashed #007bff; border-radius: 15px; background: #ffffff; margin: 0%; padding: 0%;">
                             <img src="img/barcode-scan.gif" alt="Aguardando Leitura"
                                 style="width: 150px; opacity: 1; margin: 0%; padding: 0%;">
-                                 <input type="text" id="barcodeInput"
-                style="opacity: 0; pointer-events: none; height: 0.5px; border: 0px; padding: 0px;">
-
-
+                            <input type="text" id="barcodeInput"
+                                style="opacity: 0; pointer-events: none; height: 0.5px; border: 0px; padding: 0px;">
                             <p style="color: #000000; margin: 0%; padding: 1%;">Passe o produto no leitor de código de
                                 barras</p>
+                        </div>
                     </form>
-
                 </div>
                 <div class="login-container-sem-Fundo ">
-
                     <button id="btnFecharModal" class="btn-secundario">Cancelar</button>
-                    <button id="btnContinuar" >Continuar para Pagamento</button>
+                    <button id="btnContinuar">Continuar para Pagamento</button>
                 </div>
-
             </div>
         </div>
     </div>
 
-
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/caixa.js"></script>
 </body>
 
 </html>
-<script type="module" src="js/auth.js"></script>
-<script src="js/caixa.js"></script>
