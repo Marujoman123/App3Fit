@@ -1,5 +1,6 @@
 import CONFIG from './config.js';
 import Storage from './storage.js';
+import { capitalize } from './utils.js';
 
 // Caminhos relativos à raiz (os painéis ficam na raiz do site)
 const LOGIN = 'index.html';
@@ -19,6 +20,12 @@ export default function iniciarPainel({ donos }) {
   if (!donos.includes(tipo)) {
     window.location.href = PAINEL_POR_TIPO[tipo] || LOGIN;
     return;
+  }
+
+  // "HUGO ROSA" → "Bem-vindo, Hugo"
+  const primeiroNome = capitalize((Storage.getUserName() || '').trim().split(' ')[0]);
+  if (primeiroNome) {
+    document.getElementById('boasVindas').innerText = `Bem-vindo, ${primeiroNome}`;
   }
 
   document.querySelectorAll('[data-destino]').forEach(btn => {

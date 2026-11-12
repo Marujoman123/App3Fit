@@ -302,8 +302,9 @@ function doPost(e) {
 }
 
 // ======================================================
-// SEGREDOS (Configurações do projeto > Propriedades do script)
-// MP_TOKEN, MP_DEVICE_ID, ADMIN_SENHA e ADMINS ({"cpf": "NOME", ...})
+// SEGREDOS DA MAQUININHA (Configurações do projeto > Propriedades do script)
+// MP_TOKEN e MP_DEVICE_ID
+// ADMINISTRADORES ficam na aba "Admins" da planilha: CPF | Nome | Senha
 // ======================================================
 function credenciaisMP() {
   var props = PropertiesService.getScriptProperties();
@@ -315,9 +316,22 @@ function credenciaisMP() {
   return { token: token, deviceId: deviceId };
 }
 
+// Lê a aba "Admins" (linha 1 = cabeçalho). Devolve { "cpf": { nome, senha } }.
+// Nenhuma rota devolve esta aba: a senha só é comparada aqui dentro.
 function adminsCadastrados() {
-  var json = PropertiesService.getScriptProperties().getProperty("ADMINS");
-  return json ? JSON.parse(json) : {};
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Admins");
+  if (!aba) return {};
+
+  var dados = aba.getDataRange().getValues();
+  var admins = {};
+  for (var i = 1; i < dados.length; i++) {
+    // A planilha pode guardar o CPF como número e perder o zero da frente
+    var cpf = String(dados[i][0]).replace(/\D/g, "").padStart(11, "0");
+    if (cpf !== "00000000000") {
+      admins[cpf] = { nome: dados[i][1], senha: String(dados[i][2]).trim() };
+    }
+  }
+  return admins;
 }
 
 // Bloqueia o CPF por 15 minutos após 5 senhas erradas (a senha é curta)
@@ -331,16 +345,15 @@ function loginAdmin(cpfOriginal, senha) {
     return respostaJSON({ status: "error", message: "Muitas tentativas. Aguarde 15 minutos." });
   }
 
-  var admins = adminsCadastrados();
-  var senhaCorreta = PropertiesService.getScriptProperties().getProperty("ADMIN_SENHA");
+  var admin = adminsCadastrados()[cpf];
 
-  if (!admins[cpf] || !senhaCorreta || String(senha) !== senhaCorreta) {
+  if (!admin || !admin.senha || String(senha).trim() !== admin.senha) {
     cache.put(chave, String(tentativas + 1), 900);
     return respostaJSON({ status: "error", message: "Senha incorreta!" });
   }
 
   cache.remove(chave);
-  return respostaJSON({ status: "exists", tipo: "Proprietário", nome: admins[cpf] });
+  return respostaJSON({ status: "exists", tipo: "Proprietário", nome: admin.nome });
 }
 
 // Função auxiliar para responder JSON corretamente

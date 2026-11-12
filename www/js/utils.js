@@ -116,7 +116,8 @@ export function escapeHtml(valor) {
 }
 
 export function capitalize(str) {
-  return (str || '').charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  const texto = str || '';
+  return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
 }
 
 export function truncate(str, length = 50) {
