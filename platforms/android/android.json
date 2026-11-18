@@ -61,6 +61,14 @@
             {
               "xml": "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
               "count": 1
+            },
+            {
+              "xml": "<uses-permission android:maxSdkVersion=\"30\" android:name=\"android.permission.BLUETOOTH\" />",
+              "count": 1
+            },
+            {
+              "xml": "<uses-permission android:maxSdkVersion=\"30\" android:name=\"android.permission.BLUETOOTH_ADMIN\" />",
+              "count": 1
             }
           ]
         }

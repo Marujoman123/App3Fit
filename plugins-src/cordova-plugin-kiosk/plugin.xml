@@ -37,6 +37,9 @@
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <!-- Religar o Bluetooth do leitor de código de barras (Android 11 ou anterior) -->
+            <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">

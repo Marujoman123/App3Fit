@@ -2,6 +2,7 @@ package app3fit.kiosk;
 
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +52,9 @@ public final class KioskPolicy {
             UserManager.DISALLOW_SAFE_BOOT,
             UserManager.DISALLOW_ADD_USER,
             UserManager.DISALLOW_MODIFY_ACCOUNTS,
+            // Leitor de código de barras: ninguém desliga o Bluetooth nem despareia o leitor.
+            // Para parear outro leitor, use o modo manutenção (kiosk.ps1 off).
+            UserManager.DISALLOW_CONFIG_BLUETOOTH,
     };
 
     /** BatteryManager.BATTERY_PLUGGED_AC | USB | WIRELESS */
@@ -121,10 +125,21 @@ public final class KioskPolicy {
             dpm.setGlobalSetting(admin, Settings.Global.STAY_ON_WHILE_PLUGGED_IN, STAY_ON_ALL_PLUGS);
             // Garante a depuração USB ligada (alguém pode ter desligado nas Configurações)
             dpm.setGlobalSetting(admin, Settings.Global.ADB_ENABLED, "1");
+            ensureBluetoothOn();
             for (String r : RESTRICTIONS) dpm.addUserRestriction(admin, r);
             hideOtherLaunchers(ctx, dpm, admin);
         } catch (SecurityException e) {
             Log.e(TAG, "Falha ao aplicar políticas do quiosque", e);
+        }
+    }
+
+    /** Religa o Bluetooth (leitor de código de barras) se alguém tiver desligado. */
+    @SuppressWarnings("deprecation")
+    private static void ensureBluetoothOn() {
+        BluetoothAdapter bt = BluetoothAdapter.getDefaultAdapter();
+        if (bt != null && !bt.isEnabled()) {
+            Log.i(TAG, "Bluetooth estava desligado; religando");
+            bt.enable();
         }
     }
 

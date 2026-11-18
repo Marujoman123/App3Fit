@@ -11,10 +11,10 @@ INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManif
 	android:name
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:141-190
 manifest
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-52:12
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-52:12
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-52:12
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-52:12
 MERGED from [:CordovaLib] C:\Aplicativos\App3fit\platforms\android\CordovaLib\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:20:1-27:12
 MERGED from [androidx.appcompat:appcompat-resources:1.7.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\ecfd5e644230b94874a76c80c1820e6c\transformed\jetified-appcompat-resources-1.7.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.appcompat:appcompat:1.7.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\459cb14f885dfe9984b3b738a7946fbf\transformed\appcompat-1.7.0\AndroidManifest.xml:2:1-7:12
@@ -208,6 +208,18 @@ uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:49:5-79
 	android:name
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:49:22-76
+uses-permission#android.permission.BLUETOOTH
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:50:5-95
+	android:maxSdkVersion
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:50:22-48
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:50:49-92
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:51:5-101
+	android:maxSdkVersion
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:51:22-48
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:51:49-98
 meta-data#android.support.FILE_PROVIDER_PATHS
 ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:13-130
 	android:resource

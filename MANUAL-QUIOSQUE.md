@@ -31,6 +31,9 @@ Com o quiosque **ligado**:
   janela "Permitir depuração USB?" consegue aparecer por cima do app.
 - Ficam bloqueados: redefinição de fábrica pelas Configurações, modo de segurança,
   novos usuários e novas contas.
+- O Bluetooth fica sempre ligado (o app religa se alguém desligar), e ninguém consegue
+  desparear o leitor de código de barras. Para parear outro leitor, use o modo manutenção
+  (seção 4.2).
 - Sem internet, a tela de login mostra o botão **Configurar Wi-Fi** (seção 4.1).
 
 Com o quiosque **desligado (modo manutenção)**, o Android volta ao normal (Home, barra,

@@ -26,6 +26,12 @@
     </queries>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
 
     <permission
         android:name="com.exemplo.App3fit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
