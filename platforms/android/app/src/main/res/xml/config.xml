@@ -44,4 +44,6 @@
     <preference name="KeepRunning" value="true" />
     <preference name="AndroidLaunchMode" value="singleTask" />
     <preference name="DisallowOverscroll" value="true" />
+    <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/android/splash_3fit.xml" />
+    <preference name="AndroidWindowSplashScreenBackground" value="#000000" />
 </widget>

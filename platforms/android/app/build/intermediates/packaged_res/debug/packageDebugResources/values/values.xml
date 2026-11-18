@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:ns1="http://schemas.android.com/tools">
-    <color name="cdv_splashscreen_background">#FFFFFF</color>
+    <color name="cdv_splashscreen_background">#000000</color>
     <string name="activity_name">@string/launcher_name</string>
     <string name="app_name">App3fit</string>
     <string name="launcher_name">@string/app_name</string>

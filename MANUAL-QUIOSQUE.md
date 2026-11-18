@@ -238,6 +238,7 @@ Para voltar a usar como quiosque, siga a seção 8.
 | App abre, mas não carrega dados | Sem internet | Volte à tela de login e use **Configurar Wi-Fi** (seção 4.1). Se o botão não aparecer, use `kiosk.ps1 off`, verifique o Wi-Fi e depois `kiosk.ps1 on`. |
 | Botão "Configurar Wi-Fi" não aparece sem internet | O Android ainda considera a rede funcionando | Espere alguns segundos na tela de login. Se continuar, use o modo manutenção. |
 | "Ver recibo" não abre | O quiosque bloqueia o navegador do sistema | Limitação conhecida: o recibo abre fora do app. |
+| Hora errada no tablet (fora por algumas horas) | Fuso horário errado (o tablet veio em Europe/Moscow) | `adb shell settings put global auto_time_zone 0` e depois `adb shell service call alarm 3 s16 America/Sao_Paulo`. A hora em si vem da internet (horário automático ligado). |
 | Tela apagou | Tablet fora do carregador | A tela fica sempre acesa só no carregador. Mantenha o tablet conectado. |
 | Tela preta, não liga e o PC não detecta | Bateria acabou | Ligue no carregador de parede, espere 20 a 30 minutos e segure o botão de energia por 15 segundos. Se não ligar, segure energia + volume para cima por 15 segundos. |
 | Leitor de código de barras não funciona | Leitor desconectado ou sem carga | O quiosque não bloqueia o leitor. Reconecte ou pareie o leitor (pareamento Bluetooth exige o modo manutenção). |

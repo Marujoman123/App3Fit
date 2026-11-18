@@ -28,6 +28,9 @@
       <!-- Modo quiosque: o app também é a tela inicial (ver plugins-src/cordova-plugin-kiosk) -->
       <preference name="AndroidLaunchMode" value="singleTask" />
       <preference name="DisallowOverscroll" value="true" />
+      <!-- Tela de abertura: logo 3Fit (res/android/splash_3fit.xml) em fundo preto -->
+      <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/android/splash_3fit.xml" />
+      <preference name="AndroidWindowSplashScreenBackground" value="#000000" />
 
       <queries>
             <package name="com.mercadopago.android.point" />
