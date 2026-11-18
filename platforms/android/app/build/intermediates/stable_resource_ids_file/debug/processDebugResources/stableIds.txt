@@ -1,3 +1,4 @@
+com.exemplo.App3fit:xml/kiosk_device_admin = 0x7f100002
 com.exemplo.App3fit:xml/config = 0x7f100001
 com.exemplo.App3fit:styleable/ViewStubCompat = 0x7f0f002e
 com.exemplo.App3fit:styleable/Toolbar = 0x7f0f002b

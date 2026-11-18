@@ -16,10 +16,19 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       "clobbers": [
         "window.plugins.launchmyapp"
       ]
+    },
+    {
+      "id": "cordova-plugin-kiosk.Kiosk",
+      "file": "plugins/cordova-plugin-kiosk/www/kiosk.js",
+      "pluginId": "cordova-plugin-kiosk",
+      "clobbers": [
+        "App3fitKiosk"
+      ]
     }
   ];
   module.exports.metadata = {
     "cordova-plugin-keyboard": "1.3.0",
-    "cordova-plugin-customurlscheme": "5.0.2"
+    "cordova-plugin-customurlscheme": "5.0.2",
+    "cordova-plugin-kiosk": "1.0.0"
   };
 });

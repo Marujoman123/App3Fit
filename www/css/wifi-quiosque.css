@@ -1,0 +1,18 @@
+/* Botão "Configurar Wi-Fi" do tablet-quiosque (aparece só sem internet) */
+.btn-wifi {
+    width: 100%;
+    margin-top: 1rem;
+    background: #6c757d;
+    color: white;
+    border: none;
+    font-size: 1rem;
+}
+
+.wifi-aviso {
+    color: #dc3545;
+    margin: 1.5rem 0 0.5rem;
+}
+
+.wifi-oculto {
+    display: none;
+}

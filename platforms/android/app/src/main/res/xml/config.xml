@@ -6,6 +6,10 @@
     <feature name="LaunchMyApp">
         <param name="android-package" value="nl.xservices.plugins.LaunchMyApp" />
     </feature>
+    <feature name="Kiosk">
+        <param name="android-package" value="app3fit.kiosk.KioskPlugin" />
+        <param name="onload" value="true" />
+    </feature>
     <name>App3fit</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
@@ -34,9 +38,10 @@
     <icon background="res/mipmap-xxhdpi/icon_3fit_background.png" density="xxhdpi" foreground="res/mipmap-xxhdpi/icon_3fit_foreground.png" monochrome="res/mipmap-xxhdpi/icon_3fit_monochrome.png" />
     <icon background="res/mipmap-xxxhdpi/icon_3fit_background.png" density="xxxhdpi" foreground="res/mipmap-xxxhdpi/icon_3fit_foreground.png" monochrome="res/mipmap-xxxhdpi/icon_3fit_monochrome.png" />
     <preference name="loglevel" value="DEBUG" />
-    <preference name="Fullscreen" value="true" />
+    <preference name="Fullscreen" value="false" />
     <preference name="HideKeyboardFormAccessoryBar" value="true" />
     <preference name="android-windowSoftInputMode" value="stateAlwaysHidden|adjustResize" />
     <preference name="KeepRunning" value="true" />
+    <preference name="AndroidLaunchMode" value="singleTask" />
     <preference name="DisallowOverscroll" value="true" />
 </widget>

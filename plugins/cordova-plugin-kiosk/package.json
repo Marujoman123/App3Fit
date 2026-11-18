@@ -1,0 +1,12 @@
+{
+  "name": "cordova-plugin-kiosk",
+  "version": "1.0.0",
+  "description": "Modo quiosque (Device Owner + Lock Task Mode) do App3fit",
+  "private": true,
+  "cordova": {
+    "id": "cordova-plugin-kiosk",
+    "platforms": ["android"]
+  },
+  "keywords": ["ecosystem:cordova", "cordova-android"],
+  "license": "UNLICENSED"
+}

@@ -1347,3 +1347,4 @@ styleable ViewBackgroundHelper android_background backgroundTint backgroundTintM
 styleable ViewStubCompat android_id android_layout android_inflatedId
 xml cdv_core_file_provider_paths
 xml config
+xml kiosk_device_admin

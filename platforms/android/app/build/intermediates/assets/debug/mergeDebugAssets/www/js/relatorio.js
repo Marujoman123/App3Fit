@@ -1,173 +1,124 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzOsEqzpZPE0JJk6U3Hs7Y3pAU2d47kuBcKuRy1k2RfPOeQ4muCLj8GLG1GhHZ7eCjz/exec";
-const btnFiltrar = document.getElementById("btnFiltrar");
-const btnVoltar = document.getElementById("btnVoltar");
-let cacheVendasGeral = [];
+import CONFIG from './config.js';
+import Storage from './storage.js';
+import API from './api.js';
+import Router from './router.js';
+import { escapeHtml } from './utils.js';
+import { exigirAcesso } from './acesso.js';
 
-/**
- * 1. INICIALIZAÇÃO
- */
-document.addEventListener('DOMContentLoaded', () => {
-    const agora = new Date();
-    const ano = agora.getFullYear();
-    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+const $ = (id) => document.getElementById(id);
 
-    document.getElementById('dataInicio').value = `${ano}-${mes}-01`;
-    document.getElementById('dataFim').value = agora.toISOString().split('T')[0];
+// Colunas da aba de vendas (ordem do appendRow do Apps Script)
+const COL = {
+  DATA: 1, CPF: 2, NOME: 3, PRODUTO: 6, QTD: 7, VALOR_TOTAL: 9,
+  CUPOM: 10, VALOR_SALDO: 11, VALOR_PAGO: 12, COMISSAO: 13, TIPO_PAGTO: 15,
+};
 
-    sincronizarDadosVendas();
-});
+let cacheVendas = [];
 
-btnFiltrar.addEventListener('click', () => {
-    sincronizarDadosVendas();
-});
-
-btnVoltar.addEventListener('click', () => {
-    window.location.href = "caixa.html";
-});
-
-/**
- * 2. BUSCA DE DADOS (FETCH)
- */
-async function sincronizarDadosVendas() {
-    const tbody = document.getElementById('corpoRelatorio');
-
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="6" style="text-align: center; padding: 20px; font-weight: bold; color: #666;">
-                Iniciando sincronização com a planilha...
-            </td>
-        </tr>
-    `;
-
-    try {
-        const response = await fetch(`${URL_SCRIPT}?buscarTodasVendas=true`);
-        const data = await response.json();
-
-        if (data.status === "success") {
-            cacheVendasGeral = data.vendas;
-
-            if (cacheVendasGeral.length > 0 && cacheVendasGeral[0][0] === "ID Venda") {
-                cacheVendasGeral.shift();
-            }
-
-            filtrarEProcessarRelatorio();
-        } else {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Erro: ${data.message}</td></tr>`;
-        }
-    } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">Erro de conexão ao carregar dados.</td></tr>`;
-    }
+if (exigirAcesso([CONFIG.USER_TYPES.PARCEIRO])) {
+  preencherPeriodoPadrao();
+  $('btnFiltrar').addEventListener('click', sincronizarVendas);
+  $('btnVoltar').addEventListener('click', () => Router.backToPanel());
+  sincronizarVendas();
 }
 
-/**
- * 3. FILTRO E PROCESSAMENTO (LOCAL)
- */
-function filtrarEProcessarRelatorio() {
-    const cupomLogado = (localStorage.getItem('usuario_cupom') || "").toUpperCase().trim();
-    const cpfLogado = (localStorage.getItem('usuario_cpf') || "").replace(/\D/g, "");
-    const dataInicioStr = document.getElementById('dataInicio').value;
-    const dataFimStr = document.getElementById('dataFim').value;
-
-    if (!cupomLogado && !cpfLogado) return;
-
-    const dInicio = new Date(dataInicioStr + "T00:00:00");
-    const dFim = new Date(dataFimStr + "T23:59:59");
-
-    const vendasFiltradas = cacheVendasGeral.filter(linha => {
-        const dataVenda = new Date(linha[1]);
-        const cpfVenda = linha[2].toString().replace(/\D/g, ""); 
-        const cupomVenda = linha[8].toString().trim().toUpperCase();
-
-        const pertenceAoPeriodo = dataVenda >= dInicio && dataVenda <= dFim;
-        const eDoParceiro = (cupomVenda === cupomLogado) || (cpfVenda === cpfLogado);
-
-        return pertenceAoPeriodo && eDoParceiro;
-    });
-
-    const relatorioFinal = vendasFiltradas.map(v => {
-        const comissao = parseFloat(v[11]) || 0;
-        const cpfVenda = v[2].toString().replace(/\D/g, "");
-
-        return {
-            data: v[1],
-            cliente: v[3],
-            produto: v[6],
-            valorItem: parseFloat(v[7]),
-            valorComissao: comissao,
-            pagoSaldo: parseFloat(v[9]) || 0,
-            pagoDinheiro: parseFloat(v[10]) || 0,
-            isCompraPropria: (cpfVenda === cpfLogado)
-        };
-    });
-
-    // Soma as comissões do período
-    const somaComissao = relatorioFinal.reduce((sum, item) => sum + item.valorComissao, 0);
-
-    // Vendas positivas para o card de contagem
-    const apenasVendas = relatorioFinal.filter(item => item.valorComissao > 0);
-    const quantidadeVendas = apenasVendas.length;
-
-    exibirNaTela(relatorioFinal, somaComissao, quantidadeVendas);
+function preencherPeriodoPadrao() {
+  const hoje = new Date();
+  const trintaDias = new Date();
+  trintaDias.setDate(hoje.getDate() - 30);
+  $('dataInicio').value = trintaDias.toISOString().split('T')[0];
+  $('dataFim').value = hoje.toISOString().split('T')[0];
 }
 
-/**
- * 4. RENDERIZAÇÃO NA TABELA
- */
-function exibirNaTela(itens, comissaoFiltrada, qtdVendas) {
-    const tbody = document.getElementById('corpoRelatorio');
-    const elSaldoGeral = document.getElementById('saldoValor');
-    const elComissaoPeriodo = document.getElementById('comissaoPeriodo');
-    const elTotalVendas = document.getElementById('totalVendas');
+function mensagemTabela(texto, classe = '') {
+  $('corpoRelatorio').innerHTML = `<tr><td colspan="7" class="msg-tabela ${classe}">${escapeHtml(texto)}</td></tr>`;
+}
 
-    tbody.innerHTML = "";
+async function sincronizarVendas() {
+  mensagemTabela('Iniciando sincronização com a planilha...', 'msg-carregando');
 
-    if (itens.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px;">Sem movimentações.</td></tr>`;
-    } else {
-        itens.forEach(v => {
-            const tr = document.createElement('tr');
-            
-            // Etiqueta de Tipo de Pagamento
-            let etiquetaPagto = "";
-            if (v.pagoSaldo > 0 && v.pagoDinheiro > 0) {
-                etiquetaPagto = v.isCompraPropria ? `<span style="font-size:10px; background:#e0e0e0; padding:2px 5px; border-radius:4px; margin-right:5px;">Misto</span>`: "";
-            } else if (v.pagoSaldo > 0) {
-                etiquetaPagto = v.isCompraPropria ? `<span style="font-size:10px; background:#d1ecf1; color:#0c5460; padding:2px 5px; border-radius:4px; margin-right:5px;">Saldo</span>`: "";
-            } else {
-                etiquetaPagto = v.isCompraPropria ? `<span style="font-size:10px; background:#d4edda; color:#155724; padding:2px 5px; border-radius:4px; margin-right:5px;">Dinheiro/Cartão</span>`: "";
-            }
-
-            // Etiqueta de Compra Própria
-            let etiquetaCompraPropria = v.isCompraPropria ? `<span style="font-size:10px; background:#fff3cd; color:#856404; padding:2px 5px; border-radius:4px; border:1px solid #ffeeba;">COMPRA PRÓPRIA</span>` : "";
-            const corComissao = v.valorComissao < 0 ? "color: red;" : "color: green;";
-            
-            tr.innerHTML = `
-                <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
-                <td>${v.cliente} <br>${etiquetaCompraPropria}</td>
-                <td>${v.produto} </td>
-                <td>R$ ${v.valorItem.toFixed(2)}</td>
-                <td style="font-size:11px; color:#666;">
-                    S: R$ ${v.pagoSaldo.toFixed(2)}<br>
-                    D: R$ ${v.pagoDinheiro.toFixed(2)}<br>
-                    ${etiquetaPagto}
-                </td>
-                <td style="${corComissao} font-weight: bold;">R$ ${v.valorComissao.toFixed(2)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+  try {
+    const data = await API.getAllSales();
+    if (data.status !== 'success') {
+      mensagemTabela(`Erro: ${data.message}`, 'msg-erro');
+      return;
     }
 
-    // Mata o zero negativo na comissão do período
-    let valorPeriodoLimpo = (parseFloat(comissaoFiltrada) + 0);
-    if (valorPeriodoLimpo < 0 && valorPeriodoLimpo > -0.01) valorPeriodoLimpo = 0;
-    
-    if (elComissaoPeriodo) elComissaoPeriodo.innerText = `R$ ${valorPeriodoLimpo.toFixed(2)}`;
-    if (elTotalVendas) elTotalVendas.innerText = qtdVendas;
+    cacheVendas = data.vendas;
+    if (cacheVendas.length > 0 && cacheVendas[0][0] === 'ID Venda') cacheVendas.shift();
+    filtrarEExibir();
+  } catch (error) {
+    mensagemTabela('Erro de conexão ao carregar dados.', 'msg-erro');
+  }
+}
 
-    // Saldo Geral vindo do LocalStorage
-    const saldoNoLogin = localStorage.getItem('usuario_saldo');
-    if (elSaldoGeral) {
-        const saldoGeralLimpo = (parseFloat(saldoNoLogin) + 0).toFixed(2);
-        elSaldoGeral.innerText = `R$ ${saldoGeralLimpo}`;
-    }
+function filtrarEExibir() {
+  const cupomLogado = (Storage.getUserCoupon() || '').toUpperCase().trim();
+  const cpfLogado = (Storage.getUserCPF() || '').replace(/\D/g, '');
+  if (!cupomLogado && !cpfLogado) return;
+
+  const dInicio = new Date($('dataInicio').value + 'T00:00:00');
+  const dFim = new Date($('dataFim').value + 'T23:59:59');
+
+  // Aparece se o cupom é do parceiro ou se a compra/retirada foi feita no CPF dele
+  const itens = cacheVendas
+    .filter(linha => {
+      const dataVenda = new Date(linha[COL.DATA]);
+      const cpfVenda = linha[COL.CPF].toString().replace(/\D/g, '');
+      const cupomVenda = linha[COL.CUPOM].toString().trim().toUpperCase();
+      const noPeriodo = dataVenda >= dInicio && dataVenda <= dFim;
+      return noPeriodo && (cupomVenda === cupomLogado || cpfVenda === cpfLogado);
+    })
+    .map(v => ({
+      data: v[COL.DATA],
+      cliente: v[COL.NOME],
+      produto: v[COL.PRODUTO],
+      quantidade: parseInt(v[COL.QTD]) || 0,
+      valorItem: parseFloat(v[COL.VALOR_TOTAL]) || 0,
+      valorComissao: parseFloat(v[COL.COMISSAO]) || 0,
+      pagoSaldo: parseFloat(v[COL.VALOR_SALDO]) || 0,
+      pagoDinheiro: parseFloat(v[COL.VALOR_PAGO]) || 0,
+      isCompraPropria: v[COL.CPF].toString().replace(/\D/g, '') === cpfLogado,
+      tipoPagto: v[COL.TIPO_PAGTO],
+    }));
+
+  const somaComissao = itens.reduce((sum, item) => sum + item.valorComissao, 0);
+  const totalMarmitas = itens.reduce((sum, item) => sum + item.quantidade, 0);
+  exibirNaTela(itens, somaComissao, totalMarmitas);
+}
+
+function etiqueta(v) {
+  if (v.tipoPagto === 'RETIRADA_ESTOQUE') return '<br><span class="etiqueta etiqueta-retirada">RETIRADA</span>';
+  if (v.isCompraPropria) return '<br><span class="etiqueta etiqueta-propria">COMPRA PRÓPRIA</span>';
+  return '';
+}
+
+function classeComissao(valor) {
+  if (valor < 0) return 'comissao-negativa';
+  if (valor > 0) return 'comissao-positiva';
+  return 'comissao-zero';
+}
+
+function exibirNaTela(itens, comissaoPeriodo, qtdVendas) {
+  if (itens.length === 0) {
+    mensagemTabela('Sem movimentações no período.');
+  } else {
+    // data-label alimenta o layout de tabela no celular (relatorio.css)
+    $('corpoRelatorio').innerHTML = itens.map(v => `
+      <tr>
+        <td data-label="Data">${new Date(v.data).toLocaleDateString('pt-BR')}</td>
+        <td data-label="Cliente"><b>${escapeHtml(v.cliente)}</b> ${etiqueta(v)}</td>
+        <td data-label="Produto">${escapeHtml(v.produto)}</td>
+        <td data-label="Qtd" class="col-centro">${v.quantidade}x</td>
+        <td data-label="Valor Total">R$ ${v.valorItem.toFixed(2)}</td>
+        <td data-label="Pagamento" class="col-pagamento">
+          S: R$ ${v.pagoSaldo.toFixed(2)} | P: R$ ${v.pagoDinheiro.toFixed(2)}
+        </td>
+        <td data-label="Comissão" class="${classeComissao(v.valorComissao)}">R$ ${v.valorComissao.toFixed(2)}</td>
+      </tr>`).join('');
+  }
+
+  $('comissaoPeriodo').innerText = `R$ ${Math.max(0, comissaoPeriodo).toFixed(2)}`;
+  $('totalVendas').innerText = qtdVendas;
+  $('saldoValor').innerText = `R$ ${Storage.getUserBalance().toFixed(2)}`;
 }

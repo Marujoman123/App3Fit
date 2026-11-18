@@ -1,101 +1,91 @@
-// Função para carregar o perfil no topo da página
-function carregarPerfilHeader() {
-    const nome = localStorage.getItem('usuario_nome');
-    const primeiroNome = nome.split(" ")[0];
-    const tipo = localStorage.getItem('usuario_tipo');
-    const saldo = localStorage.getItem('usuario_saldo');
+import CONFIG from './config.js';
+import Storage from './storage.js';
+import Router from './router.js';
+import ErrorHandler from './errorHandler.js';
 
-    const elNome = document.getElementById('header-nome');
-    const elSaldo = document.getElementById('header-saldo');
-    const btnRelatorio = document.getElementById('btnRelatorio');
+// ============================================
+// HEADER PROFILE
+// ============================================
 
-    if (nome) {
-        // Pega apenas o primeiro nome para não ocupar muito espaço
-        elNome.innerText = primeiroNome;
-
-        // Se for parceiro, mostra o saldo
-        if (tipo === "Parceiro" && saldo !== null) {
-            // Somar + 0 remove o sinal negativo do zero
-            const saldoFormatado = (parseFloat(saldo) + 0).toFixed(2);
-            elSaldo.innerText = `Saldo: R$ ${saldoFormatado}`;
-            elSaldo.style.display = 'block';
-        }
-    } else {
-        // Se não tiver nome (sessão expirada ou não logado), redireciona para login
-        window.location.href = "index.html";
-    }
-}
-
-// Executa assim que a página carrega
-document.addEventListener('DOMContentLoaded', carregarPerfilHeader);
-
-
-
-btnSair.addEventListener('click', () => {
-    window.location.href = "index.html";
+document.addEventListener('DOMContentLoaded', () => {
+  setupHeaderProfile();
+  setupInactivityMonitoring();
+  setupEventListeners();
 });
 
+function setupHeaderProfile() {
+  const nome = Storage.getUserName();
 
-// ------------------------INATIVIDADE DO APLICATIVO----------------------
+  if (!nome) {
+    Router.backToLogin();
+    return;
+  }
 
+  const elNome = document.getElementById('header-nome');
+  const elSaldo = document.getElementById('header-saldo');
+  const tipo = Storage.getUserType();
+  const saldo = Storage.getUserBalance();
 
-// Configuração: 3 minutos (180.000 milissegundos)
-const TEMPO_LIMITE = 3 * 60 * 1000;
-let cronometroInatividade;
+  if (elNome) {
+    const primeiroNome = nome.split(' ')[0];
+    elNome.innerText = primeiroNome;
+  }
 
-function iniciarMonitoramento() {
-    // Lista de eventos que provam que o usuário ainda está lá
-    const eventos = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+  if (tipo === CONFIG.USER_TYPES.PARCEIRO && elSaldo) {
+    elSaldo.innerText = `Saldo: R$ ${saldo.toFixed(2)}`;
+    elSaldo.classList.remove('oculto');
+  }
+}
 
-    // Para cada interação, o cronômetro reinicia
-    eventos.forEach(evento => {
-        document.addEventListener(evento, resetarTemporizador, true);
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
+function setupEventListeners() {
+  const btnSair = document.getElementById('btnSair');
+  const btnFecharModal = document.getElementById('btnFecharModal');
+
+  if (btnSair) {
+    btnSair.addEventListener('click', () => Router.logout());
+  }
+
+  if (btnFecharModal) {
+    btnFecharModal.addEventListener('click', () => {
+      if (confirm('Tem certeza que deseja cancelar e voltar para o início?')) {
+        Router.backToLogin();
+      }
     });
-
-    resetarTemporizador();
+  }
 }
 
-function resetarTemporizador() {
-    // Cancela o agendamento anterior
-    clearTimeout(cronometroInatividade);
+// ============================================
+// INACTIVITY MONITORING (Session Timeout)
+// ============================================
 
-    // Se estiver na index.html, não precisa deslogar dela mesma
-    if (!window.location.href.includes("index.html")) {
-        // Agenda o logout para daqui a 3 minutos
-        cronometroInatividade = setTimeout(voltarAoInicio, TEMPO_LIMITE);
-    }
+let inactivityTimer;
+const ACTIVITY_EVENTS = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+
+function setupInactivityMonitoring() {
+  ACTIVITY_EVENTS.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+  });
+
+  resetInactivityTimer();
 }
 
-function voltarAoInicio() {
-    // 1. Limpa os dados sensíveis do LocalStorage (CPF, Saldo, Carrinho)
-    localStorage.clear();
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
 
-    // 2. Opcional: Avisar o usuário antes (mas em totens autônomos geralmente é direto)
-    // alert("Sessão encerrada por inatividade.");
-
-    // 3. Volta para a página de Login
-    window.location.href = "index.html";
+  if (!isOnLoginPage()) {
+    inactivityTimer = setTimeout(handleSessionTimeout, CONFIG.TIMEOUTS.SESSION);
+  }
 }
 
-// Inicia assim que a página carregar
-document.addEventListener('DOMContentLoaded', iniciarMonitoramento);
+function isOnLoginPage() {
+  return window.location.pathname.includes('index.html');
+}
 
-
-// ------------------------/INATIVIDADE DO APLICATIVO----------------------
-
-
-
-// Fechar ao clicar no botão cancelar
-document.getElementById('btnFecharModal').addEventListener('click', () => {
-    // Abre a caixa de confirmação
-    const confirmacao = confirm("Tem certeza que deseja cancelar e voltar para o início?");
-    // Se o usuário clicou em "OK" (true)
-    if (confirmacao) {
-        window.location.href = "index.html";
-    }
-    // Se clicou em "Cancelar" (false), o código não faz nada e o modal continua aberto
-});
-
-
-
-
+function handleSessionTimeout() {
+  ErrorHandler.show('Sessão expirada por inatividade. Faça login novamente.');
+  Router.logout();
+}

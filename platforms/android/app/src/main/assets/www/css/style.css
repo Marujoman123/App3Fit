@@ -32,7 +32,7 @@ body {
 body::before {
     content: "";
     /* Caminho para a sua imagem */
-    background-image: url('../img/01.webp');
+    background-image: url('../img/3fitLogo.svg');
 
      background-repeat: repeat;
      /* background-repeat: no-repeat; */
@@ -207,6 +207,26 @@ span {
     height: 35px;
 }
 
+.btn-sair {
+    padding: 4px;
+    background-color: black;
+    line-height: 0;
+}
+
+.btn-sair:hover {
+    background-color: #333;
+}
+
+.btn-sair svg {
+    width: 27px;
+    height: 27px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 /* ---------------------/HEADER USUARIO----------------------------- */
 
 
@@ -234,6 +254,10 @@ button:hover {
     padding: 12px;
     margin: 2px
 }
+.oculto {
+    display: none !important;
+}
+
 .backgroud-white{
  background: #FFFFFF;
     border-radius: 6px;
@@ -296,3 +320,12 @@ button:hover {
     margin-top: 15px;
 }
 /* ----------------------------/MODAL----------------------------- */
+
+
+
+.azul { background: #007bff; }
+.verde { background: #28a745; }
+.laranja { background: #fd7e14; }
+.roxo {background: #a81ba8;}
+.terracota {background: #610000;}
+.sair { background: #6c757d; }

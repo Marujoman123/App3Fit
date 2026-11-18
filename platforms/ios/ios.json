@@ -17,6 +17,23 @@
       }
     }
   },
-  "installed_plugins": {},
-  "dependent_plugins": {}
+  "installed_plugins": {
+    "cordova-plugin-kiosk": {
+      "PACKAGE_NAME": "com.exemplo.App3fit"
+    }
+  },
+  "dependent_plugins": {},
+  "modules": [
+    {
+      "id": "cordova-plugin-kiosk.Kiosk",
+      "file": "plugins/cordova-plugin-kiosk/www/kiosk.js",
+      "pluginId": "cordova-plugin-kiosk",
+      "clobbers": [
+        "App3fitKiosk"
+      ]
+    }
+  ],
+  "plugin_metadata": {
+    "cordova-plugin-kiosk": "1.0.0"
+  }
 }

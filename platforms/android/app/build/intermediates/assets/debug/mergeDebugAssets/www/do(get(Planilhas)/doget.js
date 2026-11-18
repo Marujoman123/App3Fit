@@ -44,6 +44,29 @@ function doGet(e) {
       return respostaJSON({ status: "success", produtos: listaFinal });
     }
 
+
+    // --- ROTA 1.B: Listar TODOS os produtos (MESMO ZERADOS) para Encomenda ---
+    if (e.parameter.todosProdutosSemFiltro) {
+      var abaProd = ss.getSheetByName("produtos");
+      var dadosProd = abaProd.getDataRange().getValues();
+      var listaCompleta = [];
+
+      // Começa em 1 para pular o cabeçalho
+      for (var j = 1; j < dadosProd.length; j++) {
+        listaCompleta.push({
+          codigo: dadosProd[j][0].toString(),
+          nome: dadosProd[j][1],
+          kg: dadosProd[j][2],
+          linha: dadosProd[j][6],
+          precoCusto: dadosProd[j][3],
+          precoCliente: dadosProd[j][4],
+          precoParceiro: dadosProd[j][5],
+          quantidade: 0 // Força 0 pois na encomenda começa zerado
+        });
+      }
+      return respostaJSON({ status: "success", produtos: listaCompleta });
+    }
+
     // --- ROTA 2: Validar Cupom ---
     if (e.parameter.validarCupom) {
       return validarCupom(e.parameter.validarCupom, ss);
@@ -68,10 +91,9 @@ function doGet(e) {
     }
 
     // --- ROTA 6: Verificar Status do Pagamento na Maquininha ---
+    // O token vem das Propriedades do script; qualquer token enviado pelo navegador é ignorado
     if (e.parameter.verificarPagamento) {
-      var intentId = e.parameter.verificarPagamento;
-      var tokenMP = e.parameter.token;
-      return consultarStatusPagamento(intentId, tokenMP);
+      return consultarStatusPagamento(e.parameter.verificarPagamento);
     }
 
     // --- ROTA 7: Registrar Venda Final (Chamada após aprovação da Point) ---
@@ -131,6 +153,12 @@ function buscarProduto(barcode, ss) {
 
 function realizarLogin(cpfOriginal, ss) {
   var cpf = cpfOriginal.replace(/\D/g, "");
+
+  // Admin não entra direto: o site pede a senha e valida em loginAdmin (doPost)
+  if (adminsCadastrados()[cpf]) {
+    return respostaJSON({ status: "admin" });
+  }
+
   var abaCli = ss.getSheetByName("Clientes");
   var dadosCli = abaCli.getDataRange().getValues();
   for (var i = 1; i < dadosCli.length; i++) {
@@ -190,61 +218,142 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
 
-    // Rota 1: Gravar a venda final na planilha (Ação disparada após aprovação)
+    // --- ROTA 1: Gravar a venda final na planilha ---
     if (data.acao === "registrarVendaFinal") {
       return registrarVendaNaPlanilha(data.dados);
     }
 
-    // Rota 2: Cadastro de Novo Cliente
+    // --- ROTA 1.B: Login de administrador (senha validada aqui, nunca no navegador) ---
+    if (data.acao === "loginAdmin") {
+      return loginAdmin(data.cpf, data.senha);
+    }
+
+    // --- ROTA 2: Cadastro de Novo Cliente ---
     if (data.telefone) {
       var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Clientes");
       sheet.appendRow([
         data.cpf,
         data.nome,
-        "'" + data.telefone, 
+        "'" + data.telefone,
         data.tipo,
         data.saldo
       ]);
       return respostaJSON({ status: "success", message: "Cliente cadastrado com sucesso" });
     }
 
-    // Rota 3: Iniciar Intenção de Pagamento na Point
-    if (data.config && data.config.token) {
-      var token = data.config.token;
-      var deviceId = data.config.deviceId;
+    // --- ROTA 3: Iniciar Intenção de Pagamento na Point ---
+    // Token e maquininha vêm das Propriedades do script; o que o navegador enviar é ignorado
+    if (data.config) {
+      var mp = credenciaisMP();
+      var token = mp.token;
+      var deviceId = mp.deviceId;
       var valorParaMaquininha = Number.parseInt(data.config.amount);
-      
+
       // Pegamos o ID da venda do primeiro item do carrinho
       var idVenda = data.itens && data.itens.length > 0 ? data.itens[0]["ID Venda"].toString() : "V" + Date.now();
 
       if (valorParaMaquininha > 0) {
-        // AJUSTE: Passamos data.config.payment, que pode ser null/undefined na nova lógica
+
+        // 🚨 COMANDO DE CHOQUE: Limpa a maquininha antes de enviar a nova!
+        cancelarIntencoesPendentes(deviceId, token);
+        Utilities.sleep(1500); // Pausa 1.5s para o Mercado Pago processar a limpeza
+
+        // Chamada para a função auxiliar externa
         var resMP = acionarMaquinaPoint(
           valorParaMaquininha,
           idVenda,
           token,
           deviceId,
-          data.config.payment || null // Se não existir, envia null
+          data.config.payment || null
         );
-        
-        var resObj = JSON.parse(resMP.getContentText());
 
+        var responseText = resMP.getContentText();
+        var resObj = JSON.parse(responseText);
+        var responseCode = resMP.getResponseCode(); // Captura o código HTTP (ex: 201, 409, 400)
+
+        // Caso A: Sucesso (Intenção criada)
         if (resObj.id) {
           return respostaJSON({ status: "success", intent_id: resObj.id });
-        } else {
-          // Log de erro no console do Google Scripts para facilitar seu debug
-          console.error("Erro retornado pelo Mercado Pago: " + resMP.getContentText());
-          return respostaJSON({ status: "error", message: "Erro MP: " + resMP.getContentText() });
         }
+
+        // Caso B: Erro 409 - Maquininha com pagamento pendente (Ocupada)
+        if (responseCode === 409 || resObj.error === "2205") {
+          return respostaJSON({
+            status: "error",
+            message: "A maquininha está ocupada com outro pedido. Cancele a operação atual no botão VERMELHO da maquininha e tente novamente."
+          });
+        }
+
+        // Caso C: Outros erros (Token inválido, DeviceID errado, etc)
+        console.error("Erro retornado pelo Mercado Pago: " + responseText);
+        return respostaJSON({
+          status: "error",
+          message: "Erro na Point: " + (resObj.message || "Verifique a conexão da máquina.")
+        });
       }
     }
 
-    return respostaJSON({ status: "error", message: "Dados inválidos ou formato desconhecido" });
+    return respostaJSON({ status: "error", message: "Dados inválidos ou rota desconhecida." });
 
   } catch (err) {
     console.error("Erro crítico no doPost: " + err.toString());
     return respostaJSON({ status: "error", message: "Erro no Servidor: " + err.toString() });
   }
+}
+
+// ======================================================
+// SEGREDOS DA MAQUININHA (Configurações do projeto > Propriedades do script)
+// MP_TOKEN e MP_DEVICE_ID
+// ADMINISTRADORES ficam na aba "Admins" da planilha: CPF | Nome | Senha
+// ======================================================
+function credenciaisMP() {
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty("MP_TOKEN");
+  var deviceId = props.getProperty("MP_DEVICE_ID");
+  if (!token || !deviceId) {
+    throw new Error("Configure MP_TOKEN e MP_DEVICE_ID nas Propriedades do script.");
+  }
+  return { token: token, deviceId: deviceId };
+}
+
+// Lê a aba "Admins" (linha 1 = cabeçalho). Devolve { "cpf": { nome, senha } }.
+// Nenhuma rota devolve esta aba: a senha só é comparada aqui dentro.
+function adminsCadastrados() {
+  var aba = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Admins");
+  if (!aba) return {};
+
+  var dados = aba.getDataRange().getValues();
+  var admins = {};
+  for (var i = 1; i < dados.length; i++) {
+    // A planilha pode guardar o CPF como número e perder o zero da frente
+    var cpf = String(dados[i][0]).replace(/\D/g, "").padStart(11, "0");
+    if (cpf !== "00000000000") {
+      admins[cpf] = { nome: dados[i][1], senha: String(dados[i][2]).trim() };
+    }
+  }
+  return admins;
+}
+
+// Bloqueia o CPF por 15 minutos após 5 senhas erradas (a senha é curta)
+function loginAdmin(cpfOriginal, senha) {
+  var cpf = String(cpfOriginal || "").replace(/\D/g, "");
+  var cache = CacheService.getScriptCache();
+  var chave = "tentativas_admin_" + cpf;
+  var tentativas = Number(cache.get(chave)) || 0;
+
+  if (tentativas >= 5) {
+    return respostaJSON({ status: "error", message: "Muitas tentativas. Aguarde 15 minutos." });
+  }
+
+  var admin = adminsCadastrados()[cpf];
+
+  if (!admin || !admin.senha || String(senha).trim() !== admin.senha) {
+    cache.put(chave, String(tentativas + 1), 900);
+    return respostaJSON({ status: "error", message: "Senha incorreta!" });
+  }
+
+  cache.remove(chave);
+  return respostaJSON({ status: "exists", tipo: "Proprietário", nome: admin.nome });
 }
 
 // Função auxiliar para responder JSON corretamente
@@ -323,8 +432,6 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
     }
   };
 
-  // Se o JavaScript enviou configurações (como parcelas no crédito), adiciona aqui.
-  // Se for null (nosso novo padrão), a máquina pergunta o tipo ao cliente.
   if (paymentConfig) {
     payload.payment = paymentConfig;
   }
@@ -334,7 +441,7 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
     "headers": {
       "Authorization": "Bearer " + token,
       "Content-Type": "application/json",
-      "X-Idempotency-Key": "ID-" + idVenda
+      "X-Idempotency-Key": "ID-" + idVenda // Chave para evitar duplicidade
     },
     "payload": JSON.stringify(payload),
     "muteHttpExceptions": true
@@ -343,42 +450,68 @@ function acionarMaquinaPoint(valorCentavos, idVenda, token, deviceId, paymentCon
   return UrlFetchApp.fetch(url, options);
 }
 
-function consultarStatusPagamento(intentId, token) {
-  const url = "https://api.mercadopago.com/point/integration-api/payment-intents/" + intentId;
-
-  const options = {
+function consultarStatusPagamento(intentId) {
+  var token = credenciaisMP().token;
+  var url = "https://api.mercadopago.com/point/integration-api/payment-intents/" + intentId + "?t=" + new Date().getTime();
+  var options = {
     "method": "get",
     "headers": {
       "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache"
     },
     "muteHttpExceptions": true
   };
 
   try {
-    const response = UrlFetchApp.fetch(url, options);
-    const data = JSON.parse(response.getContentText());
+    var response = UrlFetchApp.fetch(url, options);
+    var data = JSON.parse(response.getContentText());
 
-    // LOGICA DE STATUS:
-    // Na Point, 'FINISHED' significa que o dinheiro entrou e a transação acabou com sucesso.
-    var statusFinal = "pending";
+    // 1. Pega o status geral da maquininha
+    var mpStatus = (data.state || data.status || "").toUpperCase();
     
-    // Verificamos tanto 'status' quanto 'state' (a API do MP varia entre versões)
-    var mpStatus = (data.status || data.state || "").toUpperCase();
+    // 2. CRIA A VARIÁVEL paymentStatus com segurança (isso resolve o seu ReferenceError)
+    var paymentStatus = "";
+    if (data.payment && data.payment.state) {
+      paymentStatus = data.payment.state.toUpperCase();
+    }
 
-    if (mpStatus === "FINISHED" || mpStatus === "PROCESSED" || mpStatus === "SUCCESS") {
+    var statusFinal = "pending";
+
+    // 3. Verifica se foi Aprovado/Finalizado
+    if (mpStatus === "FINISHED" || mpStatus === "CLOSED" || mpStatus === "PROCESSED" || paymentStatus === "APPROVED") {
       statusFinal = "approved";
-    } else if (mpStatus === "CANCELED" || mpStatus === "ABORTED") {
+    }
+    // 4. Verifica se foi Cancelado/Rejeitado
+    else if (mpStatus === "CANCELED" || mpStatus === "ABANDONED" || mpStatus === "EXPIRED" || mpStatus === "FAILED" || paymentStatus === "REJECTED") {
       statusFinal = "canceled";
     }
 
-    return respostaJSON({ 
-      status: statusFinal, 
-      id_mercado_pago: data.payment_id || null, // ID real do pagamento para conciliação
-      raw_status: mpStatus 
+    // 5. Retorna para o seu App
+    return respostaJSON({
+      status: statusFinal,
+      raw_status: paymentStatus !== "" ? paymentStatus : mpStatus,
+      json_completo: data
     });
 
   } catch (err) {
     return respostaJSON({ status: "error", message: err.toString() });
+  }
+}
+
+// Função para limpar a tela da máquina antes de uma nova venda
+function cancelarIntencoesPendentes(deviceId, token) {
+  try {
+    var url = "https://api.mercadopago.com/point/integration-api/devices/" + deviceId + "/payment-intents";
+    var options = {
+      "method": "delete",
+      "headers": {
+        "Authorization": "Bearer " + token
+      },
+      "muteHttpExceptions": true
+    };
+    UrlFetchApp.fetch(url, options);
+  } catch (e) {
+    // Apenas ignora se não houver nada para limpar
   }
 }

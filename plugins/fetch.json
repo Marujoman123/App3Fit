@@ -24,5 +24,13 @@
     },
     "is_top_level": true,
     "variables": {}
+  },
+  "cordova-plugin-kiosk": {
+    "source": {
+      "type": "local",
+      "path": "node_modules\\cordova-plugin-kiosk"
+    },
+    "is_top_level": true,
+    "variables": {}
   }
 }

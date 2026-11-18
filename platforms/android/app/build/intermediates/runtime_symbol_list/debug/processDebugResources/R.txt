@@ -1788,3 +1788,4 @@ int styleable ViewStubCompat_android_layout 1
 int styleable ViewStubCompat_android_inflatedId 2
 int xml cdv_core_file_provider_paths 0x7f100000
 int xml config 0x7f100001
+int xml kiosk_device_admin 0x7f100002

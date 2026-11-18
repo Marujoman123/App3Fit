@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Plugin local de modo quiosque (Android) para o App3fit.
+  - O app vira Device Owner (ativado uma vez via adb) e roda em Lock Task Mode.
+  - O app é registrado como tela inicial (HOME), então abre ao ligar e volta sozinho se fechar.
+  - Comandos de manutenção só podem ser enviados pelo adb (permissão DUMP).
+  Ver scripts/kiosk.ps1 para os comandos.
+-->
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-kiosk"
+        version="1.0.0">
+
+    <name>Kiosk</name>
+    <description>Modo quiosque com Device Owner + Lock Task Mode</description>
+
+    <js-module src="www/kiosk.js" name="Kiosk">
+        <clobbers target="App3fitKiosk" />
+    </js-module>
+
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="Kiosk">
+                <param name="android-package" value="app3fit.kiosk.KioskPlugin" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+
+        <!-- App como tela inicial: abre no boot e é reaberto pelo sistema se fechar/travar -->
+        <config-file target="AndroidManifest.xml" parent="/manifest/application/activity[@android:name='MainActivity']">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <receiver android:name="app3fit.kiosk.KioskAdminReceiver"
+                      android:permission="android.permission.BIND_DEVICE_ADMIN"
+                      android:exported="true">
+                <meta-data android:name="android.app.device_admin"
+                           android:resource="@xml/kiosk_device_admin" />
+                <intent-filter>
+                    <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                </intent-filter>
+            </receiver>
+
+            <!-- Só quem tem a permissão DUMP (o adb shell) consegue enviar comandos -->
+            <receiver android:name="app3fit.kiosk.KioskCommandReceiver"
+                      android:permission="android.permission.DUMP"
+                      android:exported="true">
+                <intent-filter>
+                    <action android:name="app3fit.kiosk.COMMAND" />
+                </intent-filter>
+            </receiver>
+        </config-file>
+
+        <source-file src="src/android/KioskPolicy.java" target-dir="src/app3fit/kiosk" />
+        <source-file src="src/android/KioskPlugin.java" target-dir="src/app3fit/kiosk" />
+        <source-file src="src/android/KioskAdminReceiver.java" target-dir="src/app3fit/kiosk" />
+        <source-file src="src/android/KioskCommandReceiver.java" target-dir="src/app3fit/kiosk" />
+        <resource-file src="res/xml/kiosk_device_admin.xml" target="res/xml/kiosk_device_admin.xml" />
+    </platform>
+</plugin>

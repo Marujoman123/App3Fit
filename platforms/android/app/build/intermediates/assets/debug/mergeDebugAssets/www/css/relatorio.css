@@ -124,3 +124,66 @@
 .campo input[type="date"]:hover::-webkit-calendar-picker-indicator {
     filter: invert(0.2); /* Escurece o ícone no hover */
 }
+
+
+/* Isso garante que a tabela não quebre o layout lateral */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* --- MÁGICA PARA O CELULAR --- */
+@media (max-width: 600px) {
+    /* Esconde o cabeçalho original da tabela */
+    .tabela-relatorio medical, .tabela-relatorio thead {
+        display: none;
+    }
+
+    .tabela-relatorio, 
+    .tabela-relatorio tbody, 
+    .tabela-relatorio tr, 
+    .tabela-relatorio td {
+        display: block;
+        width: 100%;
+    }
+
+    .tabela-relatorio tr {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .tabela-relatorio td {
+        text-align: right; /* Alinha o valor à direita */
+        padding-left: 50%; /* Abre espaço para o rótulo à esquerda */
+        position: relative;
+        border: none;
+        border-bottom: 1px solid #eee;
+        min-height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    /* Adiciona os rótulos automáticos antes de cada dado */
+    .tabela-relatorio td::before {
+        content: attr(data-label); /* Pega o texto do atributo data-label */
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        font-weight: bold;
+        text-align: left;
+        color: #007bff;
+        font-size: 0.8rem;
+    }
+
+    .tabela-relatorio td:last-child {
+        border-bottom: 0;
+        background: #f9f9f9;
+        font-size: 1rem;
+    }
+}

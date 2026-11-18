@@ -29,189 +29,245 @@
 20-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:4:22-64
 21
 22    <queries>
-22-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:28:5-32:15
+22-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:44:5-48:15
 23        <intent>
-23-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:9-31:18
+23-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:45:9-47:18
 24            <action android:name="android.media.action.IMAGE_CAPTURE" />
-24-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:13-73
-24-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:21-70
+24-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:46:13-73
+24-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:46:21-70
 25        </intent>
 26    </queries>
 27
-28    <permission
-28-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
-29        android:name="com.exemplo.App3fit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-29-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
-30        android:protectionLevel="signature" />
-30-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
-31
-32    <uses-permission android:name="com.exemplo.App3fit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-32-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
-32-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+28    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+28-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:49:5-79
+28-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:49:22-76
+29
+30    <permission
+30-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
+31        android:name="com.exemplo.App3fit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+31-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
+32        android:protectionLevel="signature" />
+32-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
 33
-34    <application
-34-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:5-27:19
-35        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-35-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
-36        android:debuggable="true"
-37        android:extractNativeLibs="false"
-38        android:hardwareAccelerated="true"
-38-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:18-52
-39        android:icon="@mipmap/ic_launcher"
-39-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:53-87
-40        android:label="@string/app_name"
-40-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:88-120
-41        android:supportsRtl="true" >
-41-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:121-147
-42        <activity
-42-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:9-23:20
-43            android:name="com.exemplo.App3fit.MainActivity"
-43-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:240-267
-44            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
-44-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:19-146
-45            android:exported="true"
-45-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:147-170
-46            android:label="@string/activity_name"
-46-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:171-208
-47            android:launchMode="singleTop"
-47-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:209-239
-48            android:theme="@style/Theme.App.SplashScreen"
-48-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:268-313
-49            android:windowSoftInputMode="adjustResize" >
-49-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:314-356
-50            <intent-filter android:label="@string/launcher_name" >
-50-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:7:13-10:29
-50-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:7:28-65
-51                <action android:name="android.intent.action.MAIN" />
-51-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:8:17-69
-51-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:8:25-66
-52
-53                <category android:name="android.intent.category.LAUNCHER" />
-53-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:9:17-77
-53-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:9:27-74
-54            </intent-filter>
-55            <intent-filter>
-55-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:11:13-16:29
-56                <action android:name="android.intent.action.VIEW" />
-56-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:17-69
-56-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:25-66
-57
-58                <category android:name="android.intent.category.DEFAULT" />
-58-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:17-76
-58-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:27-73
-59                <category android:name="android.intent.category.BROWSABLE" />
-59-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:17-78
-59-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:27-75
-60
-61                <data android:scheme="app3fit" />
-61-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:17-50
-61-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:23-47
-62            </intent-filter>
-63            <intent-filter>
-63-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:17:13-22:29
-64                <action android:name="android.intent.action.VIEW" />
-64-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:17-69
-64-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:25-66
-65
-66                <category android:name="android.intent.category.DEFAULT" />
-66-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:17-76
-66-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:27-73
-67                <category android:name="android.intent.category.BROWSABLE" />
-67-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:17-78
-67-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:27-75
-68
-69                <data
-69-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:17-50
-70                    android:host=" "
-70-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:21:23-39
-71                    android:pathPrefix="/"
-71-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:21:40-62
-72                    android:scheme=" " />
-72-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:23-47
-73            </intent-filter>
-74        </activity>
-75
-76        <provider
-77            android:name="androidx.core.content.FileProvider"
-77-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:141-190
-78            android:authorities="com.exemplo.App3fit.cdv.core.file.provider"
-78-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:19-80
-79            android:exported="false"
-79-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:81-105
-80            android:grantUriPermissions="true" >
-80-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:106-140
-81            <meta-data
-81-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:13-130
-82                android:name="android.support.FILE_PROVIDER_PATHS"
-82-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:24-74
-83                android:resource="@xml/cdv_core_file_provider_paths" />
-83-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:75-127
-84        </provider>
-85        <provider
-85-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
-86            android:name="androidx.startup.InitializationProvider"
-86-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:25:13-67
-87            android:authorities="com.exemplo.App3fit.androidx-startup"
-87-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:26:13-68
-88            android:exported="false" >
-88-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:27:13-37
+34    <uses-permission android:name="com.exemplo.App3fit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+34-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
+34-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+35
+36    <application
+36-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:5-43:19
+37        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+37-->[androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
+38        android:debuggable="true"
+39        android:extractNativeLibs="false"
+40        android:hardwareAccelerated="true"
+40-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:18-52
+41        android:icon="@mipmap/ic_launcher"
+41-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:53-87
+42        android:label="@string/app_name"
+42-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:88-120
+43        android:supportsRtl="true" >
+43-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:121-147
+44        <activity
+44-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:9-28:20
+45            android:name="com.exemplo.App3fit.MainActivity"
+45-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:241-268
+46            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
+46-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:19-146
+47            android:exported="true"
+47-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:147-170
+48            android:label="@string/activity_name"
+48-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:171-208
+49            android:launchMode="singleTask"
+49-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:209-240
+50            android:theme="@style/Theme.App.SplashScreen"
+50-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:269-314
+51            android:windowSoftInputMode="adjustResize" >
+51-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:315-357
+52            <intent-filter android:label="@string/launcher_name" >
+52-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:7:13-10:29
+52-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:7:28-65
+53                <action android:name="android.intent.action.MAIN" />
+53-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:8:17-69
+53-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:8:25-66
+54
+55                <category android:name="android.intent.category.LAUNCHER" />
+55-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:9:17-77
+55-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:9:27-74
+56            </intent-filter>
+57            <intent-filter>
+57-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:11:13-16:29
+58                <action android:name="android.intent.action.VIEW" />
+58-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:17-69
+58-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:25-66
+59
+60                <category android:name="android.intent.category.DEFAULT" />
+60-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:17-76
+60-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:27-73
+61                <category android:name="android.intent.category.BROWSABLE" />
+61-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:17-78
+61-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:27-75
+62
+63                <data android:scheme="app3fit" />
+63-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:17-50
+63-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:23-47
+64            </intent-filter>
+65            <intent-filter>
+65-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:17:13-22:29
+66                <action android:name="android.intent.action.VIEW" />
+66-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:17-69
+66-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:12:25-66
+67
+68                <category android:name="android.intent.category.DEFAULT" />
+68-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:17-76
+68-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:27-73
+69                <category android:name="android.intent.category.BROWSABLE" />
+69-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:17-78
+69-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:14:27-75
+70
+71                <data
+71-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:17-50
+72                    android:host=" "
+72-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:21:23-39
+73                    android:pathPrefix="/"
+73-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:21:40-62
+74                    android:scheme=" " />
+74-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:15:23-47
+75            </intent-filter>
+76            <intent-filter>
+76-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:23:13-27:29
+77                <action android:name="android.intent.action.MAIN" />
+77-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:8:17-69
+77-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:8:25-66
+78
+79                <category android:name="android.intent.category.HOME" />
+79-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:17-73
+79-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:27-70
+80                <category android:name="android.intent.category.DEFAULT" />
+80-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:17-76
+80-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:13:27-73
+81            </intent-filter>
+82        </activity>
+83
+84        <provider
+85            android:name="androidx.core.content.FileProvider"
+85-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:141-190
+86            android:authorities="com.exemplo.App3fit.cdv.core.file.provider"
+86-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:19-80
+87            android:exported="false"
+87-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:81-105
+88            android:grantUriPermissions="true" >
+88-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:106-140
 89            <meta-data
-89-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
-90                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-90-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:30:17-75
-91                android:value="androidx.startup" />
-91-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
-92            <meta-data
-92-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hugo-\.gradle\caches\8.13\transforms\43d493f403f3ed0382eb0f1c07b66ab5\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
-93                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-93-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hugo-\.gradle\caches\8.13\transforms\43d493f403f3ed0382eb0f1c07b66ab5\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
-94                android:value="androidx.startup" />
-94-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hugo-\.gradle\caches\8.13\transforms\43d493f403f3ed0382eb0f1c07b66ab5\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
-95            <meta-data
-95-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
-96                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-96-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
-97                android:value="androidx.startup" />
-97-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
-98        </provider>
-99
-100        <receiver
-100-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
-101            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-101-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
-102            android:directBootAware="false"
-102-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
-103            android:enabled="true"
-103-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
-104            android:exported="true"
-104-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
-105            android:permission="android.permission.DUMP" >
-105-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
-106            <intent-filter>
-106-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
-107                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-107-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
-107-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
-108            </intent-filter>
-109            <intent-filter>
-109-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
-110                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-110-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
-110-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
-111            </intent-filter>
-112            <intent-filter>
-112-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
-113                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-113-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
-113-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
-114            </intent-filter>
-115            <intent-filter>
-115-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
-116                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-116-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
-116-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
-117            </intent-filter>
-118        </receiver>
-119    </application>
-120
-121</manifest>
+89-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:13-130
+90                android:name="android.support.FILE_PROVIDER_PATHS"
+90-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:24-74
+91                android:resource="@xml/cdv_core_file_provider_paths" />
+91-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:75-127
+92        </provider>
+93
+94        <receiver
+94-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:9-37:20
+95            android:name="app3fit.kiosk.KioskAdminReceiver"
+95-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:43-90
+96            android:exported="true"
+96-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:19-42
+97            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+97-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:91-148
+98            <meta-data
+98-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:33:13-109
+99                android:name="android.app.device_admin"
+99-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:33:24-63
+100                android:resource="@xml/kiosk_device_admin" />
+100-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:33:64-106
+101
+102            <intent-filter>
+102-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:34:13-36:29
+103                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+103-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:35:17-82
+103-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:35:25-79
+104            </intent-filter>
+105        </receiver>
+106        <receiver
+106-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:9-42:20
+107            android:name="app3fit.kiosk.KioskCommandReceiver"
+107-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:43-92
+108            android:exported="true"
+108-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:19-42
+109            android:permission="android.permission.DUMP" >
+109-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:93-137
+110            <intent-filter>
+110-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:39:13-41:29
+111                <action android:name="app3fit.kiosk.COMMAND" />
+111-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:40:17-64
+111-->C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:40:25-61
+112            </intent-filter>
+113        </receiver>
+114
+115        <provider
+115-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+116            android:name="androidx.startup.InitializationProvider"
+116-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:25:13-67
+117            android:authorities="com.exemplo.App3fit.androidx-startup"
+117-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:26:13-68
+118            android:exported="false" >
+118-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:27:13-37
+119            <meta-data
+119-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+120                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+120-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:30:17-75
+121                android:value="androidx.startup" />
+121-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
+122            <meta-data
+122-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hugo-\.gradle\caches\8.13\transforms\43d493f403f3ed0382eb0f1c07b66ab5\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+123                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+123-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hugo-\.gradle\caches\8.13\transforms\43d493f403f3ed0382eb0f1c07b66ab5\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+124                android:value="androidx.startup" />
+124-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hugo-\.gradle\caches\8.13\transforms\43d493f403f3ed0382eb0f1c07b66ab5\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+125            <meta-data
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+126                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+126-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+127                android:value="androidx.startup" />
+127-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+128        </provider>
+129
+130        <receiver
+130-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+131            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+131-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+132            android:directBootAware="false"
+132-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+133            android:enabled="true"
+133-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+134            android:exported="true"
+134-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+135            android:permission="android.permission.DUMP" >
+135-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+136            <intent-filter>
+136-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+137                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+137-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+137-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+138            </intent-filter>
+139            <intent-filter>
+139-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+140                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+140-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+140-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+141            </intent-filter>
+142            <intent-filter>
+142-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+143                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+143-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+143-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+144            </intent-filter>
+145            <intent-filter>
+145-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+146                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+146-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+146-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hugo-\.gradle\caches\8.13\transforms\42e3f4e99d8fe2fc7fff39091a76a22b\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+147            </intent-filter>
+148        </receiver>
+149    </application>
+150
+151</manifest>

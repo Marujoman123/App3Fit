@@ -56,6 +56,10 @@
         "source": "com.exemplo.App3fit.app-main-7:/mipmap-mdpi-v26/ic_launcher.xml"
     },
     {
+        "merged": "com.exemplo.App3fit.app-debug-5:/xml_kiosk_device_admin.xml.flat",
+        "source": "com.exemplo.App3fit.app-main-7:/xml/kiosk_device_admin.xml"
+    },
+    {
         "merged": "com.exemplo.App3fit.app-debug-5:/xml_config.xml.flat",
         "source": "com.exemplo.App3fit.app-main-7:/xml/config.xml"
     },

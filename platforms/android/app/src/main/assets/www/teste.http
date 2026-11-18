@@ -15,7 +15,7 @@
 
 GET https://api.mercadopago.com/terminals/v1/list
 # - digite aqui o token real
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 
 Content-Type: application/json
 
@@ -25,7 +25,7 @@ Content-Type: application/json
 
 ### Atualizar modo de operação do terminal
 PATCH https://api.mercadopago.com/terminals/v1/setup
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591  
+Authorization: Bearer {{MP_TOKEN}}  
 Content-Type: application/json
 
 {
@@ -39,7 +39,7 @@ Content-Type: application/json
 
 
 GET https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 
 
 
@@ -49,14 +49,14 @@ Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f47
 
 ### Listar meios de pagamento disponíveis
 GET https://api.mercadopago.com/v1/payment_methods
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 
 
 
 
 ### Enviar Cobrança de Teste para o Terminal
 POST https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 X-Idempotency-Key: 0d5020ed-1af6-469c-ae06-c3bec19954bb
 Content-Type: application/json
 
@@ -78,7 +78,7 @@ Content-Type: application/json
 
 ### Enviar Cobrança de Teste para o Terminal
 POST https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 X-Idempotency-Key: 0d5020ed-1af6-469c-ae06-c3bec19954bb
 Content-Type: application/json
 
@@ -100,7 +100,7 @@ Content-Type: application/json
 
 ### Enviar Cobrança de Teste para o Terminal
 POST https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 X-Idempotency-Key: 0d5020ed-1af6-469c-ae06-c3bec19954bb
 Content-Type: application/json
 
@@ -119,7 +119,7 @@ Content-Type: application/json
 
 ### Enviar Cobrança de Teste para o Terminal
 POST https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 X-Idempotency-Key: 0d5020ed-1af6-469c-ae06-c3bec19954bb
 Content-Type: application/json
 
@@ -141,7 +141,7 @@ Content-Type: application/json
 
 ### Enviar Cobrança de Teste para o Terminal
 POST https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}
 X-Idempotency-Key: 0d5020ed-1af6-469c-ae06-c3bec19954bb
 Content-Type: application/json
 
@@ -157,4 +157,4 @@ Content-Type: application/json
 
 ### Enviar Cobrança de Teste para o Terminal
 DELETE https://api.mercadopago.com/point/integration-api/devices/PAX_Q92__Q92-1733541950/payment-intents/88939789-c034-4993-bde4-c23c64011734
-Authorization: Bearer APP_USR-3577250795393962-011007-1f142324435256c80ac8559f4743683f-3117694591
+Authorization: Bearer {{MP_TOKEN}}

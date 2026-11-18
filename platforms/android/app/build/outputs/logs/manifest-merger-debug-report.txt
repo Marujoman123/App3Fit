@@ -1,20 +1,20 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:9-26:20
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:9-31:20
 	android:grantUriPermissions
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:106-140
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:106-140
 	android:authorities
 		INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:19-80
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:19-80
 	android:exported
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:81-105
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:81-105
 	android:name
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:24:141-190
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:141-190
 manifest
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-33:12
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-33:12
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-33:12
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-33:12
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:2:1-50:12
 MERGED from [:CordovaLib] C:\Aplicativos\App3fit\platforms\android\CordovaLib\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:20:1-27:12
 MERGED from [androidx.appcompat:appcompat-resources:1.7.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\ecfd5e644230b94874a76c80c1820e6c\transformed\jetified-appcompat-resources-1.7.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.appcompat:appcompat:1.7.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\459cb14f885dfe9984b3b738a7946fbf\transformed\appcompat-1.7.0\AndroidManifest.xml:2:1-7:12
@@ -78,8 +78,8 @@ ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest
 	android:name
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:4:22-64
 application
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:5-27:19
-INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:5-27:19
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:5-43:19
+INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:5-43:19
 MERGED from [androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.emoji2:emoji2:1.3.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\537fe04c7b6e13d2c64226c263643d00\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.core:core:1.13.0] C:\Users\hugo-\.gradle\caches\8.13\transforms\7c013e1f43d1815644395c70a32bee83\transformed\core-1.13.0\AndroidManifest.xml:28:5-89
@@ -105,21 +105,21 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\hu
 	android:icon
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:5:53-87
 activity#com.exemplo.App3fit.MainActivity
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:9-23:20
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:9-28:20
 	android:label
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:171-208
 	android:launchMode
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:209-239
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:209-240
 	android:windowSoftInputMode
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:314-356
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:315-357
 	android:exported
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:147-170
 	android:configChanges
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:19-146
 	android:theme
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:268-313
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:269-314
 	android:name
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:240-267
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:6:241-268
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
 ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:7:13-10:29
 	android:label
@@ -156,20 +156,64 @@ ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest
 		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:21:40-62
 intent-filter#action:name:android.intent.action.VIEW+category:name:android.intent.category.BROWSABLE+category:name:android.intent.category.DEFAULT+data:host: +data:pathPrefix:/+data:scheme: 
 ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:17:13-22:29
-queries
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:28:5-32:15
-intent#action:name:android.media.action.IMAGE_CAPTURE
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:29:9-31:18
-action#android.media.action.IMAGE_CAPTURE
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:13-73
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.DEFAULT+category:name:android.intent.category.HOME
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:23:13-27:29
+category#android.intent.category.HOME
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:17-73
 	android:name
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:21-70
-meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:13-130
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:27-70
+receiver#app3fit.kiosk.KioskAdminReceiver
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:9-37:20
+	android:exported
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:19-42
+	android:permission
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:91-148
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:32:43-90
+meta-data#android.app.device_admin
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:33:13-109
 	android:resource
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:75-127
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:33:64-106
 	android:name
-		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:25:24-74
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:33:24-63
+intent-filter#action:name:android.app.action.DEVICE_ADMIN_ENABLED
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:34:13-36:29
+action#android.app.action.DEVICE_ADMIN_ENABLED
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:35:17-82
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:35:25-79
+receiver#app3fit.kiosk.KioskCommandReceiver
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:9-42:20
+	android:exported
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:19-42
+	android:permission
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:93-137
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:38:43-92
+intent-filter#action:name:app3fit.kiosk.COMMAND
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:39:13-41:29
+action#app3fit.kiosk.COMMAND
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:40:17-64
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:40:25-61
+queries
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:44:5-48:15
+intent#action:name:android.media.action.IMAGE_CAPTURE
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:45:9-47:18
+action#android.media.action.IMAGE_CAPTURE
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:46:13-73
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:46:21-70
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:49:5-79
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:49:22-76
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:13-130
+	android:resource
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:75-127
+	android:name
+		ADDED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml:30:24-74
 uses-sdk
 INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Aplicativos\App3fit\platforms\android\app\src\main\AndroidManifest.xml

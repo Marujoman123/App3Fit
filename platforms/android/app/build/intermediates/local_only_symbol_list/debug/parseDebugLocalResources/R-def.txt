@@ -12,3 +12,4 @@ string launcher_name
 style Theme.App.SplashScreen
 xml cdv_core_file_provider_paths
 xml config
+xml kiosk_device_admin

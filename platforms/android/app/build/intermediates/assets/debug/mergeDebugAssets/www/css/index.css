@@ -28,3 +28,24 @@ input:focus {
     
 }
 
+
+/* Modal de senha administrativa */
+.senha-caixa { background: white; padding: 20px; border-radius: 10px; text-align: center; width: 80%; max-width: 300px; }
+.senha-input { width: 100%; padding: 15px; font-size: 20px; text-align: center; margin: 15px 0; border: 1px solid #ccc; }
+.senha-botoes { display: flex; gap: 10px; }
+.senha-botoes button { flex: 1; padding: 10px; border: none; border-radius: 5px; }
+.senha-cancelar { background: #ccc; }
+.senha-confirmar { background: #007bff; color: white; }
+
+/* Tela inicial do quiosque (Cordova, www/index.html): todos os elementos em dobro.
+   A fonte da raiz em 200% dobra tudo que usa rem/em; os valores em px são dobrados abaixo. */
+.quiosque { font-size: 200%; }
+.quiosque .login-container { max-width: 1600px; }
+.quiosque input { padding: 24px; border-radius: 12px; border-width: 2px; }
+.quiosque button { padding: 24px; border-radius: 12px; }
+.quiosque .loading-container { margin-top: 200px; padding: 20px; border-radius: 12px; }
+.quiosque .spinner { width: 80px; height: 80px; border-width: 8px; }
+.quiosque .senha-caixa { padding: 40px; border-radius: 20px; max-width: 600px; }
+.quiosque .senha-input { padding: 30px; font-size: 40px; margin: 30px 0; }
+.quiosque .senha-botoes { gap: 20px; }
+.quiosque .senha-botoes button { padding: 20px; border-radius: 10px; }

@@ -16,6 +16,9 @@
       "ANDROID_HOST": " ",
       "ANDROID_PATHPREFIX": "/",
       "PACKAGE_NAME": "com.exemplo.App3fit"
+    },
+    "cordova-plugin-kiosk": {
+      "PACKAGE_NAME": "com.exemplo.App3fit"
     }
   },
   "dependent_plugins": {}
