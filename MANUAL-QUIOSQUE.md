@@ -18,7 +18,8 @@ sem desmontar o modo quiosque.
 Com o quiosque **ligado**:
 
 - O app abre sozinho ao ligar o tablet e volta sozinho se fechar ou travar.
-- Home, recentes, notificações e menu de energia ficam bloqueados.
+- Home, recentes e notificações ficam bloqueados. O menu de energia (segurar o botão)
+  continua disponível para reiniciar ou desligar.
 - A barra do Android no topo fica visível só com informações (relógio, **bateria**, Wi-Fi).
   Ela não abre ao deslizar o dedo.
 - **Mantenha o tablet sempre no carregador de parede.** A tela nunca apaga, e na porta USB
@@ -163,14 +164,42 @@ Ao terminar, rode `.\scripts\kiosk.ps1 on`.
 > Depuração USB, nem use "Revogar autorizações de depuração USB". Sem a depuração USB,
 > não há como sair do quiosque sem resetar o tablet.
 
+### 4.3 Apps desativados (desempenho e telemetria)
+
+Para liberar memória e cortar a telemetria, 48 apps que o quiosque não usa estão
+**desativados** (não desinstalados): Google Play Services, Play Store, Chrome, YouTube,
+Gmail, Maps, Line, Zoom, Netflix, Facebook, câmera, galeria, apps de teste de fábrica etc.
+A lista completa está em `scripts/apps-desativados.txt`.
+
+```powershell
+.\scripts\kiosk-apps.ps1 status      # mostra o estado de cada app da lista
+.\scripts\kiosk-apps.ps1 reativar    # reativa todos
+.\scripts\kiosk-apps.ps1 desativar   # desativa todos de novo
+```
+
+Para reativar só um: `C:\android\sdk\platform-tools\adb.exe shell pm enable <pacote>`.
+
+Observações:
+
+- Com a **Play Store** desativada, o WebView (que roda o app) não se atualiza sozinho.
+  De vez em quando (a cada poucos meses), entre em modo manutenção, reative a Play Store e o
+  Play Services (`pm enable com.android.vending` e `pm enable com.google.android.gms`),
+  atualize o "Android System WebView" e depois rode `kiosk-apps.ps1 desativar`.
+- Para remover o quiosque de vez e usar o tablet como um tablet comum, rode
+  `kiosk-apps.ps1 reativar` antes de `kiosk.ps1 remover`.
+- **Não desative** o sistema, a interface do sistema (systemui), as Configurações, o WebView,
+  o teclado padrão (`com.android.inputmethod.latin`) nem o Bluetooth.
+
 ---
 
 ## 5. Reiniciar o tablet
 
 - **Use o botão de energia**, não o `adb reboot`. Neste tablet, o `adb reboot` faz ele ligar
   no **modo de fábrica** da MediaTek (tela de diagnóstico).
-- Com o quiosque ligado, o menu de energia está bloqueado. Para reiniciar:
-  **segure o botão de energia por 10 a 15 segundos** até a tela apagar, solte e ligue de novo
+- Para reiniciar: **segure o botão de energia por 1 a 2 segundos** e toque em **Reiniciar**
+  (Restart). O menu funciona mesmo com o quiosque ligado.
+- Segurar o botão por muito tempo **não** força o desligamento neste tablet.
+- Evite **Desligar** (Power off): o caixa só volta quando alguém ligar o tablet de novo
   (≈3 segundos no botão).
 - **Não segure nenhum botão de volume** ao ligar.
 - Ao ligar, o app abre sozinho no quiosque (pode levar cerca de 1 minuto).

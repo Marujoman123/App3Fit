@@ -102,8 +102,10 @@ public final class KioskPolicy {
             dpm.setLockTaskPackages(admin, new String[]{ctx.getPackageName(), SYSTEMUI_PKG});
             if (Build.VERSION.SDK_INT >= 28) {
                 // Barra de status só com informações (relógio, bateria, Wi-Fi), sem abrir.
-                // Sem Home, recentes, notificações nem menu de energia.
-                dpm.setLockTaskFeatures(admin, DevicePolicyManager.LOCK_TASK_FEATURE_SYSTEM_INFO);
+                // Menu de energia liberado (segurar o botão): permite reiniciar sem PC.
+                // Sem Home, recentes nem notificações.
+                dpm.setLockTaskFeatures(admin, DevicePolicyManager.LOCK_TASK_FEATURE_SYSTEM_INFO
+                        | DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS);
             }
 
             ComponentName main = mainActivity(ctx);

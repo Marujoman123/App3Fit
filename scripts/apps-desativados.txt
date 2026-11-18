@@ -1,0 +1,56 @@
+# Apps desativados no tablet-quiosque (pm disable-user). Nada foi desinstalado.
+# Reativar um:   adb shell pm enable <pacote>
+# Reativar todos: .\scripts\kiosk-apps.ps1 reativar
+# Grupo A: apps instalados
+jp.naver.line.android
+us.zoom.videomeetings
+com.netflix.mediaclient
+com.facebook.katana
+com.google.android.inputmethod.latin
+# Grupo A: Google
+com.google.android.apps.messaging
+com.google.android.apps.docs
+com.google.android.apps.maps
+com.google.android.gm
+com.google.android.calendar
+com.google.android.contacts
+com.google.android.apps.tachyon
+com.google.android.videos
+com.google.android.youtube
+com.google.android.apps.searchlite
+com.google.android.apps.wellbeing
+com.google.android.projection.gearhead
+com.google.android.gms.location.history
+com.google.android.feedback
+com.google.android.apps.restore
+com.google.android.setupwizard
+com.google.android.partnersetup
+# Grupo A: Android
+com.android.chrome
+com.android.gallery3d
+com.android.music
+com.android.deskclock
+com.android.calculator2
+com.android.soundrecorder
+com.android.fmradio
+com.android.dialer
+com.android.calllogbackup
+com.android.cellbroadcastreceiver
+com.android.protips
+com.android.egg
+com.android.traceur
+com.android.dreams.basic
+com.android.wallpaperpicker
+com.android.wallpapercropper
+# Grupo A: MediaTek / fábrica
+com.mediatek.camera0
+com.mediatek.filemanager
+com.mediatek.callrecorder
+com.mediatek.autodialer
+com.mediatek.engineermode
+com.mediatek.ygps
+com.kte.ktepcbtest
+com.roco.copymedia
+# Grupo B: Google Play Services e Play Store
+com.google.android.gms
+com.android.vending
